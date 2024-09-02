@@ -16,11 +16,15 @@ module.exports = {
         "thm-clr-1": "#2563EB",
         "thm-clr-2": "#FEF08A",
       },
+      dropShadow:{
+     '3xl': '0 35px 35px rgba(0, 0, 0, 0.25)',
+      }
     },
     fontFamily: {
       poppins: ["var(--font-poppins)"],
       bree_serif: ["var(--font-bree_serif)"],
     },
+    
   },
   plugins: [],
 };
