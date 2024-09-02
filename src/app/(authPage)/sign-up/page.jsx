@@ -52,7 +52,7 @@ const page = () => {
   }, []);
 
   if (user) {
-    router.push("/CreateProfile");
+    router.push(`/CreateProfile?id=${user.uid}`);
   }
   return (
     <>

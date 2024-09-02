@@ -1,5 +1,6 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
+import CheckUserName from "@/Firebase Functions/CheckUserName";
 import GetUserData from "@/Firebase Functions/GetuserData";
 import StoreUserData from "@/Firebase Functions/StoreUserData";
 import { auth } from "@/lib/firebaseConfig";
@@ -7,6 +8,7 @@ import { onAuthStateChanged } from "@firebase/auth";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import useDebounce from "@/Firebase Functions/useDebounce";
 
 const page = () => {
   const router = useRouter();
@@ -17,6 +19,8 @@ const page = () => {
   const [uid, setUid] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setphotoURL] = useState("");
+
+  const [IsUsernameExist, setIsUsernameExist] = useState(null);
 
   const searchparams = useSearchParams();
   const id = searchparams.get("id");
@@ -58,18 +62,37 @@ const page = () => {
     }
   }, [uid]);
 
+  const debouncedUsername = useDebounce(username, 500);
+  useEffect(() => {
+    if (username !== "") {
+      console.log(debouncedUsername);
+      CheckUserName(debouncedUsername)
+        .then((res) => {
+          console.log("res: ", res);
+          setIsUsernameExist(res);
+          console.log("username exist, please choose another one");
+        })
+        .catch((error) => {
+          console.log("res: ", error);
+          setIsUsernameExist(error);
+        });
+    }
+  }, [debouncedUsername]);
+
   const handleClick = () => {
     if (name === "" || username === "") {
       alert("Please fill in all fields");
     } else {
-      StoreUserData({ uid, name, username, photoURL, email })
-        .then((res) => {
-          console.log(res);
-          router.push(`/Profile/${username}`);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (IsUsernameExist === false) {
+        StoreUserData({ uid, name, username, photoURL, email })
+          .then((res) => {
+            console.log(res);
+            router.push(`/Profile/${username}`);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
   };
 
@@ -103,16 +126,33 @@ const page = () => {
                 value={name}
               />
             </div>
-            <div className="flex flex-col gap-1 m-2 my-4">
+            <div className="flex flex-col gap-1 m-2 my-4 mb-1">
               <label className="font-bold" htmlFor="">
                 Choose username
               </label>
               <input
                 type="text"
-                className="m-2 p-2 border-2 rounded-md outline-thm-clr-1  text-sm"
-                onChange={(e) => setUsername(e.target.value)}
+                className="m-2 mb-0 p-2 border-2 rounded-md outline-thm-clr-1  text-sm"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
                 value={username}
               />
+            </div>
+
+            <div className="mb-4 flex justify-end mx-7">
+              <span
+                className={`${
+                  IsUsernameExist ? "text-red-500" : "text-green-500"
+                } text-xs `}
+              >
+                {IsUsernameExist === null
+                  ? ""
+                  : IsUsernameExist
+                  ? "Username already exist"
+                  : "Username is available"}
+                  
+              </span>
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
               <button
