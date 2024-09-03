@@ -65,6 +65,7 @@ const page = () => {
   const debouncedUsername = useDebounce(username, 500);
   useEffect(() => {
     if (username !== "") {
+     
       console.log(debouncedUsername);
       CheckUserName(debouncedUsername)
         .then((res) => {

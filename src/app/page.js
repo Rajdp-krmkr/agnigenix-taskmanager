@@ -27,7 +27,7 @@ export default function Home() {
     IsUserExist({ uid })
       .then((user) => {
         console.log(user);
-        router.push(`/dashboard/${user.username}`);
+        router.push(`/Dashboard/${user.username}`);
       })
       .catch(() => {
         router.push(`/CreateProfile?id=${uid}`);

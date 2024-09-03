@@ -5,7 +5,7 @@ import GetUserData, {
 import StoreUserData from "@/Firebase Functions/StoreUserData";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const page = () => {
   const params = useParams();
@@ -21,16 +21,18 @@ const page = () => {
   const [jobRole, setJobRole] = useState("");
   const [socialAcounts, setSocialAcounts] = useState([]);
 
-  GetUserDataByUsername({ username }).then((res) => {
-    setUser(res);
-    setPhotoURL(res.photoURL);
-    console.log(res);
-    setName(res.name);
-    setBio(res.bio);
-    setEmail(res.email);
-    setJobRole(res.jobRole);
-    setSocialAcounts(res.socialMediaAcounts);
-  });
+  useEffect(() => {
+    GetUserDataByUsername({ username }).then((res) => {
+      setUser(res);
+      setPhotoURL(res.photoURL);
+      console.log(res);
+      setName(res.name);
+      setBio(res.bio);
+      setEmail(res.email);
+      setJobRole(res.jobRole);
+      setSocialAcounts(res.socialMediaAcounts);
+    });
+  }, []);
 
   return (
     <>
