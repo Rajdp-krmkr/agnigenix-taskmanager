@@ -1,14 +1,16 @@
 import { db } from "@/lib/firebaseConfig";
-import { doc, getDoc } from "@firebase/firestore";
-import React from "react";
+import { collection, doc, getDoc, getDocs, query, where } from "@firebase/firestore";
 
 const IsUserExist = (user) => {
   const { uid } = user;
   return new Promise(async (resolve, reject) => {
-    const docRef = doc(db, "users", uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      resolve(docSnap.data());
+    const docs = collection(db, "users");
+    const q = query(docs, where("uid", "==", uid));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      querySnapshot.forEach((doc) => {
+        resolve(doc.data());
+      });
     } else {
       reject(false);
     }

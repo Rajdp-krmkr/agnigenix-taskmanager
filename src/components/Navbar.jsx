@@ -30,22 +30,18 @@ import { BsClipboard2Check } from "react-icons/bs";
 import { BiTaskX } from "react-icons/bi";
 import { GoTasklist } from "react-icons/go";
 import { IoMdAdd } from "react-icons/io";
+import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 
 const NavbarComponent = () => {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [User, setUser] = useState(null);
   const [uid, setUid] = useState(null);
+
   const [ClassNameForWorkSpace, setClassNameForWorkSpace] = useState("hidden");
   const [classNameForYourTasks, setClassNameForYourTasks] = useState("hidden");
   const [openTasksSection, setOpenTasksSection] = useState(false);
   const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // console.log(user);
-    }
-  });
 
   const Pathname = usePathname();
   useEffect(() => {
@@ -56,6 +52,57 @@ const NavbarComponent = () => {
 
   const params = useParams();
   const username = params.user;
+  useEffect(() => {
+    console.log(username);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is signed in", user.uid);
+        setUid(user.uid);
+      } else {
+        console.log("User is signed out");
+        router.push("/sign-up");
+
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (uid && username) {
+      isUserAuthenticated({ username, uid })
+        .then((res) => {
+          console.log("User is authenticated", res);
+          if (
+            url === "/log-in" ||
+            url === "/sign-up" ||
+            url === "/CreateProfile" ||
+            url === "/"
+          ) {
+            return;
+          } else {
+            console.log(username);
+            if (
+              username !== null &&
+              username !== "" &&
+              username !== undefined
+            ) {
+              GetUserDataByUsername({ username })
+                .then((res) => {
+                  setUser(res);
+                  // console.log(res);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
+          }
+        })
+        .catch((err) => {
+          if (err == false) {
+            router.push("/sign-up");
+          }
+        });
+    }
+  }, [uid]);
   // console.log(username);
 
   const searchparams = useSearchParams();
@@ -66,52 +113,6 @@ const NavbarComponent = () => {
 
   useEffect(() => {
     // console.log(url);
-
-    if (
-      url === "/log-in" ||
-      url === "/sign-up" ||
-      url === "/CreateProfile" ||
-      url === "/"
-    ) {
-      return;
-    } else {
-      // if (sessionStorage.getItem("user")) {
-      //   setUser(JSON.parse(sessionStorage.getItem("user")));
-      //   console.log(JSON.parse(sessionStorage.getItem("user")))
-      //   console.log("object");
-      // } else if (uid !== null) {
-      //   console.log("object");
-      //   GetUserData({ uid })
-      //     .then((res) => {
-      //       setUser(res);
-      //       sessionStorage.setItem("user", JSON.stringify(res));
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //     });
-      // }
-      if (uid !== null) {
-        GetUserData({ uid })
-          .then((res) => {
-            setUser(res);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      } else {
-        console.log(username);
-        if (username !== null && username !== "" && username !== undefined) {
-          GetUserDataByUsername({ username })
-            .then((res) => {
-              setUser(res);
-              console.log(res);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        }
-      }
-    }
   }, [url]);
 
   useEffect(() => {
@@ -379,7 +380,12 @@ const NavbarComponent = () => {
                       url === item.url ? "text-thm-clr-1" : "text-black"
                     } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 transition-all rounded-md p-2`}
                     onClick={() => {
-                      router.push(item.url);
+                      if (item.name === "Log out") {
+                        auth.signOut();
+                        router.push("/");
+                      } else {
+                        router.push(item.url);
+                      }
                     }}
                   >
                     <div>{item.icon}</div>

@@ -2,16 +2,21 @@
 import GetUserData, {
   GetUserDataByUsername,
 } from "@/Firebase Functions/GetuserData";
+import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 import StoreUserData from "@/Firebase Functions/StoreUserData";
+import { auth } from "@/lib/firebaseConfig";
+import { onAuthStateChanged } from "@firebase/auth";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
+  const router = useRouter();
   const params = useParams();
   const username = params.user;
   console.log(username);
 
+  const [uid, setUid] = useState("");
   const [user, setUser] = useState(false);
   const [photoURL, setPhotoURL] = useState("");
   const [coverPhoto, setCoverPhoto] = useState("");
@@ -22,17 +27,44 @@ const Page = () => {
   const [socialAcounts, setSocialAcounts] = useState([]);
 
   useEffect(() => {
-    GetUserDataByUsername({ username }).then((res) => {
-      setUser(res);
-      setPhotoURL(res.photoURL);
-      console.log(res);
-      setName(res.name);
-      setBio(res.bio);
-      setEmail(res.email);
-      setJobRole(res.jobRole);
-      setSocialAcounts(res.socialMediaAcounts);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is signed in", user.uid);
+        setUid(user.uid);
+      } else {
+        console.log("User is signed out");
+        router.push("/sign-up");
+      }
     });
   }, []);
+
+  useEffect(() => {
+    if (uid && username) {
+      isUserAuthenticated({ username, uid })
+        .then((res) => {
+          console.log("User is authenticated", res);
+          GetUserDataByUsername({ username }).then((res) => {
+            setUser(res);
+            setPhotoURL(res.photoURL);
+            console.log(res);
+            setName(res.name);
+            setBio(res.bio);
+            setEmail(res.email);
+            setJobRole(res.jobRole);
+            setSocialAcounts(res.socialMediaAcounts);
+          });
+        })
+        .catch((err) => {
+          if (err == false) {
+            router.push("/sign-up");
+          }
+        });
+    }
+  }, [uid]);
+
+  // useEffect(() => {
+
+  // }, []);
 
   return (
     <>
