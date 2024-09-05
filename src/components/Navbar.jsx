@@ -22,12 +22,17 @@ import { FaTasks } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
 import { IoMdArrowDropright } from "react-icons/io";
+import { Chela_One } from "next/font/google";
 
 const NavbarComponent = () => {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [User, setUser] = useState(null);
   const [uid, setUid] = useState(null);
+  const [ClassNameForWorkSpace, setClassNameForWorkSpace] = useState("hidden");
+  const [classNameForYourTasks, setClassNameForYourTasks] = useState("hidden");
+  const [openTasksSection, setOpenTasksSection] = useState(false);
+  const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -102,6 +107,31 @@ const NavbarComponent = () => {
     }
   }, [url]);
 
+  useEffect(() => {
+    const yourtasks = window.document.getElementById("yourTasks");
+    const workspace = window.document.getElementById("workspace");
+    yourtasks.addEventListener("mouseover", () => {
+      setClassNameForYourTasks("block");
+    });
+    yourtasks.addEventListener("mouseout", () => {
+      setClassNameForYourTasks("hidden");
+    });
+
+    workspace.addEventListener("mouseover", () => {
+      setClassNameForWorkSpace("block");
+    });
+    workspace.addEventListener("mouseout", () => {
+      setClassNameForWorkSpace("hidden");
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(openTasksSection);
+  }, [openTasksSection]);
+  useEffect(() => {
+    console.log(openWorkSpaceSection);
+  }, [openWorkSpaceSection]);
+
   if (
     url !== "/log-in" &&
     url !== "/sign-up" &&
@@ -112,7 +142,7 @@ const NavbarComponent = () => {
       <>
         <nav className="fixed top-0 left-0 p-2 bg-gray-100 flex flex-col min-h-screen lg:w-[210px]">
           <div className="flex justify-center my-4 mx-auto">
-            <h1 className="text-xl font-bold">Task Manager</h1>
+            <h1 className="text-xl font-bold text-black">Task Manager</h1>
           </div>
           <div>
             <div
@@ -121,24 +151,32 @@ const NavbarComponent = () => {
                 router.push(`/Profile/${username}`);
               }}
             >
-              <div className="profilePhoto relative w-10 h-10 ">
-                <Image
-                  src={User !== null ? User.photoURL : ""}
-                  className="rounded-2xl"
-                  fill
-                  alt="profile-picture"
-                />
-                {/* //TODO: account svg will be added */}
-              </div>
-              <div className="flex flex-col">
-                <h2 className="text-[12px] font-bold">
-                  {User !== null ? User.name : "name"}
-                </h2>
-                {/* //TODO: loader component will be added*/}
-                <p className="text-xs text-gray-400">
-                  {User !== null ? User.username : "username"}
-                </p>
-              </div>
+              {User == null ? (
+                // <div className="flex justify-center items-center w-full">
+                <div class="loader"></div>
+              ) : (
+                // </div>
+                <>
+                  <div className="profilePhoto relative w-10 h-10 ">
+                    <Image
+                      src={User !== null ? User.photoURL : ""}
+                      className="rounded-2xl"
+                      fill
+                      alt="profile-picture"
+                    />
+                    {/* //TODO: account svg will be added */}
+                  </div>
+                  <div className="flex flex-col">
+                    <h2 className="text-[12px] font-bold">
+                      {User !== null ? User.name : "name"}
+                    </h2>
+                    {/* //TODO: loader component will be added*/}
+                    <p className="text-xs text-gray-400">
+                      {User !== null ? User.username : "username"}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="flex flex-col min-h-[80vh] my-2 gap-10 justify-between">
@@ -154,38 +192,103 @@ const NavbarComponent = () => {
                   {
                     name: "Your tasks",
                     icon: <FaTasks />,
-                    url: `/Tasks/${username}`,
+                    url: `#`,
                     activatedIcon: "",
+                    subSections: [
+                      "Due tasks",
+                      "Completed tasks",
+                      "incompleted tasks",
+                      "All tasks",
+                      "Add new task",
+                    ],
                   },
 
                   {
                     name: "Workspace",
                     icon: <MdOutlineWorkOutline />,
-                    url: "/",
+                    url: `#`,
                     activatedIcon: <MdOutlineWork />,
                   },
                 ].map((item, index) => (
                   <li
                     key={index}
+                    id={`${
+                      item.name === "Your tasks"
+                        ? "yourTasks"
+                        : item.name === "Workspace"
+                        ? "workspace"
+                        : ""
+                    }`}
                     className={`${
                       url === item.url ? "text-thm-clr-1" : "text-black"
-                    } cursor-pointer m-2 flex flex-row gap-2 justify-between items-center hover:bg-gray-200 rounded-md p-2`}
+                    } ${
+                      item.name === "Your tasks" && openTasksSection
+                        ? "bg-gray-200"
+                        : item.name === "Workspace" && openWorkSpaceSection
+                        ? "bg-gray-200"
+                        : ""
+                    } cursor-pointer m-2 flex flex-row gap-2 justify-between items-center hover:bg-gray-200 transition-all rounded-md p-2`}
                     onClick={() => {
-                      router.push(item.url);
+                      if (item.name === "Your tasks") {
+                        setOpenTasksSection(!openTasksSection);
+                        console.log(openTasksSection);
+                      } else if (item.name === "Workspace") {
+                        setOpenWorkSpaceSection(!openWorkSpaceSection);
+                        setClassNameForWorkSpace("block");
+                      } else {
+                        router.push(item.url);
+                      }
                     }}
                   >
                     <div className="flex items-center gap-2 flex-row">
                       <div>{item.icon}</div>
                       <h2 className="text-sm font-semibold">{item.name}</h2>
                     </div>
-                    <div>
-                      {item.name === "Workspace" ||
-                      item.name === "Your tasks" ? (
-                        <IoMdArrowDropright />
-                      ) : (
-                        <></>
-                      )}
+                    <div
+                      className={` ${
+                        item.name === "Your tasks"
+                          ? openTasksSection
+                            ? `block rotate-90`
+                            : `${classNameForYourTasks}`
+                          : item.name === "Workspace"
+                          ? openWorkSpaceSection
+                            ? `block rotate-90`
+                            : `${ClassNameForWorkSpace}`
+                          : ""
+                      } transition-all`}
+                    >
+                      {(item.name === "Workspace" ||
+                        item.name === "Your tasks") && <IoMdArrowDropright />}
                     </div>
+                    {/* <div>
+                      {item.name === "Your tasks" && openTasksSection ? (
+                        <div>
+                          {item.subSections.map((section, index) => (
+                            <div
+                              key={index}
+                              className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
+                            >
+                              {section}
+                            </div>
+                          ))}
+                        </div>
+                      ) : item.name === "Workspace" && openWorkSpaceSection ? (
+                        <div>
+                          {item.subSections.length === 0
+                            ? "No workspace found"
+                            : item.subSections.map((section, index) => (
+                                <div
+                                  key={index}
+                                  className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
+                                >
+                                  {section}
+                                </div>
+                              ))}
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </div> */}
                   </li>
                 ))}
               </ul>
@@ -212,7 +315,7 @@ const NavbarComponent = () => {
                       item.name === "Log out" ? "text-red-500" : "text-black"
                     } ${
                       url === item.url ? "text-thm-clr-1" : "text-black"
-                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 rounded-md p-2`}
+                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200  transition-all rounded-md p-2`}
                     onClick={() => {
                       router.push(item.url);
                     }}

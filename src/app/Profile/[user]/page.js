@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const page = () => {
+const Page = () => {
   const params = useParams();
   const username = params.user;
   console.log(username);
@@ -140,4 +140,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

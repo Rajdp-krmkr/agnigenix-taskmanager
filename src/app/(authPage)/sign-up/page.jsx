@@ -13,7 +13,7 @@ import {
 import { auth } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   
   const SignUpWithGoogle = () => {
@@ -132,4 +132,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

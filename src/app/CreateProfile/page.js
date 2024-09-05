@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   const [User, setUser] = useState(null);
 
@@ -177,4 +177,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
