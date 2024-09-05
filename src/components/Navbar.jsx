@@ -57,17 +57,25 @@ const NavbarComponent = () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User is signed in", user.uid);
+        console.log(user, "User");
         setUid(user.uid);
       } else {
         console.log("User is signed out");
-        router.push("/sign-up");
-
+        console.log(user, "User");
+        if (
+          url !== "/log-in" &&
+          url !== "/sign-up" &&
+          url !== "/CreateProfile" &&
+          url !== ""
+        ) {
+          router.push("/sign-up");
+        }
       }
     });
   }, []);
 
   useEffect(() => {
-    if (uid && username) {
+    if (uid !== null && username) {
       isUserAuthenticated({ username, uid })
         .then((res) => {
           console.log("User is authenticated", res);
