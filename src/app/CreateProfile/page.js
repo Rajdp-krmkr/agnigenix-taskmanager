@@ -7,10 +7,10 @@ import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "@firebase/auth";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
 
-const Page = () => {
+const PageComponent = () => {
   const router = useRouter();
   const [User, setUser] = useState(null);
 
@@ -176,5 +176,16 @@ const Page = () => {
     </>
   );
 };
+
+
+const Page = () => {
+  return (
+    <Suspense>
+        <PageComponent />
+    </Suspense>
+  )
+}
+
+
 
 export default Page;
