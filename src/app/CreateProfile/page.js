@@ -14,13 +14,16 @@ const PageComponent = () => {
   const router = useRouter();
   const [User, setUser] = useState(null);
 
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
-  const [uid, setUid] = useState("");
-  const [email, setEmail] = useState("");
-  const [photoURL, setphotoURL] = useState("");
+  const [shouldWait, setShouldWait] = useState(false);
+
+  const [name, setName] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [uid, setUid] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [photoURL, setphotoURL] = useState(null);
 
   const [IsUsernameExist, setIsUsernameExist] = useState(null);
+  const [usernameMessage, setUsernameMessage] = useState(null);
 
   const searchparams = useSearchParams();
   const id = searchparams.get("id");
@@ -62,19 +65,80 @@ const PageComponent = () => {
     }
   }, [uid]);
 
+  function validateUsername(username) {
+    // Check for minimum and maximum length
+    if (username.length < 3 || username.length > 15) {
+      setUsernameMessage("Username must be between 3 and 15 characters.");
+      setIsUsernameExist(true);
+      return false;
+    }
+
+    // Check if the username starts with an underscore
+    if (username.startsWith("_")) {
+      setUsernameMessage("Username cannot start with an (_).");
+      setIsUsernameExist(true);
+      return false;
+    }
+    if (username.startsWith("-")) {
+      setUsernameMessage("Username cannot start with an (-).");
+      setIsUsernameExist(true);
+      return false;
+    }
+
+    // Regular expression for the username rules:
+    // - Alphanumeric characters (a-z, A-Z, 0-9)
+    // - Underscore (_) and hyphen (-) are allowed
+    // - No spaces allowed
+    const usernameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+
+    // Check if the username matches the regex
+    if (!usernameRegex.test(username)) {
+      setUsernameMessage(
+        "Username can only contain letters, numbers, underscores (_), and hyphens (-)."
+      );
+      setIsUsernameExist(true); //! here setIsUsernameExist is working as a boundery for the username
+      return false;
+    }
+
+    // If all checks pass
+    setUsernameMessage("Username is valid.");
+    setIsUsernameExist(false);
+    return true;
+  }
+
+  // Example usage
+  // const usernamesToTest = [
+  //   "john_doe",    // valid
+  //   "john-doe",    // valid
+  //   "johndoe123",  // valid
+  //   "admin@site",  // invalid (special characters like @ not allowed)
+  //   "john doe",    // invalid (spaces not allowed)
+  //   "jo",          // invalid (too short)
+  //   "thisusernameiswaytoolong", // invalid (too long)
+  //   "_johndoe",    // invalid (cannot start with underscore)
+  //   "johndoe-",    // valid
+  //   "john__doe",   // valid
+  //   "john--doe"    // valid
+  // ];
+
   const debouncedUsername = useDebounce(username, 500);
   useEffect(() => {
-    if (username !== "") {
+    console.log("debouncedUsername: ", debouncedUsername);
+
+    if (debouncedUsername !== null && validateUsername(debouncedUsername)) {
       console.log(debouncedUsername);
       CheckUserName(debouncedUsername)
         .then((res) => {
           console.log("res: ", res);
           setIsUsernameExist(res);
+          setUsernameMessage("Username already exist");
           console.log("username exist, please choose another one");
         })
         .catch((error) => {
           console.log("res: ", error);
           setIsUsernameExist(error);
+          setUsernameMessage("Username is available");
+          console.log("username is available");
         });
     }
   }, [debouncedUsername]);
@@ -84,6 +148,7 @@ const PageComponent = () => {
       alert("Please fill in all fields");
     } else {
       if (IsUsernameExist === false) {
+        setShouldWait(true);
         StoreUserData({ uid, name, username, photoURL, email })
           .then((res) => {
             console.log(res);
@@ -108,7 +173,7 @@ const PageComponent = () => {
             <div className="relative w-24 h-24">
               <Image
                 fill
-                src={User !== null ? User.photoURL : ""}
+                src={photoURL !== null ? photoURL : ""}
                 className="rounded-3xl"
                 alt="profile-photo"
               />
@@ -146,27 +211,36 @@ const PageComponent = () => {
                   IsUsernameExist ? "text-red-500" : "text-green-500"
                 } text-xs `}
               >
-                {IsUsernameExist === null
-                  ? ""
-                  : IsUsernameExist
-                  ? "Username already exist"
-                  : "Username is available"}
+                {IsUsernameExist === null ? "" : usernameMessage}
               </span>
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
-              <button
-                className="btn p-1"
-                onClick={() => {
-                  handleClick();
-                }}
-              >
-                <span class="circle1"></span>
-                <span class="circle2"></span>
-                <span class="circle3"></span>
-                <span class="circle4"></span>
-                <span class="circle5"></span>
-                <span class="text">Create profile</span>
-              </button>
+              {shouldWait ? (
+                <div class="typewriter m-5">
+                  <div class="slide">
+                    <i></i>
+                  </div>
+                  <div class="paper"></div>
+                  <div class="keyboard"></div>
+                </div>
+              ) : (
+                <button
+                  className="btn p-1"
+                  onClick={() => {
+                    if (!shouldWait) {
+                      handleClick();
+                    }
+                  }}
+                >
+                  <span class="circle1"></span>
+                  <span class="circle2"></span>
+                  <span class="circle3"></span>
+                  <span class="circle4"></span>
+                  <span class="circle5"></span>
+
+                  <span class="text">Create profile</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

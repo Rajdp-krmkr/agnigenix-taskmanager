@@ -6,7 +6,7 @@ const CheckUserName = async (username) => {
   const docSnap = await getDoc(docRef);
   return new Promise((resolve, reject) => {
     if (docSnap.exists()) {
-      resolve(true);
+      resolve(true);  
     } else {
       reject(false);
     }
