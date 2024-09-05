@@ -65,7 +65,6 @@ const PageComponent = () => {
   const debouncedUsername = useDebounce(username, 500);
   useEffect(() => {
     if (username !== "") {
-     
       console.log(debouncedUsername);
       CheckUserName(debouncedUsername)
         .then((res) => {
@@ -152,7 +151,6 @@ const PageComponent = () => {
                   : IsUsernameExist
                   ? "Username already exist"
                   : "Username is available"}
-                  
               </span>
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
@@ -177,15 +175,12 @@ const PageComponent = () => {
   );
 };
 
-
 const Page = () => {
   return (
     <Suspense>
-        <PageComponent />
+      <PageComponent />
     </Suspense>
-  )
-}
-
-
+  );
+};
 
 export default Page;

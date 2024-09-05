@@ -24,6 +24,13 @@ import { MdLogout } from "react-icons/md";
 import { IoMdArrowDropright } from "react-icons/io";
 import { Chela_One } from "next/font/google";
 
+import { TbCalendarDue } from "react-icons/tb";
+import { BsClipboardCheck } from "react-icons/bs";
+import { BsClipboard2Check } from "react-icons/bs";
+import { BiTaskX } from "react-icons/bi";
+import { GoTasklist } from "react-icons/go";
+import { IoMdAdd } from "react-icons/io";
+
 const NavbarComponent = () => {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -195,11 +202,31 @@ const NavbarComponent = () => {
                     url: `#`,
                     activatedIcon: "",
                     subSections: [
-                      "Due tasks",
-                      "Completed tasks",
-                      "incompleted tasks",
-                      "All tasks",
-                      "Add new task",
+                      {
+                        title: "Due tasks",
+                        url: `/DueTasks/${username}`,
+                        icon: <TbCalendarDue />,
+                      },
+                      {
+                        title: "Completed tasks",
+                        url: `/CompletedTasks/${username}`,
+                        icon: <BsClipboardCheck />,
+                      },
+                      {
+                        title: "Uncompleted tasks",
+                        url: `/UncompletedTasks/${username}`,
+                        icon: <BiTaskX />,
+                      },
+                      {
+                        title: "All tasks",
+                        url: `/AllTasks/${username}`,
+                        icon: <GoTasklist />,
+                      },
+                      {
+                        title: "Add new task",
+                        url: `#`,
+                        icon: <IoMdAdd />,
+                      },
                     ],
                   },
 
@@ -208,6 +235,7 @@ const NavbarComponent = () => {
                     icon: <MdOutlineWorkOutline />,
                     url: `#`,
                     activatedIcon: <MdOutlineWork />,
+                    subSections: [],
                   },
                 ].map((item, index) => (
                   <li
@@ -219,76 +247,110 @@ const NavbarComponent = () => {
                         ? "workspace"
                         : ""
                     }`}
-                    className={`${
-                      url === item.url ? "text-thm-clr-1" : "text-black"
-                    } ${
-                      item.name === "Your tasks" && openTasksSection
-                        ? "bg-gray-200"
-                        : item.name === "Workspace" && openWorkSpaceSection
-                        ? "bg-gray-200"
-                        : ""
-                    } cursor-pointer m-2 flex flex-row gap-2 justify-between items-center hover:bg-gray-200 transition-all rounded-md p-2`}
-                    onClick={() => {
-                      if (item.name === "Your tasks") {
-                        setOpenTasksSection(!openTasksSection);
-                        console.log(openTasksSection);
-                      } else if (item.name === "Workspace") {
-                        setOpenWorkSpaceSection(!openWorkSpaceSection);
-                        setClassNameForWorkSpace("block");
-                      } else {
-                        router.push(item.url);
-                      }
-                    }}
+                    className={``}
                   >
-                    <div className="flex items-center gap-2 flex-row">
-                      <div>{item.icon}</div>
-                      <h2 className="text-sm font-semibold">{item.name}</h2>
-                    </div>
                     <div
-                      className={` ${
-                        item.name === "Your tasks"
-                          ? openTasksSection
-                            ? `block rotate-90`
-                            : `${classNameForYourTasks}`
-                          : item.name === "Workspace"
-                          ? openWorkSpaceSection
-                            ? `block rotate-90`
-                            : `${ClassNameForWorkSpace}`
+                      className={`${
+                        url === item.url ? "text-thm-clr-1" : "text-black"
+                      } ${
+                        item.name === "Your tasks" && openTasksSection
+                          ? "bg-gray-200"
+                          : item.name === "Workspace" && openWorkSpaceSection
+                          ? "bg-gray-200"
                           : ""
-                      } transition-all`}
+                      } flex flex-row gap-2 justify-between items-center hover:bg-gray-200 transition-all cursor-pointer m-2 p-2 rounded-md`}
+                      onClick={() => {
+                        if (item.name === "Your tasks") {
+                          setOpenTasksSection(!openTasksSection);
+                          console.log(openTasksSection);
+                        } else if (item.name === "Workspace") {
+                          setOpenWorkSpaceSection(!openWorkSpaceSection);
+                          setClassNameForWorkSpace("block");
+                        } else {
+                          router.push(item.url);
+                        }
+                      }}
                     >
-                      {(item.name === "Workspace" ||
-                        item.name === "Your tasks") && <IoMdArrowDropright />}
+                      <div className="flex items-center gap-2 flex-row">
+                        <div>{item.icon}</div>
+                        <h2 className="text-sm font-semibold">{item.name}</h2>
+                      </div>
+                      <div
+                        className={` ${
+                          item.name === "Your tasks"
+                            ? openTasksSection
+                              ? `block rotate-90`
+                              : `${classNameForYourTasks}`
+                            : item.name === "Workspace"
+                            ? openWorkSpaceSection
+                              ? `block rotate-90`
+                              : `${ClassNameForWorkSpace}`
+                            : ""
+                        } transition-all`}
+                      >
+                        {(item.name === "Workspace" ||
+                          item.name === "Your tasks") && <IoMdArrowDropright />}
+                      </div>
                     </div>
-                    {/* <div>
+                    <div className={` ml-6 m-2`}>
                       {item.name === "Your tasks" && openTasksSection ? (
-                        <div>
+                        <div className={`transition-all`}>
                           {item.subSections.map((section, index) => (
                             <div
                               key={index}
-                              className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
+                              className={`
+                                ${
+                                  url === section.url
+                                    ? "text-thm-clr-1"
+                                    : "text-black"
+                                }
+                                ${
+                                  section.title === "Add new task"
+                                    ? "bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2"
+                                    : "hover:bg-gray-200"
+                                }
+                                cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
+                              onClick={() => {
+                                router.push(section.url);
+                              }}
                             >
-                              {section}
+                              <div className="icon text-lg font-bold">
+                                {section.icon}
+                              </div>
+                              <span>{section.title}</span>
                             </div>
                           ))}
                         </div>
-                      ) : item.name === "Workspace" && openWorkSpaceSection ? (
-                        <div>
-                          {item.subSections.length === 0
-                            ? "No workspace found"
-                            : item.subSections.map((section, index) => (
-                                <div
-                                  key={index}
-                                  className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
-                                >
-                                  {section}
-                                </div>
-                              ))}
-                        </div>
                       ) : (
-                        ""
+                        item.name === "Workspace" &&
+                        openWorkSpaceSection && (
+                          <div className="flex flex-col">
+                            <div>
+                              {item.subSections.length === 0 ? (
+                                <span className="text-gray-400 text-xs">
+                                  No workspace found
+                                </span>
+                              ) : (
+                                item.subSections.map((section, index) => (
+                                  <div
+                                    key={index}
+                                    className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
+                                  >
+                                    {section.title}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                            <button className="bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs">
+                              <span className="">
+                                <IoMdAdd />
+                              </span>
+                              <span>Add new workspace</span>
+                            </button>
+                          </div>
+                        )
                       )}
-                    </div> */}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -315,7 +377,7 @@ const NavbarComponent = () => {
                       item.name === "Log out" ? "text-red-500" : "text-black"
                     } ${
                       url === item.url ? "text-thm-clr-1" : "text-black"
-                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200  transition-all rounded-md p-2`}
+                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 transition-all rounded-md p-2`}
                     onClick={() => {
                       router.push(item.url);
                     }}
