@@ -23,17 +23,17 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
   const handleclick = () => {
     if (workspaceTitle === "" && LogoLetter === "") {
       setFillAllTheFields({
-        workspaceTitle: "Please fill the field",
+        message: "Please fill the fields",
         status: "error",
       });
     } else if (workspaceTitle === "" && LogoLetter !== "") {
       setFillAllTheFields({
-        workspaceTitle: "Please fill the title",
+        message: "Please add a title",
         status: "error",
       });
     } else if (workspaceTitle !== "" && LogoLetter === "") {
       setFillAllTheFields({
-        workspaceTitle: "Please fill the logo",
+        message: "Please fill the logo",
         status: "error",
       });
     } else {
@@ -58,6 +58,7 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
           setShowCreateWorkspacePopup(false);
           setIsCustomizingIcon(false);
           setCustomizedLogo(null);
+          setFillAllTheFields(null);
           if (LogoLetter === "") {
             setLogoLetter("W");
           }
@@ -68,7 +69,6 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
           onClick={(e) => {
             e.stopPropagation();
             setIsCustomizingIcon(false);
-
             if (LogoLetter === "") {
               setLogoLetter("W");
             }
@@ -84,7 +84,14 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
             </div>
             <div className="flex flex-col gap-2 my-4">
               <label htmlFor="workspaceTitle" className="text-sm font-bold ">
-                Icon & title {<span className={``}>(fill the field)</span>}
+                Icon & title{" "}
+                <span
+                  className={`${
+                    fillAllTheFields !== null ? "text-red-500" : "hidden"
+                  }`}
+                >
+                  ({fillAllTheFields?.message})
+                </span>
               </label>
               <div className="flex flex-row gap-2 justify-start items-center w-full">
                 <div
@@ -173,14 +180,9 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
               </button>
               <button
                 className="bg-thm-clr-1 hover:bg-thm-clr-2 hover:text-black transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
-                onClick={() => {
-                  console.log({
-                    workspaceTitle,
-                    workspaceDescription,
-                    isPrivate,
-                    LogoLetter,
-                    customizedLogo,
-                  });
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleclick();
                 }}
               >
                 Create Workspace
