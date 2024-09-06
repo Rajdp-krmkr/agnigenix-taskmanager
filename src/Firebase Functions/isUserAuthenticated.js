@@ -7,7 +7,8 @@ const isUserAuthenticated = ({ username, uid }) => {
     const docRef = doc(db, "users", username);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      docSnap.data().uid == uid ? resolve(true) : reject(false);
+      
+      docSnap.data()?.uid == uid ? resolve(true) : reject(false);
     } else {
       reject(false);
     }

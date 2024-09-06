@@ -31,6 +31,7 @@ import { BiTaskX } from "react-icons/bi";
 import { GoTasklist } from "react-icons/go";
 import { IoMdAdd } from "react-icons/io";
 import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
+import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 
 const NavbarComponent = () => {
   const router = useRouter();
@@ -42,6 +43,8 @@ const NavbarComponent = () => {
   const [classNameForYourTasks, setClassNameForYourTasks] = useState("hidden");
   const [openTasksSection, setOpenTasksSection] = useState(false);
   const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
+  const [username, setUsername] = useState(null);
+  const [CreateWorkspacePopupNum, setCreateWorkspacePopupNum] = useState(0);
 
   const Pathname = usePathname();
   useEffect(() => {
@@ -51,17 +54,22 @@ const NavbarComponent = () => {
   }, [Pathname]);
 
   const params = useParams();
-  const username = params.user;
+  const uname = params.user;
+
+  useEffect(() => {
+    if (uname !== undefined) setUsername(uname);
+  }, [uname]);
+
   useEffect(() => {
     console.log(username);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("User is signed in", user.uid);
-        console.log(user, "User");
+        // console.log("User is signed in", user.uid);
+        // console.log(user, "User");
         setUid(user.uid);
       } else {
-        console.log("User is signed out");
-        console.log(user, "User");
+        // console.log("User is signed out");
+        // console.log(user, "User");
         if (
           url !== "/log-in" &&
           url !== "/sign-up" &&
@@ -75,10 +83,10 @@ const NavbarComponent = () => {
   }, []);
 
   useEffect(() => {
-    if (uid !== null && username) {
+    if (uid !== null && username !== null) {
       isUserAuthenticated({ username, uid })
         .then((res) => {
-          console.log("User is authenticated", res);
+          // console.log("User is authenticated", res);
           if (
             url === "/log-in" ||
             url === "/sign-up" ||
@@ -87,19 +95,19 @@ const NavbarComponent = () => {
           ) {
             return;
           } else {
-            console.log(username);
+            // console.log(username);
             if (
               username !== null &&
               username !== "" &&
               username !== undefined
             ) {
               GetUserDataByUsername({ username })
-                .then((res) => {
-                  setUser(res);
+                .then((result) => {
+                  setUser(result);
                   // console.log(res);
                 })
                 .catch((error) => {
-                  console.log(error);
+                  // console.log(error);
                 });
             }
           }
@@ -110,7 +118,7 @@ const NavbarComponent = () => {
           }
         });
     }
-  }, [uid]);
+  }, [uid, username]);
   // console.log(username);
 
   const searchparams = useSearchParams();
@@ -142,11 +150,8 @@ const NavbarComponent = () => {
   }, []);
 
   useEffect(() => {
-    console.log(openTasksSection);
-  }, [openTasksSection]);
-  useEffect(() => {
-    console.log(openWorkSpaceSection);
-  }, [openWorkSpaceSection]);
+    console.log("CreateWorkspacePopupNum", CreateWorkspacePopupNum);
+  }, [CreateWorkspacePopupNum]);
 
   if (
     url !== "/log-in" &&
@@ -244,7 +249,8 @@ const NavbarComponent = () => {
                     icon: <MdOutlineWorkOutline />,
                     url: `#`,
                     activatedIcon: <MdOutlineWork />,
-                    subSections: [],
+                    subSections: User ? User.workspace : [],
+                    // subSections: User.workspace,
                   },
                 ].map((item, index) => (
                   <li
@@ -271,7 +277,7 @@ const NavbarComponent = () => {
                       onClick={() => {
                         if (item.name === "Your tasks") {
                           setOpenTasksSection(!openTasksSection);
-                          console.log(openTasksSection);
+                          // console.log(openTasksSection);
                         } else if (item.name === "Workspace") {
                           setOpenWorkSpaceSection(!openWorkSpaceSection);
                           setClassNameForWorkSpace("block");
@@ -301,7 +307,7 @@ const NavbarComponent = () => {
                           item.name === "Your tasks") && <IoMdArrowDropright />}
                       </div>
                     </div>
-                    <div className={` ml-6 m-2`}>
+                    <div className={`ml-6 m-2`}>
                       {item.name === "Your tasks" && openTasksSection ? (
                         <div className={`transition-all`}>
                           {item.subSections.map((section, index) => (
@@ -343,14 +349,35 @@ const NavbarComponent = () => {
                                 item.subSections.map((section, index) => (
                                   <div
                                     key={index}
-                                    className="cursor-pointer hover:bg-gray-200 rounded-md p-2"
+                                    className={`
+                                ${
+                                  url === section.url
+                                    ? "text-thm-clr-1"
+                                    : "text-black"
+                                }
+                                
+                                cursor-pointer transition-all hover:bg-gray-200 my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
+                                    onClick={() => {
+                                      router.push(section.url);
+                                    }}
                                   >
-                                    {section.title}
+                                    <div className="icon text-lg font-bold">
+                                      {section.icon}
+                                    </div>
+                                    <span>{section.title}</span>
                                   </div>
                                 ))
                               )}
                             </div>
-                            <button className="bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs">
+                            <button
+                              className="bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
+                              onClick={() => {
+                                // router.push(`/CreateWorkspace/${username}`);
+                                setCreateWorkspacePopupNum(
+                                  CreateWorkspacePopupNum + 1
+                                );
+                              }}
+                            >
                               <span className="">
                                 <IoMdAdd />
                               </span>
@@ -404,46 +431,51 @@ const NavbarComponent = () => {
             </div>
           </div>
         </nav>
+        <CreateWorkSpacePopup createPopupNum={CreateWorkspacePopupNum} />
       </>
     );
   }
   return (
-    <nav className="fixed w-screen top-0">
-      <div className=" flex flex-row justify-center m-3 items-center ">
-        <ul className="flex flex-row items-center justify-between w-[70%]">
-          <li className="">
-            <h1 className="text-2xl font-bold">Task Manager</h1>
-          </li>
-          <li className="">
-            {url === "/CreateProfile" || url === "/log-in" || url === "/sign-up"
-              ? null
-              : url === "/" && (
-                  <>
-                    <div className="flex justify-evenly gap-7">
-                      <button
-                        className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-1 transition-all hover:text-black text-white bg-thm-clr-1"
-                        onClick={() => {
-                          router.push("/sign-up");
-                        }}
-                      >
-                        <span>Sign up</span>
-                      </button>
+    <>
+      <nav className="fixed w-screen top-0">
+        <div className=" flex flex-row justify-center m-3 items-center ">
+          <ul className="flex flex-row items-center justify-between w-[70%]">
+            <li className="">
+              <h1 className="text-2xl font-bold">Task Manager</h1>
+            </li>
+            <li className="">
+              {url === "/CreateProfile" ||
+              url === "/log-in" ||
+              url === "/sign-up"
+                ? null
+                : url === "/" && (
+                    <>
+                      <div className="flex justify-evenly gap-7">
+                        <button
+                          className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-1 transition-all hover:text-black text-white bg-thm-clr-1"
+                          onClick={() => {
+                            router.push("/sign-up");
+                          }}
+                        >
+                          <span>Sign up</span>
+                        </button>
 
-                      <button
-                        className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-2 transition-all hover:text-black text-black bg-thm-clr-2"
-                        onClick={() => {
-                          router.push("/log-in");
-                        }}
-                      >
-                        <span>Sign in</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-          </li>
-        </ul>
-      </div>
-    </nav>
+                        <button
+                          className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-2 transition-all hover:text-black text-black bg-thm-clr-2"
+                          onClick={() => {
+                            router.push("/log-in");
+                          }}
+                        >
+                          <span>Sign in</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </>
   );
 };
 

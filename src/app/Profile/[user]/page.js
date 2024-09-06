@@ -81,8 +81,11 @@ const Page = () => {
           <>
             <div className="m-2 w-full">
               <h1 className="text-2xl font-bold mx-12">Profile</h1>
+              <p className="mx-12 text-gray-400 text-xs">
+                This is your profile page, you can view your information here
+              </p>
             </div>
-            <div className="w-[90%] min-h-[80vh] flex flex-row gap-7 mx-20 m-5">
+            <div className="w-[90%] min-h-[70vh] flex flex-row gap-7 mx-20 m-5">
               <div className="flex w-[50%] h-max rounded-3xl flex-col gap-2 bg-gray-100 ">
                 <div className="photos h-[190px] ">
                   <div className="coverPhoto relative w-full h-36 bg-black rounded-t-3xl">
