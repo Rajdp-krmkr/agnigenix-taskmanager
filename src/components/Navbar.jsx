@@ -45,6 +45,8 @@ const NavbarComponent = () => {
   const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
   const [username, setUsername] = useState(null);
   const [CreateWorkspacePopupNum, setCreateWorkspacePopupNum] = useState(0);
+  const [workspaceArray, setWorkspaceArray] = useState([]);
+  const [email, setEmail] = useState(null);
 
   const Pathname = usePathname();
   useEffect(() => {
@@ -104,6 +106,11 @@ const NavbarComponent = () => {
               GetUserDataByUsername({ username })
                 .then((result) => {
                   setUser(result);
+                  console.log("adding workspace...");
+                  setWorkspaceArray(result.workspaces);
+                  setEmail(result.email);
+                  console.log(result);
+                  console.log(result.workspaces);
                   // console.log(res);
                 })
                 .catch((error) => {
@@ -150,7 +157,7 @@ const NavbarComponent = () => {
   }, []);
 
   useEffect(() => {
-    console.log("CreateWorkspacePopupNum", CreateWorkspacePopupNum);
+    // console.log("CreateWorkspacePopupNum", CreateWorkspacePopupNum);
   }, [CreateWorkspacePopupNum]);
 
   if (
@@ -174,7 +181,7 @@ const NavbarComponent = () => {
             >
               {User == null ? (
                 // <div className="flex justify-center items-center w-full">
-                <div class="loader"></div>
+                <div class="loader w-9 h-9 border-[4px] border-white"></div>
               ) : (
                 // </div>
                 <>
@@ -249,7 +256,7 @@ const NavbarComponent = () => {
                     icon: <MdOutlineWorkOutline />,
                     url: `#`,
                     activatedIcon: <MdOutlineWork />,
-                    subSections: User ? User.workspace : [],
+                    subSections: workspaceArray,
                     // subSections: User.workspace,
                   },
                 ].map((item, index) => (
@@ -361,8 +368,20 @@ const NavbarComponent = () => {
                                       router.push(section.url);
                                     }}
                                   >
-                                    <div className="icon text-lg font-bold">
-                                      {section.icon}
+                                    <div className="icon font-bold">
+                                      <span
+                                        className={`${
+                                          section.customizedLogo !== null
+                                            && section.customizedLogo.bg
+                                            
+                                        } ${
+                                          section.customizedLogo !== null
+                                            ? `text-${section.customizedLogo.text}`
+                                            : "text-gray-400 border-2 border-gray-300"
+                                        } cursor-pointer font-semibold text-center flex items-center justify-center text-xs rounded-lg w-6 h-6`}
+                                      >
+                                        <span>{section.LogoLetter}</span>
+                                      </span>
                                     </div>
                                     <span>{section.title}</span>
                                   </div>
@@ -431,7 +450,13 @@ const NavbarComponent = () => {
             </div>
           </div>
         </nav>
-        <CreateWorkSpacePopup createPopupNum={CreateWorkspacePopupNum} />
+        <CreateWorkSpacePopup
+          createPopupNum={CreateWorkspacePopupNum}
+          uname={username}
+          uniqID={uid}
+          workspacearray={workspaceArray}
+          email={email}
+        />
       </>
     );
   }

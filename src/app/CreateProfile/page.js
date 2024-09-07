@@ -66,14 +66,11 @@ const PageComponent = () => {
   }, [uid]);
 
   function validateUsername(username) {
-    // Check for minimum and maximum length
     if (username.length < 3 || username.length > 15) {
       setUsernameMessage("Username must be between 3 and 15 characters.");
       setIsUsernameExist(true);
       return false;
     }
-
-    // Check if the username starts with an underscore
     if (username.startsWith("_")) {
       setUsernameMessage("Username cannot start with an (_).");
       setIsUsernameExist(true);
@@ -85,10 +82,10 @@ const PageComponent = () => {
       return false;
     }
 
-    // Regular expression for the username rules:
+    //{ Regular expression for the username rules:
     // - Alphanumeric characters (a-z, A-Z, 0-9)
     // - Underscore (_) and hyphen (-) are allowed
-    // - No spaces allowed
+    // - No spaces allowed}
     const usernameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
     // Check if the username matches the regex
@@ -106,7 +103,7 @@ const PageComponent = () => {
     return true;
   }
 
-  // Example usage
+  // {Example usage
   // const usernamesToTest = [
   //   "john_doe",    // valid
   //   "john-doe",    // valid
@@ -119,7 +116,7 @@ const PageComponent = () => {
   //   "johndoe-",    // valid
   //   "john__doe",   // valid
   //   "john--doe"    // valid
-  // ];
+  // ];}
 
   const debouncedUsername = useDebounce(username, 500);
   useEffect(() => {

@@ -1,8 +1,23 @@
+import CreateWorkspace, {
+  updateWorkspaceinUsers,
+} from "@/Firebase Functions/CreateWorkspace";
+import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
+import useDebounce from "@/Firebase Functions/useDebounce";
+import { auth } from "@/lib/firebaseConfig";
+import { onAuthStateChanged } from "@firebase/auth";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { GrStatusInfoSmall } from "react-icons/gr";
 import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
 
-const CreateWorkSpacePopup = ({ createPopupNum }) => {
+const CreateWorkSpacePopup = ({
+  createPopupNum,
+  uname,
+  uniqID,
+  workspacearray,
+  email,
+}) => {
+  const router = useRouter();
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
     useState(false);
 
@@ -14,11 +29,33 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
   const [customizedLogo, setCustomizedLogo] = useState(null);
 
   const [fillAllTheFields, setFillAllTheFields] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [uid, setUid] = useState("");
+  // const [user, setUser] = useState(null);
+  const [WorkspaceArray, setWorkspaceArray] = useState([]);
+
+  const [workspaceMessage, setWorkspaceMessage] = useState(null);
+
+  useEffect(() => {
+    setWorkspaceArray(workspacearray);
+    console.log(workspacearray);
+  }, [workspacearray]);
+
+  const [members, setMembers] = useState([]);
   useEffect(() => {
     if (createPopupNum > 0) {
       setShowCreateWorkspacePopup(true);
     }
   }, [createPopupNum]);
+
+  useEffect(() => {
+    if (uname !== undefined) setUsername(uname);
+  }, [uname]);
+
+  useEffect(() => {
+    setUid(uniqID);
+  }, [uniqID]);
 
   const handleclick = () => {
     if (workspaceTitle === "" && LogoLetter === "") {
@@ -38,16 +75,130 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
       });
     } else {
       setFillAllTheFields(null);
+      setIsLoading(true);
 
-      console.log({
-        workspaceTitle,
-        workspaceDescription,
-        isPrivate,
-        LogoLetter,
-        customizedLogo,
-      });
+      if (validateWorkspaceTitle(workspaceTitle)) {
+        members.push({
+          username: username,
+          uid: uid,
+          isAdmin: true,
+          email: email,
+        });
+        const workspaceID = Math.floor(
+          Math.random() * 1000000000000000
+        ).toString();
+        console.log(workspaceID);
+
+        const object = {
+          workspaceTitle,
+          workspaceDescription,
+          isPrivate,
+          LogoLetter,
+          customizedLogo,
+          members,
+          url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
+          //!members will come soon
+        };
+        console.log(object);
+
+        CreateWorkspace(workspaceID, object)
+          .then((res) => {
+            setIsLoading(true);
+            if (res == workspaceID) {
+              console.log("Workspace Created Successfully");
+              WorkspaceArray.push({
+                title: workspaceTitle,
+                id: workspaceID,
+                LogoLetter: LogoLetter,
+                customizedLogo: customizedLogo,
+                isPrivate: isPrivate,
+                members: members,
+                url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
+              });
+
+              updateWorkspaceinUsers(username, [...WorkspaceArray])
+                .then(() => {
+                  console.log("Workspace added to user");
+                  setIsLoading(false);
+
+                  setIsCustomizingIcon(false);
+                  setShowCreateWorkspacePopup(false);
+                  setWorkspaceTitle("");
+                  setWorkspaceDescription("");
+                  setIsPrivate(false);
+                  setLogoLetter("W");
+                  setCustomizedLogo(null);
+                  setFillAllTheFields(null);
+                  setMembers([]);
+                })
+                .catch((err) => {
+                  console.error("Error adding workspace to user", err);
+                  setIsLoading(false);
+
+                  setIsCustomizingIcon(false);
+                  // setShowCreateWorkspacePopup(false);
+                  setWorkspaceTitle("");
+                  setWorkspaceDescription("");
+                  setIsPrivate(false);
+                  setLogoLetter("W");
+                  setCustomizedLogo(null);
+                  setFillAllTheFields(null);
+                  setMembers([]);
+                });
+            }
+          })
+          .catch((err) => {
+            setIsLoading(true);
+            console.error("Error creating workspace", err);
+          });
+      }
     }
   };
+
+  function validateWorkspaceTitle(workspaceTitle) {
+    if (workspaceTitle.length < 2 || workspaceTitle.length > 15) {
+      setWorkspaceMessage({
+        type: "error",
+        message: "Workspace title must be between 2 and 15 characters.",
+      });
+      return false;
+    }
+    if (workspaceTitle.startsWith("_")) {
+      setWorkspaceMessage({
+        type: "error",
+        message: "Workspace title cannot start with an (_).",
+      });
+      return false;
+    }
+    if (workspaceTitle.startsWith("-")) {
+      setWorkspaceMessage({
+        type: "error",
+        message: "Workspace title cannot start with an (-).",
+      });
+      return false;
+    }
+    const workspaceTitleRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+
+    if (!workspaceTitleRegex.test(workspaceTitle)) {
+      setWorkspaceMessage({
+        type: "error",
+        message:
+          "Workspace title can only contain letters, numbers, underscores (_), and hyphens (-).",
+      });
+      return false;
+    }
+
+    setWorkspaceMessage({
+      type: "success",
+      message: "Workspace title is valid.",
+    });
+    return true;
+  }
+
+  useEffect(() => {
+    validateWorkspaceTitle(workspaceTitle);
+  }, [workspaceTitle]);
+
   return (
     <>
       <div
@@ -65,7 +216,7 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
         }}
       >
         <div
-          className=" min-w-[40%] min-h-[50%] bg-[#dbdbdb] rounded-3xl z-[21] p-4 animate-PopUpAppear"
+          className="w-[40%] min-h-[50%] bg-[#dbdbdb] rounded-3xl z-[21] p-4 animate-PopUpAppear"
           onClick={(e) => {
             e.stopPropagation();
             setIsCustomizingIcon(false);
@@ -98,8 +249,8 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
                   className={`${
                     customizedLogo === null
                       ? "hover:bg-gray-300 text-gray-400"
-                      : `text-${customizedLogo.text} bg-${customizedLogo.bg}`
-                  } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg  border-gray-400`}
+                      : `text-${customizedLogo.text} ${customizedLogo.bg}`
+                  } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg border-gray-400`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsCustomizingIcon(!isCustomizingIcon);
@@ -118,6 +269,19 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
                   placeholder="Add a title"
                 />
               </div>
+              {workspaceMessage !== null ? (
+                <div
+                  className={`${
+                    workspaceMessage.type === "error"
+                      ? "text-red-500"
+                      : "text-green-500"
+                  } text-end text-xs`}
+                >
+                  {workspaceMessage.message}
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
             <div className="flex flex-col gap-2 my-4">
               <label
@@ -153,7 +317,10 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
                 <label class="switch">
                   <input
                     type="checkbox"
-                    onChange={() => {
+                    checked={isPrivate}
+                    onChange={(e) => {
+                      // console.log(e);
+                      // console.log(isPrivate);
                       setIsPrivate(!isPrivate);
                       // console.log(isPrivate)
                     }}
@@ -171,6 +338,11 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
                 onClick={() => {
                   setShowCreateWorkspacePopup(false);
                   setIsCustomizingIcon(false);
+                  setCustomizedLogo(null);
+                  setFillAllTheFields(null);
+                  setWorkspaceTitle("");
+                  setWorkspaceDescription("");
+                  setIsPrivate(false);
                   if (LogoLetter === "") {
                     setLogoLetter("W");
                   }
@@ -179,12 +351,23 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
                 Cancel
               </button>
               <button
-                className="bg-thm-clr-1 hover:bg-thm-clr-2 hover:text-black transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
+                className={` ${
+                  isLoading
+                    ? "bg-gray-500 text-white"
+                    : "bg-thm-clr-1 hover:bg-thm-clr-2 hover:text-black text-white"
+                }  flex justify-center items-center gap-2 transition-all rounded-lg px-4 py-2 text-sm font-bold`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleclick();
+                  if (!isLoading) {
+                    handleclick();
+                  }
                 }}
               >
+                {isLoading && (
+                  <>
+                    <div className="loader border-gray-500/25 w-4 h-4 border-2"></div>
+                  </>
+                )}
                 Create Workspace
               </button>
             </div>
