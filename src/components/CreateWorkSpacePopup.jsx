@@ -222,19 +222,19 @@ const CreateWorkSpacePopup = ({ createPopupNum }) => {
               <div className="grid grid-cols-7 grid-rows-2 gap-2">
                 {[
                   null,
-                  { text: "white", bg: "black" },
-                  { text: "white", bg: "red-500" },
-                  { text: "white", bg: "green-500" },
-                  { text: "white", bg: "purple-500" },
-                  { text: "white", bg: "yellow-500" },
-                  { text: "white", bg: "cyan-500" },
-                  { text: "white", bg: "blue-500" },
-                  { text: "white", bg: "orange-500" },
+                  { text: "white", bg: "bg-black" },
+                  { text: "white", bg: "bg-red-500" },
+                  { text: "white", bg: "bg-green-500" },
+                  { text: "white", bg: "bg-purple-500" },
+                  { text: "white", bg: "bg-yellow-500" },
+                  { text: "white", bg: "bg-cyan-500" },
+                  { text: "white", bg: "bg-blue-500" },
+                  { text: "white", bg: "bg-orange-500" },
                 ].map((colors, index) => (
                   <span
                     key={index}
                     className={`${
-                      colors !== null ? `bg-${colors.bg}` : "bg-transparent"
+                      colors !== null ? colors.bg : "bg-transparent"
                     } ${
                       colors !== null
                         ? `text-${colors.text}`
