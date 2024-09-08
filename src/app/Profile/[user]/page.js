@@ -82,7 +82,7 @@ const Page = () => {
             <div className="m-2 w-full">
               <h1 className="text-2xl font-bold mx-12">Profile</h1>
               <p className="mx-12 text-gray-400 text-xs">
-                This is your profile page, you can view your information here
+                This is your profile page, you can view and edit your information here
               </p>
             </div>
             <div className="w-[90%] min-h-[70vh] flex flex-row gap-7 mx-20 m-5">
