@@ -34,8 +34,7 @@ const CreateWorkspace = (
 
 export default CreateWorkspace;
 
-
-export const updateWorkspaceinUsers = (username , [...WorkspaceArray]) => {
+export const updateWorkspaceinUsers = (username, [...WorkspaceArray]) => {
   return new Promise(async (resolve, reject) => {
     try {
       const docRef = doc(db, "users", username);

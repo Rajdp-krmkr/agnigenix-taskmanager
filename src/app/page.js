@@ -16,7 +16,6 @@ export default function Home() {
       if (user) {
         setUser(user);
         console.log(user);
-        
       } else {
         setUser(null);
       }
@@ -25,15 +24,20 @@ export default function Home() {
 
   if (user) {
     const { uid } = user;
+    const { emailVerified } = user;
     console.log(user);
-    IsUserExist({ uid })
-      .then((user) => {
-        console.log(user);
-        router.push(`/Dashboard/${user.username}`);
-      })
-      .catch(() => {
-        router.push(`/CreateProfile?id=${uid}`);
-      });
+    if (emailVerified) {
+      IsUserExist({ uid })
+        .then((user) => {
+          console.log(user);
+          router.push(`/Dashboard/${user.username}`);
+        })
+        .catch(() => {
+          router.push(`/CreateProfile?id=${uid}`);
+        });
+    } else {
+      router.push("/verify-email");
+    }
   }
   return (
     <>

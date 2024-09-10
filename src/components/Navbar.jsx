@@ -164,7 +164,8 @@ const NavbarComponent = () => {
     url !== "/log-in" &&
     url !== "/sign-up" &&
     url !== "/CreateProfile" &&
-    url !== "/"
+    url !== "/" &&
+    url !== "/verify-email"
   ) {
     return (
       <>
@@ -207,8 +208,8 @@ const NavbarComponent = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-col min-h-[80vh] my-2 gap-10 justify-between">
-            <div className="mt-5">
+          <div className="flex flex-col min-h-[80vh] mt-0 gap-10 justify-between">
+            <div className="mt-1">
               <ul>
                 {[
                   {
@@ -347,7 +348,7 @@ const NavbarComponent = () => {
                         item.name === "Workspace" &&
                         openWorkSpaceSection && (
                           <div className="flex flex-col">
-                            <div>
+                            <div className="workspaceScrollBar max-h-[268px] overflow-auto">
                               {item.subSections.length === 0 ? (
                                 <span className="text-gray-400 text-xs">
                                   No workspace found
@@ -389,7 +390,7 @@ const NavbarComponent = () => {
                               )}
                             </div>
                             <button
-                              className="bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
+                              className="bg-thm-clr-1 my-4 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
                               onClick={() => {
                                 // router.push(`/CreateWorkspace/${username}`);
                                 setCreateWorkspacePopupNum(

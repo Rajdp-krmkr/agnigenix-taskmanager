@@ -9,6 +9,8 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { GrStatusInfoSmall } from "react-icons/gr";
 import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
+import UserSearchResults from "./userSearchResults";
+import { generateCustomCode } from "./getCustomCode";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
@@ -36,13 +38,25 @@ const CreateWorkSpacePopup = ({
   const [WorkspaceArray, setWorkspaceArray] = useState([]);
 
   const [workspaceMessage, setWorkspaceMessage] = useState(null);
+  const [members, setMembers] = useState([]);
+
+  const ColorsArray = [
+    null,
+    { text: "white", bg: "bg-black" },
+    { text: "white", bg: "bg-red-500" },
+    { text: "white", bg: "bg-green-500" },
+    { text: "white", bg: "bg-purple-500" },
+    { text: "white", bg: "bg-yellow-500" },
+    { text: "white", bg: "bg-cyan-500" },
+    { text: "white", bg: "bg-blue-500" },
+    { text: "white", bg: "bg-orange-500" },
+  ];
 
   useEffect(() => {
     setWorkspaceArray(workspacearray);
     console.log(workspacearray);
   }, [workspacearray]);
 
-  const [members, setMembers] = useState([]);
   useEffect(() => {
     if (createPopupNum > 0) {
       setShowCreateWorkspacePopup(true);
@@ -84,9 +98,8 @@ const CreateWorkSpacePopup = ({
           isAdmin: true,
           email: email,
         });
-        const workspaceID = Math.floor(
-          Math.random() * 1000000000000000
-        ).toString();
+        
+        const workspaceID = generateCustomCode(14);
         console.log(workspaceID);
 
         const object = {
@@ -210,22 +223,24 @@ const CreateWorkSpacePopup = ({
           setIsCustomizingIcon(false);
           setCustomizedLogo(null);
           setFillAllTheFields(null);
+          setIsPrivate(false);
           if (LogoLetter === "") {
             setLogoLetter("W");
           }
         }}
       >
         <div
-          className="w-[40%] min-h-[50%] bg-[#dbdbdb] rounded-3xl z-[21] p-4 animate-PopUpAppear"
+          className="flex flex-row justify-between gap-2 min-w-[40%] min-h-[50%] bg-[#dbdbdb] rounded-3xl z-[21] p-4 animate-PopUpAppear"
           onClick={(e) => {
             e.stopPropagation();
             setIsCustomizingIcon(false);
+
             if (LogoLetter === "") {
               setLogoLetter("W");
             }
           }}
         >
-          <div className="mx-5">
+          <div className={`mx-5 ${!isPrivate && "w-full"} transition-all`}>
             <div className="text-xl mt-1">
               <h1 className="font-bold">Create Workspace</h1>
               <p className="text-gray-400 text-xs font-normal">
@@ -309,7 +324,7 @@ const CreateWorkSpacePopup = ({
                 </label>
                 <div className="flex flex-row gap-2 justify-start items-center w-full">
                   <span className="text-xs text-gray-400">
-                    Private workspaces are only visible to members
+                    Private workspaces are only visible to invited members
                   </span>
                 </div>
               </div>
@@ -372,6 +387,15 @@ const CreateWorkSpacePopup = ({
               </button>
             </div>
           </div>
+          {isPrivate && (
+            <>
+              <div className="w-[2px] bg-gray-300"></div>
+              <div className="m-2 flex flex-col items-start "> {/*animation-widthIncreasing */}
+                <h2 className="font-bold my-1">Invite users</h2>
+                <UserSearchResults username={username} />
+              </div>
+            </>
+          )}
           <div
             className={`${
               isCustomizingIcon ? "flex" : "hidden"
@@ -403,17 +427,7 @@ const CreateWorkSpacePopup = ({
                 Background color
               </h2>
               <div className="grid grid-cols-7 grid-rows-2 gap-2">
-                {[
-                  null,
-                  { text: "white", bg: "bg-black" },
-                  { text: "white", bg: "bg-red-500" },
-                  { text: "white", bg: "bg-green-500" },
-                  { text: "white", bg: "bg-purple-500" },
-                  { text: "white", bg: "bg-yellow-500" },
-                  { text: "white", bg: "bg-cyan-500" },
-                  { text: "white", bg: "bg-blue-500" },
-                  { text: "white", bg: "bg-orange-500" },
-                ].map((colors, index) => (
+                {ColorsArray.map((colors, index) => (
                   <span
                     key={index}
                     className={`${

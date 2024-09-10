@@ -365,8 +365,8 @@
   width: 36px;
   height: 36px;
   } */
-  
-  .loader {
+
+.loader {
   border-radius: 50%;
   border: solid rgba(0, 0, 0, 0.1);
   border-left-color: transparent;
@@ -400,8 +400,7 @@
   animation: PopUpAppear 0.3s ease-in-out;
 }
 
-
-/* From Uiverse.io by Cksunandh */ 
+/* From Uiverse.io by Cksunandh */
 .switch {
   height: 24px;
   display: block;
@@ -547,4 +546,48 @@
 .switch :before,
 :after {
   box-sizing: border-box;
+}
+
+:root {
+  --primary: transparent;
+  --secondary: #57575730;
+}
+
+/* *::-webkit-scrollbar {
+  width: 15px;
+} */
+/* @keyframes widthIncreasing {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 198.40px;
+  }
+} */
+/* 
+.animation-widthIncreasing {
+  animation: widthIncreasing 0.5s ease-in-out;
+} */
+
+.workspaceScrollBar {
+  scrollbar-width: none;
+  scrollbar-color: var(--secondary) var(--primary);
+  scrollbar-arrow-color: transparent;
+}
+.workspaceScrollBar:hover {
+  scrollbar-width: thin;
+}
+
+.workspaceScrollBar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.searchResultScrollBar {
+  scrollbar-color: var(--secondary) var(--primary);
+  scrollbar-arrow-color: transparent;
+  scrollbar-width: thin;
+}
+
+.searchResultScrollBar::-webkit-scrollbar {
+  width: 10px;
 }

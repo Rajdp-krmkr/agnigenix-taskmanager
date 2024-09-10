@@ -9,38 +9,61 @@ import {
   GithubAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
 } from "@firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
   const router = useRouter();
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const SignUpWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-    .then((result) => {
-      console.log("loggedin", result);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+      .then((result) => {
+        console.log("loggedin", result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
   const SignUpWithGithub = () => {
     const provider = new GithubAuthProvider();
     signInWithPopup(auth, provider)
-    .then((result) => {
-      console.log("loggedin", result);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+      .then((result) => {
+        console.log("loggedin", result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
+  const handleClick = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        sendEmailVerification(auth.currentUser)
+          .then(() => {
+            console.log("email verification link sent");
+          })
+          .catch((error) => {
+            console.log("Error in sending email verification link", error);
+          });
 
-  
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(error, errorCode, errorMessage);
+      });
+  };
+
   const [user, setUser] = useState(null);
-  
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -52,7 +75,11 @@ const Page = () => {
   }, []);
 
   if (user) {
-    router.push(`/CreateProfile?id=${user.uid}`);
+    if (user.emailVerified) {
+      router.push(`/CreateProfile?id=${user.uid}`);
+    } else {
+      router.push("/verify-email");
+    }
   }
   return (
     <>
@@ -64,12 +91,15 @@ const Page = () => {
           </div>
           <div className="input my-2">
             <div className="flex flex-col gap-1">
-              <label className="font-bold" htmlFor="">
+              <label className="font-bold" htmlFor="email">
                 Email
               </label>
               <input
                 type="text"
+                id="email"
                 className="m-2 p-2 border-2 rounded-md outline-thm-clr-1"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -77,11 +107,18 @@ const Page = () => {
                 Password
               </label>
               <input
-                type="text"
+                type="password"
                 className="m-2 p-2 border-2 rounded-md outline-thm-clr-1"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="AuthBtn flex justify-center items-center m-3">
+            <div
+              className="AuthBtn flex justify-center items-center m-3"
+              onClick={() => {
+                handleClick();
+              }}
+            >
               <button className="btn p-1">
                 <span class="circle1"></span>
                 <span class="circle2"></span>
