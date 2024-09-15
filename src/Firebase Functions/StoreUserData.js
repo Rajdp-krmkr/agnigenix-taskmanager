@@ -14,7 +14,7 @@ const StoreUserData = ({ uid, name, username, photoURL, email }) => {
         bio: "",
         socialMediaAcounts: [],
         jobRole: "",
-        workspaces: [],
+        workspaces: [], //TODO: add welcome notification
       });
       resolve("User Data Stored Successfully");
     } catch (error) {
