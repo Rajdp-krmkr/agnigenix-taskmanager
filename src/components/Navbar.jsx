@@ -30,6 +30,8 @@ import { BsClipboard2Check } from "react-icons/bs";
 import { BiTaskX } from "react-icons/bi";
 import { GoTasklist } from "react-icons/go";
 import { IoMdAdd } from "react-icons/io";
+import { IoMdNotificationsOutline } from "react-icons/io";
+
 import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 
@@ -217,6 +219,12 @@ const NavbarComponent = () => {
                     icon: <MdOutlineDashboard />,
                     url: `/Dashboard/${username}`,
                     activatedIcon: <MdDashboard />,
+                  },
+                  {
+                    name: "Notifications",
+                    icon: <IoMdNotificationsOutline />,
+                    url: `/Notifications/all/${username}`,
+                    activatedIcon: <IoMdNotificationsOutline />,
                   },
                   {
                     name: "Your tasks",
