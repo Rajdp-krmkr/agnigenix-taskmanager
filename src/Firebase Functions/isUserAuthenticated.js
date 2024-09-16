@@ -10,7 +10,7 @@ const isUserAuthenticated = ({ username, uid }) => {
         return reject(false);
       }
 
-      console.log("Checking username:", username);
+      // console.log("Checking username:", username);
 
       // Create a document reference in the "users" collection with the given username
       const docRef = doc(db, "users", username);
@@ -22,10 +22,10 @@ const isUserAuthenticated = ({ username, uid }) => {
       if (docSnap.exists()) {
         // Compare the uid from the document with the provided uid
         docSnap.data()?.uid === uid ? resolve(true) : reject(false);
-        console.log("User authenticated successfully.");
+        // console.log("User authenticated successfully.");
       } else {
         // Document doesn't exist
-        console.log("No such document!");
+        // console.log("No such document!");
         reject(false);
       }
     } catch (error) {
@@ -75,7 +75,7 @@ export const CheckIfUserAssignedToWorkspace = (
           resolve({
             isWorkspaceFound: false,
             isAssigned: null,
-            message: "No workspace found with the given title",
+            message: "No workspace found with the given workspaceTitle",
           });
         }
       }

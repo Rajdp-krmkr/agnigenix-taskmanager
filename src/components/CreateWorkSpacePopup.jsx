@@ -11,15 +11,31 @@ import { GrStatusInfoSmall } from "react-icons/gr";
 import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
 import UserSearchResults from "./userSearchResults";
 import { generateCustomCode } from "./getCustomCode";
+import { useSelector, useDispatch } from "react-redux";
+import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
+import Link from "next/link";
+import { resetInvitedUsersArray } from "@/lib/features/slice";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
   uname,
+  name,
   uniqID,
   workspacearray,
   email,
 }) => {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const invitedUsers = useSelector((state) => state.invitedUsers.invitedUsers);
+  const [members, setMembers] = useState([]);
+
+  useEffect(() => {
+    if (invitedUsers.length > 0) {
+      console.log("invitedUsers", invitedUsers);
+      // setMembers(invitedUsers);
+    }
+  }, [invitedUsers]);
+
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
     useState(false);
 
@@ -38,7 +54,6 @@ const CreateWorkSpacePopup = ({
   const [WorkspaceArray, setWorkspaceArray] = useState([]);
 
   const [workspaceMessage, setWorkspaceMessage] = useState(null);
-  const [members, setMembers] = useState([]);
 
   const ColorsArray = [
     null,
@@ -89,84 +104,188 @@ const CreateWorkSpacePopup = ({
       });
     } else {
       setFillAllTheFields(null);
-      setIsLoading(true);
 
       if (validateWorkspaceTitle(workspaceTitle)) {
-        members.push({
-          username: username,
-          uid: uid,
-          isAdmin: true,
-          email: email,
-        });
-        
-        const workspaceID = generateCustomCode(14);
-        console.log(workspaceID);
-
-        const object = {
-          workspaceTitle,
-          workspaceDescription,
-          isPrivate,
-          LogoLetter,
-          customizedLogo,
-          members,
-          url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
-          //!members will come soon
-        };
-        console.log(object);
-
-        CreateWorkspace(workspaceID, object)
-          .then((res) => {
-            setIsLoading(true);
-            if (res == workspaceID) {
-              console.log("Workspace Created Successfully");
-              WorkspaceArray.push({
-                title: workspaceTitle,
-                id: workspaceID,
-                LogoLetter: LogoLetter,
-                customizedLogo: customizedLogo,
-                isPrivate: isPrivate,
-                members: members,
-                url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
-              });
-
-              updateWorkspaceinUsers(username, [...WorkspaceArray])
-                .then(() => {
-                  console.log("Workspace added to user");
-                  setIsLoading(false);
-
-                  setIsCustomizingIcon(false);
-                  setShowCreateWorkspacePopup(false);
-                  setWorkspaceTitle("");
-                  setWorkspaceDescription("");
-                  setIsPrivate(false);
-                  setLogoLetter("W");
-                  setCustomizedLogo(null);
-                  setFillAllTheFields(null);
-                  setMembers([]);
-                })
-                .catch((err) => {
-                  console.error("Error adding workspace to user", err);
-                  setIsLoading(false);
-
-                  setIsCustomizingIcon(false);
-                  // setShowCreateWorkspacePopup(false);
-                  setWorkspaceTitle("");
-                  setWorkspaceDescription("");
-                  setIsPrivate(false);
-                  setLogoLetter("W");
-                  setCustomizedLogo(null);
-                  setFillAllTheFields(null);
-                  setMembers([]);
-                });
-            }
-          })
-          .catch((err) => {
-            setIsLoading(true);
-            console.error("Error creating workspace", err);
-          });
+        setIsLoading(true);
+        setMembers([
+          ...invitedUsers,
+          {
+            username: username,
+            uid: uid,
+            isAdmin: true,
+            isPendingInvitation: false,
+          },
+        ]);
       }
     }
   };
+
+  useEffect(() => {
+    console.log("members: ", members);
+    if (members.length == invitedUsers.length + 1) {
+      const workspaceID = generateCustomCode(14);
+      console.log(workspaceID);
+      const object = {
+        // This is the object that will be added to the workspaces collection
+        workspaceTitle,
+        workspaceDescription,
+        workspaceID,
+        isPrivate,
+        LogoLetter,
+        customizedLogo,
+        members,
+        url: `/Workspaces/${workspaceTitle}/${workspaceID}/`,
+        //!members will come soon
+      };
+      console.log(object);
+      CreateWorkspace(workspaceID, object)
+        .then((res) => {
+          setIsLoading(true);
+          if (res == workspaceID) {
+            console.log("Workspace Created Successfully");
+            const NewWorkspace = {
+              // This is the object that will be added to the user's workspaces array
+              workspaceTitle,
+              workspaceID,
+              isPrivate: isPrivate,
+              LogoLetter: LogoLetter,
+              customizedLogo: customizedLogo,
+              members: members,
+              url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
+            };
+            // WorkspaceArray.push(NewWorkspace);
+
+            const workspaceArrayUpdated = [...workspacearray];
+            workspaceArrayUpdated.push(NewWorkspace); 
+
+            const notificationID = generateCustomCode(14);
+
+            function dateFunction() {
+              const d = new Date();
+
+              const date = d.getDate();
+              const month =
+                d.getMonth() + 1 == 1
+                  ? "Jan"
+                  : d.getMonth() + 1 == 2
+                  ? "Feb"
+                  : d.getMonth() + 1 == 3
+                  ? "Mar"
+                  : d.getMonth() + 1 == 4
+                  ? "Apr"
+                  : d.getMonth() + 1 == 5
+                  ? "May"
+                  : d.getMonth() + 1 == 6
+                  ? "Jun"
+                  : d.getMonth() + 1 == 7
+                  ? "Jul"
+                  : d.getMonth() + 1 == 8
+                  ? "Aug"
+                  : d.getMonth() + 1 == 9
+                  ? "Sep"
+                  : d.getMonth() + 1 == 10
+                  ? "Oct"
+                  : d.getMonth() + 1 == 11
+                  ? "Nov"
+                  : "Dec";
+              const year = d.getFullYear();
+              const hours = d.getHours();
+              const minutes =
+                d.getMinutes() < 10 ? `0${d.getMinutes()}` : d.getMinutes();
+
+              return {
+                expirationDate: {
+                  date: date,
+                  month: d.getMonth() + 1,
+                  year: year,
+                  hours: hours,
+                  minutes: minutes,
+                },
+                time: `${hours}:${minutes}     ${date} ${month}, ${year}`,
+              };
+            }
+            function hoursLeft() {
+              const newDate = new Date();
+              if (
+                newDate.getDate() == dateFunction().expirationDate.date &&
+                newDate.getMonth() + 1 == dateFunction().expirationDate.month &&
+                newDate.getFullYear() == dateFunction().expirationDate.year
+              ) {
+                return `This invitation will expire after 24 hours.`;
+              } else if (
+                newDate.getDate() > dateFunction().expirationDate.date ||
+                newDate.getMonth() + 1 > dateFunction().expirationDate.month ||
+                newDate.getFullYear() > dateFunction().expirationDate.year
+              ) {
+                return "";
+              }
+            }
+
+            for (let i = 0; i < invitedUsers.length; i++) {
+              PostNotifications(members[i].username, notificationID, {
+                Body: `${hoursLeft()}`,
+                isRead: false,
+                isSeen: false,
+                Title: `${name} (${username}) has invited you to join ${workspaceTitle}`,
+                Time: dateFunction().time,
+                uid: notificationID,
+                Type: "invitation",
+                invitationExpirationDate: dateFunction().expirationDate,
+                isInvitationAccepted: null,
+                isInvitationExpired: false,
+                workSpace: object,
+              })
+                .then(() => {
+                  console.log(
+                    `Successfully send invitation to ${members[i].username}`
+                  );
+                })
+                .catch((err) => {
+                  console.log(
+                    `failed to send invitation to ${members[i].username}`,
+                    err
+                  );
+                });
+            }
+
+            updateWorkspaceinUsers(username, [...workspaceArrayUpdated])
+              .then(() => {
+                console.log("Workspace added to user");
+                setIsLoading(false);
+
+                setIsCustomizingIcon(false);
+                setShowCreateWorkspacePopup(false);
+                setWorkspaceTitle("");
+                setWorkspaceDescription("");
+                setIsPrivate(false);
+                setLogoLetter("W");
+                setCustomizedLogo(null);
+                setFillAllTheFields(null);
+                setMembers([]);
+              })
+              .catch((err) => {
+                console.error("Error adding workspace to user", err);
+                setIsLoading(false);
+
+                setIsCustomizingIcon(false);
+                // setShowCreateWorkspacePopup(false);
+                setWorkspaceTitle("");
+                setWorkspaceDescription("");
+                setIsPrivate(false);
+                setLogoLetter("W");
+                setCustomizedLogo(null);
+                setFillAllTheFields(null);
+                setMembers([]);
+              });
+          }
+          dispatch(resetInvitedUsersArray());
+        })
+        .catch((err) => {
+          setIsLoading(true);
+          console.error("Error creating workspace", err);
+        });
+    }
+  }, [members]);
 
   function validateWorkspaceTitle(workspaceTitle) {
     if (workspaceTitle.length < 2 || workspaceTitle.length > 15) {
@@ -390,7 +509,9 @@ const CreateWorkSpacePopup = ({
           {isPrivate && (
             <>
               <div className="w-[2px] bg-gray-300"></div>
-              <div className="m-2 flex flex-col items-start "> {/*animation-widthIncreasing */}
+              <div className="m-2 flex flex-col items-start ">
+                {" "}
+                {/*animation-widthIncreasing */}
                 <h2 className="font-bold my-1">Invite users</h2>
                 <UserSearchResults username={username} />
               </div>

@@ -19,8 +19,11 @@ export const invitedUsersSlice = createSlice({
         );
       }
     },
+    resetInvitedUsersArray: (state) => {
+      state.invitedUsers = [];
+    },
   },
 });
 
-export const { addInvitedUser, removeInvitedUser } = invitedUsersSlice.actions;
+export const { addInvitedUser, removeInvitedUser, resetInvitedUsersArray } = invitedUsersSlice.actions;
 export default invitedUsersSlice.reducer;

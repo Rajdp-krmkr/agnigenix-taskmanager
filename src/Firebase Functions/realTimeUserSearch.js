@@ -12,6 +12,7 @@ const realTimeUserSearch = () => {
         name: doc.data().name, // Internal document data
         email: doc.data().email, // Internal document data
         photoURL: doc.data().photoURL, // Internal document
+        uid: doc.data().uid, // Internal document data
       }));
       usersList.sort((a, b) => a.username.localeCompare(b.username));
 

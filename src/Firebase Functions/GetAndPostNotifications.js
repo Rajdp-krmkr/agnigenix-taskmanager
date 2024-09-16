@@ -28,7 +28,8 @@ const GetNotifications = (username) => {
 
 export default GetNotifications;
 
-export const updateNotifications = (username, notificationID) => {
+export const updateNotifications = (username, notification) => {
+  const notificationID = notification.uid;
   return new Promise(async (resolve, reject) => {
     try {
       const docRef = doc(
@@ -36,13 +37,7 @@ export const updateNotifications = (username, notificationID) => {
         "users",
         username + "/notifications" + "/" + notificationID
       );
-      const docSnap = await setDoc(
-        docRef,
-        {
-          isRead: true,
-        },
-        { merge: true }
-      );
+      const docSnap = await updateDoc(docRef, notification);
       console.log("notification Updated");
       resolve("done");
     } catch (error) {
@@ -62,8 +57,9 @@ export const PostNotifications = (username, notificationID, notification) => {
       await setDoc(docRef, notification)
         .then(() => {
           console.log("notification Posted");
-          resolve("done");})
-          //!etodur hoyeche 
+          resolve("done");
+        })
+        //!etodur hoyeche
         .catch((error) => {
           console.error(error);
         });

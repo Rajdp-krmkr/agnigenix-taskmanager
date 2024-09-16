@@ -362,37 +362,36 @@ const NavbarComponent = () => {
                                   No workspace found
                                 </span>
                               ) : (
-                                item.subSections.map((section, index) => (
+                                item.subSections.map((subSection, index) => (
                                   <div
                                     key={index}
                                     className={`
                                 ${
-                                  url === section.url
+                                  url === subSection.url
                                     ? "text-thm-clr-1"
                                     : "text-black"
                                 }
                                 
                                 cursor-pointer transition-all hover:bg-gray-200 my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
                                     onClick={() => {
-                                      router.push(section.url);
+                                      router.push(subSection.url);
                                     }}
                                   >
                                     <div className="icon font-bold">
                                       <span
                                         className={`${
-                                          section.customizedLogo !== null
-                                            && section.customizedLogo.bg
-                                            
+                                          subSection.customizedLogo !== null &&
+                                          subSection.customizedLogo.bg
                                         } ${
-                                          section.customizedLogo !== null
-                                            ? `text-${section.customizedLogo.text}`
+                                          subSection.customizedLogo !== null
+                                            ? `text-${subSection.customizedLogo.text}`
                                             : "text-gray-400 border-2 border-gray-300"
                                         } cursor-pointer font-semibold text-center flex items-center justify-center text-xs rounded-lg w-6 h-6`}
                                       >
-                                        <span>{section.LogoLetter}</span>
+                                        <span>{subSection.LogoLetter}</span>
                                       </span>
                                     </div>
-                                    <span>{section.title}</span>
+                                    <span>{subSection.workspaceTitle}</span>
                                   </div>
                                 ))
                               )}
@@ -465,6 +464,7 @@ const NavbarComponent = () => {
           uniqID={uid}
           workspacearray={workspaceArray}
           email={email}
+          name={User !== null ? User.name : ""}
         />
       </>
     );

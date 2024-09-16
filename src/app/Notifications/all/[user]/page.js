@@ -5,6 +5,7 @@ import GetNotifications, {
   updateNotifications,
 } from "@/Firebase Functions/GetAndPostNotifications";
 import Notifications from "@/components/notifications";
+import Link from "next/link"; //! don't remove Link
 
 const Page = () => {
   const params = useParams();
@@ -17,7 +18,7 @@ const Page = () => {
         console.log(notifications);
         const arr = [];
         if (notifications !== undefined) {
-          for (let i = 0; i < notifications.length;   i++) {
+          for (let i = 0; i < notifications.length; i++) {
             arr.push(notifications[i]);
           }
         }
@@ -30,7 +31,8 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-    console.log(AllNotifications);
+    if (AllNotifications === null) return;
+    // console.log(AllNotifications);
   }, [AllNotifications]);
 
   return (
@@ -47,24 +49,10 @@ const Page = () => {
               <div className="text-center">No Notifications</div>
             ) : (
               AllNotifications.map((notification, index) => {
-                console.log(notification);
+                // console.log(notification);
                 return (
                   <>
-                    <div
-                      key={index}
-                      // onClick={() => {
-                      //   notification.isRead = true;
-                      //   console.log(AllNotifications);
-                      //   updateNotifications(username, notification.uid)
-                      //     .then(() => {
-                      //       console.log("Notification Updated");
-                      //       // window.location.reload();
-                      //     })
-                      //     .catch((error) => {
-                      //       console.error(error);
-                      //     });
-                      // }}
-                    >
+                    <div key={index}>
                       <Notifications
                         username={username}
                         notification={notification}

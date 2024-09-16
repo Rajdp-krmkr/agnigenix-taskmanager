@@ -12,6 +12,7 @@ const Page = () => {
   const username = params.user;
 
   console.log(workspaceTitle, workspaceID, username);
+  
   const [isUserAssigned, setisUserAssigned] = useState(null);
   const [isWorkspaceFound, setIsWorkspaceFound] = useState(null);
   const [UserAssignmentMessage, setUserAssignmentMessage] = useState(null);
@@ -41,8 +42,8 @@ const Page = () => {
 
   return (
     <div className="ml-[500px]">
-      <h1>Workspace Title: {workspaceTitle}</h1>
-      <h1>Workspace ID: {workspaceID}</h1>
+      <h1>WorkspaceTitle: {workspaceTitle}</h1>
+      <h1>WorkspaceID: {workspaceID}</h1>
       <h1>Username: {username}</h1>
       <h1>isUserAssigned: {isUserAssigned === null? "null" : isUserAssigned ? "true" : "false"}</h1>
       <h1>isWorkspaceFound: {isWorkspaceFound === null? "null" : isWorkspaceFound ? "true" : "false"}</h1>

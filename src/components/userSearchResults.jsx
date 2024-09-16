@@ -2,9 +2,11 @@
 import React from "react";
 import realTimeUserSearch from "@/Firebase Functions/realTimeUserSearch";
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import UsersOfSearchResults from "./usersOfSearchResults";
+import { useSelector } from "react-redux";
 
 const UserSearchResults = ({ username }) => {
+  
   // const username = params.user;
   const [searchresultsArray, setSearchResultsArray] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +28,7 @@ const UserSearchResults = ({ username }) => {
           arr.push(usersArray[i]);
         }
       }
-
+      
       setSearchResultsArray(arr);
     } else if (searchQuery === "") {
       setSearchResultsArray([]);
@@ -73,10 +75,10 @@ const UserSearchResults = ({ username }) => {
             // console.log(e.target.value);
             setSearchQuery(e.target.value);
           }}
-          className="outline-thm-clr-1 rounded-xl p-3 border-2 bg-gray-100 placeholder:text-xs text-sm"
+          className="outline-thm-clr-1 rounded-xl p-3 border-2 w-full bg-gray-100 placeholder:text-xs text-sm"
           placeholder="Type username or name"
         />
-        <div className="overflow-auto searchResultScrollBar my-2 transition-all">
+        <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
           {searchresultsArray === null ? (
             <div className="loader w-9 h-9 border-[4px] border-white"></div>
           ) : searchresultsArray.length === 0 && searchQuery !== "" ? (
@@ -84,28 +86,11 @@ const UserSearchResults = ({ username }) => {
               No results found
             </div>
           ) : (
-            searchresultsArray.map((user) => {
+            searchresultsArray.map((user, index) => {
               if (user.username !== username) {
                 return (
                   <>
-                    <div className="bg-white cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2">
-                      <div className="profilePhoto relative w-7 h-7 ">
-                        <Image
-                          src={user.photoURL}
-                          className="rounded-2xl"
-                          fill
-                          alt="profile-picture"
-                        />
-                        {/* //TODO: account svg will be added */}
-                      </div>
-                      <div className="flex flex-col">
-                        <h2 className="text-[12px] font-bold">{user.name}</h2>
-                        {/* //TODO: loader component will be added*/}
-                        <p className="text-[10px] text-gray-400">
-                          {user.username}
-                        </p>
-                      </div>
-                    </div>
+                    <UsersOfSearchResults index={index} user={user} />
                   </>
                 );
               }
