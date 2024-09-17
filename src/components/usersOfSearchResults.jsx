@@ -1,17 +1,28 @@
 import Image from "next/image";
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { addInvitedUser, removeInvitedUser } from "@/lib/features/slice";
 
 const UsersOfSearchResults = ({ user, index }) => {
   const dispatch = useDispatch();
+  const InvitedUser = useSelector((state) => state.invitedUsers);
+
+  const isUserInvited = InvitedUser.invitedUsers.some(
+    (invitedUser) => invitedUser.username === user.username
+  );
+
+  useEffect(() => {
+    console.log(isUserInvited);
+  }, [isUserInvited]);
 
   const [invitingButtons, setInvitingButtons] = useState(false);
 
   return (
     <div
       key={index}
-      className="bg-white cursor-pointer hover:shadow-md flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2"
+      className={`${
+        isUserInvited ? "bg-gray-200" : "bg-white"
+      } cursor-pointer hover:shadow-md flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2`}
       onClick={() => {
         setInvitingButtons(!invitingButtons);
       }}
@@ -33,7 +44,7 @@ const UsersOfSearchResults = ({ user, index }) => {
         </div>
       </div>
       <div className="w-10 flex gap-1 mx-2">
-        {invitingButtons && (
+        {invitingButtons && !isUserInvited ? (
           <>
             <button
               className="hover:scale-110"
@@ -69,6 +80,31 @@ const UsersOfSearchResults = ({ user, index }) => {
               ❌
             </button>
           </>
+        ) : (
+        
+          isUserInvited &&
+          (!invitingButtons ? (
+            <span className="px-1 font-semibold flex justify-center items-center rounded-lg text-xs text-center text-gray-400 border-2 border-gray-400">
+              <span>Invited</span>
+            </span>
+          ) : (
+            <>
+              <button
+                className="hover:scale-110"
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(
+                    removeInvitedUser({
+                      username: user.username,
+                    })
+                  );
+                  setInvitingButtons(false);
+                }}
+              >
+                ❌
+              </button>
+            </>
+          ))
         )}
       </div>
     </div>

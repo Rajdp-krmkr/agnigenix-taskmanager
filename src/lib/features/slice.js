@@ -15,7 +15,7 @@ export const invitedUsersSlice = createSlice({
     removeInvitedUser: (state, action) => {
       if (state.invitedUsers.length > 0) {
         state.invitedUsers = state.invitedUsers.filter(
-          (user) => user.username !== action.payload
+          (user) => user.username !== action.payload.username
         );
       }
     },
