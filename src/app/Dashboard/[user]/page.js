@@ -1,4 +1,5 @@
 "use client";
+import ThemeToggle from "@/components/ThemeToggle";
 import { GetUserDataByUsername } from "@/Firebase Functions/GetuserData";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -32,7 +33,7 @@ const Page = () => {
   }, []);
   return (
     <>
-      <div className="mt-7 lg:ml-[210px] lg:mr-[180px] m-10 flex justify-center items-center">
+      <div className="mt-7 lg:ml-[240px] lg:mr-[180px] m-10 flex justify-center items-center">
         <div className="m-2 w-full">
           <h1
             className="text-2xl font-bold mx-12 cursor-pointer"
@@ -48,6 +49,7 @@ const Page = () => {
             </span>
           </div>
         </div>
+      <ThemeToggle />
       </div>
     </>
   );

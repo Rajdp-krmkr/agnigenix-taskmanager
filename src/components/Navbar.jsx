@@ -34,6 +34,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 
 import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
+import ThemeToggle from "./ThemeToggle";
 
 const NavbarComponent = () => {
   const router = useRouter();
@@ -171,13 +172,17 @@ const NavbarComponent = () => {
   ) {
     return (
       <>
-        <nav className="fixed top-0 left-0 p-2 bg-gray-100 flex flex-col min-h-screen lg:w-[210px]">
-          <div className="flex justify-center my-4 mx-auto">
-            <h1 className="text-xl font-bold text-black">Task Manager</h1>
+        <nav className="fixed top-0 left-0 p-2 dark:bg-gray-800 bg-gray-100 flex flex-col min-h-screen lg:w-[240px]">
+          <div className="flex justify-between gap-5 items-center my-4 mx-auto">
+            <h1 className="text-xl font-bold text-black dark:text-slate-200">
+              Task Manager
+            </h1>
+            <ThemeToggle />
+
           </div>
           <div>
             <div
-              className="bg-white cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2"
+              className="bg-white dark:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2"
               onClick={() => {
                 router.push(`/Profile/${username}`);
               }}
@@ -198,7 +203,7 @@ const NavbarComponent = () => {
                     {/* //TODO: account svg will be added */}
                   </div>
                   <div className="flex flex-col">
-                    <h2 className="text-[12px] font-bold">
+                    <h2 className="text-[12px] font-semibold">
                       {User !== null ? User.name : "name"}
                     </h2>
                     {/* //TODO: loader component will be added*/}
@@ -282,14 +287,16 @@ const NavbarComponent = () => {
                   >
                     <div
                       className={`${
-                        url === item.url ? "text-thm-clr-1" : "text-black"
+                        url === item.url
+                          ? "text-thm-clr-1 dark:text-blue-500"
+                          : "text-black dark:text-slate-200"
                       } ${
                         item.name === "Your tasks" && openTasksSection
-                          ? "bg-gray-200"
+                          ? "bg-gray-200 dark:bg-gray-700"
                           : item.name === "Workspace" && openWorkSpaceSection
-                          ? "bg-gray-200"
+                          ? "bg-gray-200 dark:bg-gray-700"
                           : ""
-                      } flex flex-row gap-2 justify-between items-center hover:bg-gray-200 transition-all cursor-pointer m-2 p-2 rounded-md`}
+                      } flex flex-row gap-2 justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer m-2 p-2 rounded-md`}
                       onClick={() => {
                         if (item.name === "Your tasks") {
                           setOpenTasksSection(!openTasksSection);
@@ -332,13 +339,13 @@ const NavbarComponent = () => {
                               className={`
                                 ${
                                   url === section.url
-                                    ? "text-thm-clr-1"
-                                    : "text-black"
+                                    ? "text-thm-clr-1 dark:text-blue-500"
+                                    : "text-black dark:text-slate-200"
                                 }
                                 ${
                                   section.title === "Add new task"
-                                    ? "bg-thm-clr-1 text-white transition-all hover:text-black hover:bg-thm-clr-2"
-                                    : "hover:bg-gray-200"
+                                    ? "bg-thm-clr-1 text-white transition-all dark:hover:text-black hover:bg-thm-clr-2"
+                                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
                                 }
                                 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
                               onClick={() => {
@@ -366,18 +373,18 @@ const NavbarComponent = () => {
                                   <div
                                     key={index}
                                     className={`
-                                ${
-                                  url === subSection.url
-                                    ? "text-thm-clr-1"
-                                    : "text-black"
-                                }
+                                    ${
+                                      url === subSection.url
+                                        ? "text-thm-clr-1 dark:text-blue-500"
+                                        : "text-black dark:text-slate-200"
+                                    }
                                 
-                                cursor-pointer transition-all hover:bg-gray-200 my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
+                                    cursor-pointer transition-all  hover:bg-gray-200 dark:hover:bg-gray-700 my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
                                     onClick={() => {
                                       router.push(subSection.url);
                                     }}
                                   >
-                                    <div className="icon font-bold">
+                                    <div className="icon flex gap-2 items-center font-bold">
                                       <span
                                         className={`${
                                           subSection.customizedLogo !== null &&
@@ -390,8 +397,22 @@ const NavbarComponent = () => {
                                       >
                                         <span>{subSection.LogoLetter}</span>
                                       </span>
+                                      <span>{subSection.workspaceTitle}</span>
                                     </div>
-                                    <span>{subSection.workspaceTitle}</span>
+                                    {subSection.isPrivate && (
+                                      <div className=" flex fill-black dark:fill-slate-300 justify-center items-center">
+                                        <svg
+                                          className="lock-svgIcon w-3 h-3"
+                                          viewBox="-0.5 -0.5 16 16"
+                                        >
+                                          <path
+                                            d="M7.5 8.235c-0.1949375 0 -0.38187499999999996 0.0775 -0.5196875 0.2153125s-0.2153125 0.32475 -0.2153125 0.5196875v2.205c0 0.1949375 0.0775 0.38187499999999996 0.2153125 0.51975s0.32475 0.21525 0.5196875 0.21525c0.1949375 0 0.3819375 -0.07743749999999999 0.51975 -0.21525s0.21525 -0.32481250000000006 0.21525 -0.51975v-2.205c0 -0.1949375 -0.07743749999999999 -0.38187499999999996 -0.21525 -0.5196875s-0.32481250000000006 -0.2153125 -0.51975 -0.2153125Zm3.675 -2.94V3.825c0 -0.9746875 -0.3871875 -1.9094375 -1.076375 -2.598625S8.4746875 0.15 7.5 0.15c-0.9746875 0 -1.9094375 0.3871875 -2.598625 1.076375S3.825 2.8503125000000002 3.825 3.825v1.47c-0.5848125 0 -1.145625 0.23231249999999998 -1.5591875 0.6458125000000001C1.8523124999999998 6.354375 1.62 6.9152499999999995 1.62 7.5v5.145c0 0.58475 0.23231249999999998 1.145625 0.6458125000000001 1.5591875 0.41356249999999994 0.4135 0.974375 0.6458125000000001 1.5591875 0.6458125000000001h7.35c0.58475 0 1.145625 -0.23231249999999998 1.5591875 -0.6458125000000001 0.4135 -0.41356249999999994 0.6458125000000001 -0.9744375 0.6458125000000001 -1.5591875V7.5c0 -0.58475 -0.23231249999999998 -1.145625 -0.6458125000000001 -1.5591875 -0.41356249999999994 -0.4135 -0.9744375 -0.6458125000000001 -1.5591875 -0.6458125000000001ZM5.295 3.825c0 -0.5848125 0.23231249999999998 -1.145625 0.6458125000000001 -1.5591875C6.354375 1.8523124999999998 6.9152499999999995 1.62 7.5 1.62s1.145625 0.23231249999999998 1.5591875 0.6458125000000001c0.4135 0.41356249999999994 0.6458125000000001 0.974375 0.6458125000000001 1.5591875v1.47H5.295V3.825Zm6.615 8.82c0 0.1949375 -0.07743749999999999 0.3819375 -0.21525 0.51975s-0.32481250000000006 0.21525 -0.51975 0.21525H3.825c-0.1949375 0 -0.38187499999999996 -0.07743749999999999 -0.51975 -0.21525 -0.1378125 -0.1378125 -0.21525 -0.32481250000000006 -0.21525 -0.51975V7.5c0 -0.1949375 0.07743749999999999 -0.38187499999999996 0.21525 -0.5196875 0.137875 -0.1378125 0.32481250000000006 -0.2153125 0.51975 -0.2153125h7.35c0.1949375 0 0.3819375 0.0775 0.51975 0.2153125s0.21525 0.32475 0.21525 0.5196875v5.145Z"
+                                            fill=""
+                                            stroke-width="1"
+                                          ></path>
+                                        </svg>
+                                      </div>
+                                    )}
                                   </div>
                                 ))
                               )}
@@ -437,10 +458,14 @@ const NavbarComponent = () => {
                   <li
                     key={index}
                     className={`${
-                      item.name === "Log out" ? "text-red-500" : "text-black"
+                      item.name === "Log out"
+                        ? "text-red-500 dark:text-red-500"
+                        : "text-black"
                     } ${
-                      url === item.url ? "text-thm-clr-1" : "text-black"
-                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 transition-all rounded-md p-2`}
+                      url === item.url
+                        ? "text-thm-clr-1 dark:text-blue-500"
+                        : "text-black dark:text-slate-200"
+                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md p-2`}
                     onClick={() => {
                       if (item.name === "Log out") {
                         auth.signOut();

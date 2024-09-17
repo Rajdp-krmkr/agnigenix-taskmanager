@@ -44,7 +44,15 @@ const Page = () => {
         <div className="flex flex-row mt-3 ml-[50px] ">
           <div className=" w-full">
             {AllNotifications === null ? (
-              <div className="loader w-10 h-10"></div>
+              <div className="w-full flex justify-center items-center">
+                <div class="typewriter absolute top-[40vh] self-center">
+                  <div class="slide">
+                    <i></i>
+                  </div>
+                  <div class="paper"></div>
+                  <div class="keyboard"></div>
+                </div>
+              </div>
             ) : AllNotifications.length === 0 ? (
               <div className="text-center">No Notifications</div>
             ) : (

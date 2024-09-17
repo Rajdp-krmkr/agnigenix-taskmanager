@@ -54,12 +54,19 @@ export const CheckIfUserAssignedToWorkspace = (
 
         if (title === workspaceTitle) {
           for (let i = 0; i < membersArray.length; i++) {
-            if (membersArray[i].username === username) {
+            if (
+              membersArray[i].username === username &&
+              membersArray[i].isPendingInvitation === false &&
+              (membersArray[i].isInvitationAccepted === true ||
+                membersArray[i].isAdmin == true)
+            ) {
+              // Check if the user is assigned to the workspace
               isAssigned = true;
               resolve({
                 isWorkspaceFound: true,
                 isAssigned: true,
                 message: "User is assigned to workspace",
+                membersData: membersArray,
               });
               break;
             }
@@ -69,21 +76,23 @@ export const CheckIfUserAssignedToWorkspace = (
               isWorkspaceFound: true,
               isAssigned: false,
               message: "User is not assigned to workspace",
+              membersData: null,
             });
           }
         } else {
           resolve({
             isWorkspaceFound: false,
-            isAssigned: null,
+            isAssigned: null, //if workspace is not found, then user may or may not be assigned. so this value is null
             message: "No workspace found with the given workspaceTitle",
+            membersData: null,
           });
         }
-      }
-      else {
+      } else {
         resolve({
           isWorkspaceFound: null,
           isAssigned: null,
           message: "No workspace found with the given ID",
+          membersData: null,
         });
       }
     } catch (error) {
@@ -92,6 +101,7 @@ export const CheckIfUserAssignedToWorkspace = (
         isWorkspaceFound: null,
         isAssigned: null,
         message: "Error during workspace check",
+        membersData: null,
       });
     }
   });
