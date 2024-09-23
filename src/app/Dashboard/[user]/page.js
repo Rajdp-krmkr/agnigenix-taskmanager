@@ -8,7 +8,7 @@ const Page = () => {
   const router = useRouter();
   const params = useParams();
   const username = params.user;
-  console.log(username);
+  console.log("username", username);
 
   const [user, setUser] = useState(false);
   const [photoURL, setPhotoURL] = useState("");
@@ -44,12 +44,10 @@ const Page = () => {
             Dashboard
           </h1>
           <div className="h-full">
-            <span>
-                Page is under construction
-            </span>
+            <span>Page is under construction</span>
           </div>
         </div>
-      <ThemeToggle />
+        <ThemeToggle />
       </div>
     </>
   );

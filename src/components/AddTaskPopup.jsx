@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { LuPlusCircle } from "react-icons/lu";
 import { RxCross2 } from "react-icons/rx";
+import AddTask from "@/Firebase Functions/AddUpdateFetchTask";
+import { generateCustomCode } from "./getCustomCode";
 
-const AddTaskPopup = ({ addTaskPopupNum }) => {
+const AddTaskPopup = ({ addTaskPopupNum, username }) => {
   const [OpenPopup, setOpenPopup] = useState(false);
   useEffect(() => {
     if (addTaskPopupNum > 0) {
@@ -18,6 +20,7 @@ const AddTaskPopup = ({ addTaskPopupNum }) => {
   const [taskDate, setTaskDate] = useState(null);
   const [taskPriority, setTaskPriority] = useState(null);
   const [taskTag, setTaskTag] = useState("");
+  const [taskTagArray, setTaskTagArray] = useState([]);
 
   const [taskTypePopup, setTaskTypePopup] = useState(false);
   const [taskDatePopup, setTaskDatePopup] = useState(false);
@@ -90,6 +93,36 @@ const AddTaskPopup = ({ addTaskPopupNum }) => {
     },
   ];
 
+  useEffect(() => {
+    console.log("taskTagArray: ", taskTagArray);
+  }, [taskTagArray]);
+
+  function handleAddTask() {
+    const taskID = generateCustomCode(10); //generate a random taskID
+    const yourtask = {
+      title: newTaskTitle,
+      taskID,
+      description: taskdescription,
+      type: taskType,
+      date: taskDate,
+      priority: taskPriority,
+      tag: taskTagArray,
+      isCompleted: false,
+    };
+
+    AddTask(username, taskID, yourtask)
+      .then(() => {
+        setOpenPopup(false);
+        btnsArray.forEach((item) => {
+          item.setPopup(false);
+        });
+        setAddTaskDescription(false);
+      })
+      .catch(() => {
+        console.log("Something went wrong while storing task");
+      });
+  }
+
   return (
     <>
       <div
@@ -123,7 +156,12 @@ const AddTaskPopup = ({ addTaskPopupNum }) => {
                     setNewTaskTitle(e.target.value);
                   }}
                 />
-                <button className="text-2xl bg-thm-clr-1 p-2 px-4 rounded-xl m-2 hover:bg-blue-700 transition-all duration-75">
+                <button
+                  className="text-2xl bg-thm-clr-1 p-2 px-4 rounded-xl m-2 hover:bg-blue-700 transition-all duration-75"
+                  onClick={() => {
+                    handleAddTask();
+                  }}
+                >
                   +
                 </button>
               </div>
@@ -152,10 +190,12 @@ const AddTaskPopup = ({ addTaskPopupNum }) => {
                       <div></div>
                     </div>
                     <div className="flex justify-end text-xs">
-                      <span className=" flex m-2 gap-2 p-1 px-2 cursor-pointer transition-all duration-75 rounded-lg flex-row justify-center items-center dark:text-gray-500 dark:hover:bg-gray-500 dark:hover:text-gray-300"
-                      onClick={()=>{
-                        setAddTaskDescription(false);
-                      }}>
+                      <span
+                        className=" flex m-2 gap-2 p-1 px-2 cursor-pointer transition-all duration-75 rounded-lg flex-row justify-center items-center dark:text-gray-500 dark:hover:bg-gray-500 dark:hover:text-gray-300"
+                        onClick={() => {
+                          setAddTaskDescription(false);
+                        }}
+                      >
                         <RxCross2 />
                         <span className="">cancel</span>
                       </span>
@@ -224,7 +264,13 @@ const AddTaskPopup = ({ addTaskPopupNum }) => {
                                 setTaskTag(e.target.value);
                               }}
                             />
-                            <button className="p-1 px-2 rounded-lg bg-thm-clr-1 text-center outline-transparent">
+                            <button
+                              className="p-1 px-2 rounded-lg bg-thm-clr-1 text-center outline-transparent"
+                              onClick={() => {
+                                taskTagArray.push(taskTag);
+                                setTaskTag("");
+                              }}
+                            >
                               +
                             </button>
                           </div>

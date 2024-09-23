@@ -60,57 +60,7 @@ const Page = () => {
   }, [membersData]);
 
   return (
-    // <div className="ml-[230px]">
-    //   <h1>WorkspaceTitle: { !isWorkspaceFound || isWorkspaceFound === null ? "not found" : workspaceTitle}</h1>
-    //   <h1>WorkspaceID: {workspaceID}</h1>
-    //   <h1>Username: {username}</h1>
-    //   <h1>
-    //     isWorkspaceFound:{" "}
-    //     {isWorkspaceFound === null
-    //       ? "null"
-    //       : isWorkspaceFound
-    //       ? "true"
-    //       : "false"}
-    //   </h1>
-    //   <h1>
-    //     isUserAssigned:{" "}
-    //     {isUserAssigned === null ? "null" : isUserAssigned ? "true" : "false"}
-    //   </h1>
-    //   <h1>UserAssignmentMessage: {UserAssignmentMessage}</h1>
-    //   {isAdmin && (
-    //     <div className=" m-4">
-    //       {membersData !== null ? (
-    //         <>
-    //           {membersData.map((member, index) => {
-    //             return [
-    //               <div key={index}>
-    //                 <h1>Username: {member.username}</h1>
-    //                 <h1>
-    //                   isPendingInvitation:{" "}
-    //                   {member.isPendingInvitation !== null
-    //                     ? member.isPendingInvitation
-    //                       ? "true"
-    //                       : "false"
-    //                     : "null"}
-    //                 </h1>
-    //                 <h1>
-    //                   isInvitationAccepted:{" "}
-    //                   {member.isInvitationAccepted !== null
-    //                     ? member.isInvitationAccepted
-    //                       ? "true"
-    //                       : "false"
-    //                     : "null"}
-    //                 </h1>
-    //               </div>,
-    //             ];
-    //           })}
-    //         </>
-    //       ) : (
-    //         <>No members found</>
-    //       )}
-    //     </div>
-    //   )}
-    // </div>
+
     <>
       <div className="ml-[250px]">
         <div className="fixed  w-full top-0  font-bold border-b-2 border-gray-200 dark:border-gray-800 p-2 flex flex-row ">

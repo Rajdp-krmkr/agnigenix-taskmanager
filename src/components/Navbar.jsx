@@ -243,22 +243,22 @@ const NavbarComponent = () => {
                     subSections: [
                       {
                         title: "Due tasks",
-                        url: `/DueTasks/${username}`,
+                        url: `/YourTasks/DueTasks/${username}`,
                         icon: <TbCalendarDue />,
                       },
                       {
                         title: "Completed tasks",
-                        url: `/CompletedTasks/${username}`,
+                        url: `/YourTasks/CompletedTasks/${username}`,
                         icon: <BsClipboardCheck />,
                       },
                       {
                         title: "Uncompleted tasks",
-                        url: `/UncompletedTasks/${username}`,
+                        url: `/YourTasks/UncompletedTasks/${username}`,
                         icon: <BiTaskX />,
                       },
                       {
                         title: "All tasks",
-                        url: `/AllTasks/${username}`,
+                        url: `/YourTasks/AllTasks/${username}`,
                         icon: <GoTasklist />,
                       },
                       {
@@ -502,7 +502,7 @@ const NavbarComponent = () => {
           name={User !== null ? User.name : ""}
           photoUrl={photoURL}
         />
-        <AddTaskPopup addTaskPopupNum={AddTaskPopupNum}/>
+        <AddTaskPopup addTaskPopupNum={AddTaskPopupNum} username={username}/>
       </>
     );
   }
