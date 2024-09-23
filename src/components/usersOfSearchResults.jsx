@@ -21,7 +21,7 @@ const UsersOfSearchResults = ({ user, index }) => {
     <div
       key={index}
       className={`${
-        isUserInvited ? "bg-gray-200" : "bg-white"
+        isUserInvited ? "bg-gray-200 dark:bg-gray-700" : "bg-white dark:bg-gray-500"
       } cursor-pointer hover:shadow-md flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2`}
       onClick={() => {
         setInvitingButtons(!invitingButtons);
@@ -29,7 +29,7 @@ const UsersOfSearchResults = ({ user, index }) => {
     >
       <div className="flex flex-row gap-2 items-center">
         <div className="profilePhoto relative w-7 h-7 ">
-          <Image
+          <Image  
             src={user.photoURL}
             className="rounded-2xl"
             fill
@@ -38,9 +38,9 @@ const UsersOfSearchResults = ({ user, index }) => {
           {/* //TODO: account svg will be added */}
         </div>
         <div className="flex flex-col">
-          <h2 className="text-[12px] font-bold">{user.name}</h2>
+          <h2 className="text-[12px] font-bold dark:text-white">{user.name}</h2>
           {/* //TODO: loader component will be added*/}
-          <p className="text-[10px] text-gray-400">{user.username}</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-300">{user.username}</p>
         </div>
       </div>
       <div className="w-10 flex gap-1 mx-2">
@@ -58,6 +58,7 @@ const UsersOfSearchResults = ({ user, index }) => {
                     uid: user.uid,
                     isPendingInvitation: true,
                     isInvitationAccepted: null,
+                    photoURL: user.photoURL,
                   })
                 );
                 setInvitingButtons(false);

@@ -16,6 +16,7 @@ import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications"
 import Link from "next/link";
 import { resetInvitedUsersArray } from "@/lib/features/slice";
 
+
 const CreateWorkSpacePopup = ({
   createPopupNum,
   uname,
@@ -23,6 +24,7 @@ const CreateWorkSpacePopup = ({
   uniqID,
   workspacearray,
   email,
+  photoUrl,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -111,9 +113,11 @@ const CreateWorkSpacePopup = ({
           ...invitedUsers,
           {
             username: username,
+            name: name,
             uid: uid,
             isAdmin: true,
             isPendingInvitation: false,
+            photoURL: photoUrl,
           },
         ]);
       }
@@ -156,7 +160,7 @@ const CreateWorkSpacePopup = ({
             // WorkspaceArray.push(NewWorkspace);
 
             const workspaceArrayUpdated = [...workspacearray];
-            workspaceArrayUpdated.push(NewWorkspace); 
+            workspaceArrayUpdated.push(NewWorkspace);
 
             const notificationID = generateCustomCode(14);
 
@@ -336,7 +340,7 @@ const CreateWorkSpacePopup = ({
       <div
         className={`${
           showCreateWorkspacePopup ? "flex" : "hidden"
-        } absolute justify-center items-center w-screen h-screen top-0 left-0 bg-black/50 backdrop-blur-sm z-20 overflow-x-hidden`}
+        } absolute justify-center items-center w-screen h-screen top-0 left-0 bg-black/50  backdrop-blur-sm z-20 overflow-x-hidden`}
         onClick={() => {
           setShowCreateWorkspacePopup(false);
           setIsCustomizingIcon(false);
@@ -349,7 +353,7 @@ const CreateWorkSpacePopup = ({
         }}
       >
         <div
-          className="flex flex-row justify-between gap-2 min-w-[40%] min-h-[50%] bg-[#dbdbdb] rounded-3xl z-[21] p-4 animate-PopUpAppear"
+          className="flex flex-row justify-between gap-2 min-w-[40%] min-h-[50%] bg-[#dbdbdb] dark:bg-gray-700 rounded-3xl z-[21] p-4 animate-PopUpAppear"
           onClick={(e) => {
             e.stopPropagation();
             setIsCustomizingIcon(false);
@@ -384,7 +388,7 @@ const CreateWorkSpacePopup = ({
                     customizedLogo === null
                       ? "hover:bg-gray-300 text-gray-400"
                       : `text-${customizedLogo.text} ${customizedLogo.bg}`
-                  } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg border-gray-400`}
+                  } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg border-gray-400 dark:border-gray-500`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsCustomizingIcon(!isCustomizingIcon);
@@ -399,7 +403,7 @@ const CreateWorkSpacePopup = ({
                   onChange={(e) => {
                     setWorkspaceTitle(e.target.value);
                   }}
-                  className="outline-thm-clr-1 rounded-xl p-3 border-2 w-[92%] bg-gray-100 placeholder:text-xs text-sm"
+                  className="outline-thm-clr-1 rounded-xl p-3 border-2 w-[92%] bg-gray-100 dark:border-gray-500 dark:bg-gray-500 dark:placeholder:text-gray-100 placeholder:text-xs text-sm"
                   placeholder="Add a title"
                 />
               </div>
@@ -432,7 +436,7 @@ const CreateWorkSpacePopup = ({
                   setWorkspaceDescription(e.target.value);
                 }}
                 id="workspaceDescription"
-                className="outline-thm-clr-1 rounded-xl p-3 border-2 bg-gray-100 placeholder:text-xs text-sm"
+                className="outline-thm-clr-1 rounded-xl p-3 border-2 bg-gray-100 dark:border-gray-500 dark:bg-gray-500 placeholder:text-xs dark:placeholder:text-gray-100 text-sm"
                 placeholder="Add a description"
               />
             </div>
@@ -468,7 +472,7 @@ const CreateWorkSpacePopup = ({
             </div>
             <div className="flex flex-row justify-between gap-2 my-5">
               <button
-                className="bg-gray-400 hover:bg-gray-500 transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
+                className="bg-gray-400 dark:bg-gray-900 dark:hover:bg-black hover:bg-gray-500 transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
                 onClick={() => {
                   setShowCreateWorkspacePopup(false);
                   setIsCustomizingIcon(false);

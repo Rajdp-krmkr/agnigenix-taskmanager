@@ -75,9 +75,9 @@ const UserSearchResults = ({ username }) => {
             // console.log(e.target.value);
             setSearchQuery(e.target.value);
           }}
-          className="outline-thm-clr-1 rounded-xl p-3 border-2 w-full bg-gray-100 placeholder:text-xs text-sm"
+          className="outline-thm-clr-1 rounded-xl p-3 border-2 dark:border-gray-500 w-full dark:bg-gray-500 dark:text-gray-100 dark:placeholder:text-gray-100 bg-gray-100 placeholder:text-xs text-sm"
           placeholder="Type username or name"
-        />
+        /> 
         <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
           {searchresultsArray === null ? (
             <div className="loader w-9 h-9 border-[4px] border-white"></div>

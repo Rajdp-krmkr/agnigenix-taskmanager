@@ -86,7 +86,7 @@ const Page = () => {
               </p>
             </div>
             <div className="w-[90%] min-h-[70vh] flex flex-row gap-7 mx-20 m-5">
-              <div className="flex w-[50%] h-max rounded-3xl flex-col gap-2 bg-gray-100 ">
+              <div className="flex w-[50%] h-max rounded-3xl flex-col gap-2 bg-gray-100 dark:bg-gray-800">
                 <div className="photos h-[190px] ">
                   <div className="coverPhoto relative w-full h-36 bg-black rounded-t-3xl">
                     {coverPhoto ? (
@@ -123,7 +123,7 @@ const Page = () => {
                 </div>
               </div>
               <div className="flex w-[50%] h-[50%] flex-col gap-5">
-                <div className="flex rounded-3xl flex-col gap-2 bg-gray-100 p-4">
+                <div className="flex rounded-3xl flex-col gap-2 bg-gray-100 dark:bg-gray-800 p-4">
                   <h1 className="font-bold">Personal information</h1>
                   <div>
                     <div className="w-full">
@@ -144,7 +144,7 @@ const Page = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex rounded-3xl flex-col gap-2 bg-gray-100 p-4">
+                <div className="flex rounded-3xl flex-col gap-2 bg-gray-100 dark:bg-gray-800 p-4">
                   <h1 className="font-bold">Social Media accounts</h1>
                   <div>
                     {socialAcounts.length === 0 ? (

@@ -35,6 +35,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 import ThemeToggle from "./ThemeToggle";
+import AddTaskPopup from "./AddTaskPopup";
 
 const NavbarComponent = () => {
   const router = useRouter();
@@ -50,6 +51,9 @@ const NavbarComponent = () => {
   const [CreateWorkspacePopupNum, setCreateWorkspacePopupNum] = useState(0);
   const [workspaceArray, setWorkspaceArray] = useState([]);
   const [email, setEmail] = useState(null);
+  const [photoURL, setPhotoURL] = useState(null);
+
+  const [AddTaskPopupNum, setAddTaskPopupNum] = useState(0);
 
   const Pathname = usePathname();
   useEffect(() => {
@@ -112,6 +116,7 @@ const NavbarComponent = () => {
                   console.log("adding workspace...");
                   setWorkspaceArray(result.workspaces);
                   setEmail(result.email);
+                  setPhotoURL(result.photoURL);
                   console.log(result);
                   console.log(result.workspaces);
                   // console.log(res);
@@ -178,7 +183,6 @@ const NavbarComponent = () => {
               Task Manager
             </h1>
             <ThemeToggle />
-
           </div>
           <div>
             <div
@@ -349,7 +353,13 @@ const NavbarComponent = () => {
                                 }
                                 cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
                               onClick={() => {
-                                router.push(section.url);
+                                if (section.title === "Add new task") {
+                                  setAddTaskPopupNum(AddTaskPopupNum + 1);
+
+
+                                } else {
+                                  router.push(section.url);
+                                }
                               }}
                             >
                               <div className="icon text-lg font-bold">
@@ -490,7 +500,9 @@ const NavbarComponent = () => {
           workspacearray={workspaceArray}
           email={email}
           name={User !== null ? User.name : ""}
+          photoUrl={photoURL}
         />
+        <AddTaskPopup addTaskPopupNum={AddTaskPopupNum}/>
       </>
     );
   }

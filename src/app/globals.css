@@ -581,6 +581,18 @@
 .workspaceScrollBar::-webkit-scrollbar {
   width: 10px;
 }
+.scrollbar1 {
+  scrollbar-width: none;
+  scrollbar-color: rgba(128, 128, 128, 0.538) transparent;
+  scrollbar-arrow-color: transparent;
+}
+.scrollbar1:hover {
+  scrollbar-width: thin;
+}
+
+.scrollbar1::-webkit-scrollbar {
+  width: 5px;
+}
 
 .searchResultScrollBar {
   scrollbar-color: var(--secondary) var(--primary);
@@ -590,4 +602,55 @@
 
 .searchResultScrollBar::-webkit-scrollbar {
   width: 10px;
+}
+
+@keyframes curtain-1 {
+  0% {
+    height: 0;
+    opacity: 0%;
+    overflow: hidden;
+  }
+
+  100% {
+    height: 240px;
+    opacity: 100%;
+  }
+}
+
+.animation-curtain-1 {
+  animation: curtain-1 0.2s ease-out;
+}
+
+@keyframes curtain-2 {
+  0% {
+    height: 0;
+    opacity: 0%;
+    overflow: hidden;
+  }
+
+  100% {
+    height: 116px;
+    opacity: 100%;
+  }
+}
+
+.animation-curtain-2 {
+  animation: curtain-2 0.2s ease-out;
+}
+
+@keyframes curtain-3 {
+  0% {
+    height: 0;
+    opacity: 0%;
+    overflow: hidden;
+  }
+  
+  100% {
+    height: 36px;
+    opacity: 100%;
+  }
+}
+
+.animation-curtain-3 {
+  animation: curtain-3 0.2s ease-out;
 }

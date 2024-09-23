@@ -1,5 +1,6 @@
 "use client";
 import { CheckIfUserAssignedToWorkspace } from "@/Firebase Functions/isUserAuthenticated";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -120,36 +121,79 @@ const Page = () => {
           </h1>
         </div>
         <div className="mt-12 p-2">
-          <div className="listOfUsers lg:w-1/3 dark:bg-gray-700 rounded-3xl p-3">
-            <h1 className="text-xl dark:text-gray-200 font-bold p-1 border-b-2 dark:border-gray-500">Members</h1>
+          <div className="listOfUsers lg:w-1/3 dark:bg-gray-800 bg-gray-100 rounded-3xl p-3">
+            <h1 className="text-xl dark:text-gray-200 font-bold p-1 border-b-2 dark:border-gray-500">
+              Members
+            </h1>
             {isAdmin && (
-              <div className="m-4">
+              <div className="m-4 max-h-[250px] overflow-auto workspaceScrollBar">
                 {membersData !== null ? (
                   <>
                     {membersData.map((member, index) => {
-                      return [
-                        <div key={index}>
-                          <h1 className="dark:text-gray-300">
-                            Username: {member.username}
-                          </h1>
-                          <h1 className="dark:text-gray-300">
-                            isPendingInvitation:{" "}
-                            {member.isPendingInvitation !== null
-                              ? member.isPendingInvitation
-                                ? "true"
-                                : "false"
-                              : "null"}
-                          </h1>
-                          <h1 className="dark:text-gray-300">
+                      console.log(member);
+                      return (
+                        <>
+                          <div
+                            key={index}
+                            className="w-full dark:border-gray-600 border-gray-200 cursor-pointer hover:bg-gray-300 transition-all dark:hover:bg-gray-600 hover:rounded-lg flex justify-between border-b-2"
+                          >
+                            <div className=" flex flex-row justify-center items-center">
+                              <div className="relative w-10 h-10 m-2 flex justify-center items-center">
+                                <Image
+                                  src={member.photoURL ? member.photoURL : ""}
+                                  fill
+                                  alt="dp"
+                                  className="rounded-lg bg-blue-100"
+                                />
+                              </div>
+                              <div className="flex flex-col justify-center items-start">
+                                <h1 className="dark:text-gray-200 font-bold text-sm">
+                                  {member.name}
+                                </h1>
+                                <h1 className="dark:text-gray-300 text-xs">
+                                  {member.username}
+                                </h1>
+                              </div>
+                            </div>
+                            <div className="flex flex-row justify-around items-center">
+                              {member.isPendingInvitation ? (
+                                <h1 className="mx-2 dark:text-orange-400/80 text-xs border-2 p-[3px] rounded-lg dark:border-orange-400/80">
+                                  Pending
+                                </h1>
+                              ) : (
+                                <>
+                                  <div className="w-16 h-5 "></div>
+                                </>
+                              )}
+                              {member.isAdmin ? (
+                                <h1 className="mx-2 dark:text-teal-400/80 text-xs border-2 p-[3px] rounded-lg dark:border-teal-400">
+                                  Admin
+                                </h1>
+                              ) : (
+                                <>
+                                  {" "}
+                                  <div className="w-[65px] h-5"></div>
+                                </>
+                              )}
+
+                              {/* {member.isPendingInvitation !== null
+                                ? member.isPendingInvitation
+                                  ? ""
+                                  : "Pending"
+                                : "null"} */}
+                            </div>
+
+                            {/*<h1 className="dark:text-gray-300">
                             isInvitationAccepted:{" "}
-                            {member.isInvitationAccepted !== null
+                            {member.isInvitationAccepted
                               ? member.isInvitationAccepted
                                 ? "true"
                                 : "false"
                               : "null"}
-                          </h1>
-                        </div>,
-                      ];
+                          </h1> */}
+                          </div>
+                        </>
+                      );
                     })}
                   </>
                 ) : (
