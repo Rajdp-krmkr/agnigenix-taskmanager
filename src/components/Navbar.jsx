@@ -177,7 +177,7 @@ const NavbarComponent = () => {
   ) {
     return (
       <>
-        <nav className="fixed top-0 left-0 p-2 dark:bg-gray-800 bg-gray-100 flex flex-col min-h-screen lg:w-[240px]">
+        <nav className="fixed top-0 left-0 p-2 dark:bg-gray-800 transition-all duration-1000 bg-gray-100 flex flex-col min-h-screen lg:w-[240px]">
           <div className="flex justify-between gap-5 items-center my-4 mx-auto">
             <h1 className="text-xl font-bold text-black dark:text-slate-200">
               Task Manager
@@ -186,7 +186,7 @@ const NavbarComponent = () => {
           </div>
           <div>
             <div
-              className="bg-white dark:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2"
+              className="bg-white dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2"
               onClick={() => {
                 router.push(`/Profile/${username}`);
               }}
