@@ -108,6 +108,7 @@ const AddTaskPopup = ({ addTaskPopupNum, username }) => {
       priority: taskPriority,
       tag: taskTagArray,
       isCompleted: false,
+      dateAssigned: new Date().toLocaleDateString(),
     };
 
     AddTask(username, taskID, yourtask)
@@ -117,6 +118,12 @@ const AddTaskPopup = ({ addTaskPopupNum, username }) => {
           item.setPopup(false);
         });
         setAddTaskDescription(false);
+        setNewTaskTitle("");
+        setTaskDescription("");
+        setTaskType(null);
+        setTaskDate(null);
+        setTaskPriority(null);
+        setTaskTag("");
       })
       .catch(() => {
         console.log("Something went wrong while storing task");
@@ -135,6 +142,12 @@ const AddTaskPopup = ({ addTaskPopupNum, username }) => {
             item.setPopup(false);
           });
           setAddTaskDescription(false);
+          setNewTaskTitle("");
+          setTaskDescription("");
+          setTaskType(null);
+          setTaskDate(null);
+          setTaskPriority(null);
+          setTaskTag("");
         }}
       >
         <div
