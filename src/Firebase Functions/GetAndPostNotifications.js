@@ -16,7 +16,7 @@ const GetNotifications = (username) => {
         const arr = [];
         querySnapsahot.forEach((doc) => {
           arr.push(doc.data());
-          console.log(doc.data());
+          // console.log(doc.data());
         });
         resolve(arr);
       });

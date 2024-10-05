@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebaseConfig";
-import { doc, getDoc } from "@firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "@firebase/firestore";
 
 const isUserAuthenticated = ({ username, uid }) => {
   return new Promise(async (resolve, reject) => {
@@ -50,6 +50,10 @@ export const CheckIfUserAssignedToWorkspace = (
         const data = docSnap.data();
         const membersArray = data.members;
         const title = data.workspaceTitle;
+        // const projects = data.projects;
+
+        
+
         let isAssigned = false;
 
         if (title === workspaceTitle) {
@@ -67,6 +71,7 @@ export const CheckIfUserAssignedToWorkspace = (
                 isAssigned: true,
                 message: "User is assigned to workspace",
                 membersData: membersArray,
+                // projects: projects,
               });
               break;
             }
@@ -77,6 +82,7 @@ export const CheckIfUserAssignedToWorkspace = (
               isAssigned: false,
               message: "User is not assigned to workspace",
               membersData: null,
+              // projects: [],
             });
           }
         } else {
@@ -85,6 +91,7 @@ export const CheckIfUserAssignedToWorkspace = (
             isAssigned: null, //if workspace is not found, then user may or may not be assigned. so this value is null
             message: "No workspace found with the given workspaceTitle",
             membersData: null,
+            // projects: [],
           });
         }
       } else {
@@ -93,6 +100,7 @@ export const CheckIfUserAssignedToWorkspace = (
           isAssigned: null,
           message: "No workspace found with the given ID",
           membersData: null,
+          // projects: [],
         });
       }
     } catch (error) {
@@ -102,6 +110,7 @@ export const CheckIfUserAssignedToWorkspace = (
         isAssigned: null,
         message: "Error during workspace check",
         membersData: null,
+        // projects: [],
       });
     }
   });

@@ -14,9 +14,9 @@ const Task = ({ username, task }) => {
   const taskType = task.type;
   const taskDueDate = task.date;
 
-  console.log("taskPriority", taskPriority);
+  // console.log("taskPriority", taskPriority);
 
-  console.log(taskID, taskTitle, taskDescription);
+  // console.log(taskID, taskTitle, taskDescription);
   const [istaskCompleted, setIsTaskCompleted] = useState(false);
 
   useEffect(() => {
@@ -109,13 +109,13 @@ const Page = () => {
   const [TasksArray, setTasksArray] = useState(null);
 
   useEffect(() => {
-    console.log(TasksArray);
+    // console.log(TasksArray);
   }, [TasksArray]);
 
   useEffect(() => {
     fetchAllTasks(username)
       .then((tasks) => {
-        console.log(tasks);
+        // console.log(tasks);
         setTasksArray(tasks);
       })
       .catch((error) => {

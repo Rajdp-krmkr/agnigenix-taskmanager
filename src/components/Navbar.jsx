@@ -117,8 +117,8 @@ const NavbarComponent = () => {
                   setWorkspaceArray(result.workspaces);
                   setEmail(result.email);
                   setPhotoURL(result.photoURL);
-                  console.log(result);
-                  console.log(result.workspaces);
+                  // console.log(result);
+                  // console.log(result.workspaces);
                   // console.log(res);
                 })
                 .catch((error) => {
@@ -207,7 +207,7 @@ const NavbarComponent = () => {
                     {/* //TODO: account svg will be added */}
                   </div>
                   <div className="flex flex-col">
-                    <h2 className="text-[12px] font-semibold">
+                    <h2 className="text-[14px] font-semibold">
                       {User !== null ? User.name : "name"}
                     </h2>
                     {/* //TODO: loader component will be added*/}

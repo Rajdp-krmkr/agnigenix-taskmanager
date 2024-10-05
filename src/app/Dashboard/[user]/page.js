@@ -8,7 +8,7 @@ const Page = () => {
   const router = useRouter();
   const params = useParams();
   const username = params.user;
-  console.log("username", username);
+  // console.log("username", username);
 
   const [user, setUser] = useState(false);
   const [photoURL, setPhotoURL] = useState("");
@@ -23,14 +23,14 @@ const Page = () => {
     GetUserDataByUsername({ username }).then((res) => {
       setUser(res);
       setPhotoURL(res.photoURL);
-      console.log(res);
+      // console.log(res);
       setName(res.name);
       setBio(res.bio);
       setEmail(res.email);
       setJobRole(res.jobRole);
       setSocialAcounts(res.socialMediaAcounts);
     });
-  }, []);
+  }, [username]);
   return (
     <>
       <div className="mt-7 lg:ml-[240px] lg:mr-[180px] m-10 flex justify-center items-center">

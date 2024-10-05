@@ -63,7 +63,7 @@ const Notifications = ({ username, notification }) => {
                   console.log("notification Updated with Body: '' ");
                 })
                 .catch((error) => {
-                  console.log(error);
+                  console.log("error to update notification : ", error);
                 });
             });
           }
@@ -87,6 +87,7 @@ const Notifications = ({ username, notification }) => {
   }, [isInvitationExpired]);
 
   if (notification === null) return null;
+
   return (
     <>
       <div
@@ -97,7 +98,7 @@ const Notifications = ({ username, notification }) => {
           setIsNotificationRead(true);
 
           notification.isRead = true;
-          console.log(notification);
+          // console.log(notification);
 
           updateNotifications(username, notification)
             .then(() => {

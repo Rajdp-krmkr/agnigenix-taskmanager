@@ -368,7 +368,7 @@
 
 .loader {
   border-radius: 50%;
-  border: solid rgba(0, 0, 0, 0.1);
+  border: solid ;
   border-left-color: transparent;
   /* width: 36px; */
   /* height: 36px; */
