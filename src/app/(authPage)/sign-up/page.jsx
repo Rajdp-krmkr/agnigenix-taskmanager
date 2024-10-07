@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import DottedBg from "@/components/dottedBg";
 import GithubLogo from "../../../../public/icons/github-mark.png";
 import Image from "next/image";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
+import DottedBg from "@/ui components/dottedBg/dottedBg";
 
 const Page = () => {
   const router = useRouter();
@@ -62,25 +62,25 @@ const Page = () => {
       });
   };
 
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUser(user);
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   });
+  // }, []);
 
-  if (user) {
-    if (user.emailVerified) {
-      router.push(`/CreateProfile?id=${user.uid}`);
-    } else {
-      router.push("/verify-email");
-    }
-  }
+  // if (user) {
+  //   if (user.emailVerified) {
+  //     router.push(`/CreateProfile?id=${user.uid}`);
+  //   } else {
+  //     router.push("/verify-email");
+  //   }
+  // }
   return (
     <>
       <DottedBg />

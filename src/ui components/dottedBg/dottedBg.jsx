@@ -1,7 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "./LandingPage.module.css";
-import { useEffect, useRef } from "react";
 
 const DottedBg = () => {
   const landingPageRef = useRef(null);
@@ -30,7 +29,12 @@ const DottedBg = () => {
       document.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
-  return <div ref={landingPageRef} className={`${styles.landingpage}`}></div>;
+  return (
+    <div
+      ref={landingPageRef}
+      className={`${styles.landingpage} dark:invert`}
+    ></div>
+  );
 };
 
 export default DottedBg;

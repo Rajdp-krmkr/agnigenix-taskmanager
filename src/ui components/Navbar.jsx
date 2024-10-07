@@ -1,7 +1,5 @@
 "use client";
-import GetUserData, {
-  GetUserDataByUsername,
-} from "@/Firebase Functions/GetuserData";
+
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "@firebase/auth";
 import Image from "next/image";
@@ -31,14 +29,18 @@ import { BiTaskX } from "react-icons/bi";
 import { GoTasklist } from "react-icons/go";
 import { IoMdAdd } from "react-icons/io";
 import { IoMdNotificationsOutline } from "react-icons/io";
-
-import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
-import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 import ThemeToggle from "./ThemeToggle";
-import AddTaskPopup from "./AddTaskPopup";
+
+// import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
+// import ThemeToggle from "./ThemeToggle";
+// import AddTaskPopup from "./AddTaskPopup";
 
 const NavbarComponent = () => {
+  const Pathname = usePathname();
   const router = useRouter();
+  const params = useParams();
+  const searchparams = useSearchParams();
+
   const [url, setUrl] = useState("");
   const [User, setUser] = useState(null);
   const [uid, setUid] = useState(null);
@@ -55,134 +57,106 @@ const NavbarComponent = () => {
 
   const [AddTaskPopupNum, setAddTaskPopupNum] = useState(0);
 
-  const Pathname = usePathname();
+  const verticalNavbarPaths = [
+    "/log-in",
+    "/sign-up",
+    "/CreateProfile",
+    "/",
+    "/verify-email",
+  ];
+
   useEffect(() => {
     const url = Pathname;
     setUrl(url);
-    console.log(url);
   }, [Pathname]);
 
-  const params = useParams();
-  const uname = params.user;
+  const isVerticalNavbar = verticalNavbarPaths.includes(Pathname);
+
+  // const uname = params.user; //getting username
 
   useEffect(() => {
-    if (uname !== undefined) setUsername(uname);
-  }, [uname]);
-
-  useEffect(() => {
-    console.log(username);
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // console.log("User is signed in", user.uid);
-        // console.log(user, "User");
-        setUid(user.uid);
-      } else {
-        // console.log("User is signed out");
-        // console.log(user, "User");
-        if (
-          url !== "/log-in" &&
-          url !== "/sign-up" &&
-          url !== "/CreateProfile" &&
-          url !== ""
-        ) {
-          router.push("/sign-up");
-        }
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    if (uid !== null && username !== null) {
-      isUserAuthenticated({ username, uid })
-        .then((res) => {
-          // console.log("User is authenticated", res);
-          if (
-            url === "/log-in" ||
-            url === "/sign-up" ||
-            url === "/CreateProfile" ||
-            url === "/"
-          ) {
-            return;
-          } else {
-            // console.log(username);
-            if (
-              username !== null &&
-              username !== "" &&
-              username !== undefined
-            ) {
-              GetUserDataByUsername({ username })
-                .then((result) => {
-                  setUser(result);
-                  console.log("adding workspace...");
-                  setWorkspaceArray(result.workspaces);
-                  setEmail(result.email);
-                  setPhotoURL(result.photoURL);
-                  // console.log(result);
-                  // console.log(result.workspaces);
-                  // console.log(res);
-                })
-                .catch((error) => {
-                  // console.log(error);
-                });
-            }
-          }
-        })
-        .catch((err) => {
-          if (err == false) {
-            router.push("/sign-up");
-          }
-        });
-    }
-  }, [uid, username]);
+    if (params.user !== undefined) setUsername(params.user);
+  }, [params.user]);
   // console.log(username);
 
-  const searchparams = useSearchParams();
   const id = searchparams.get("id");
+
   useEffect(() => {
     setUid(id);
   }, [id]);
 
-  useEffect(() => {
-    // console.log(url);
-  }, [url]);
+  // useEffect(() => {
+  //   const yourtasks = window.document.getElementById("yourTasks");
+  //   const workspace = window.document.getElementById("workspace");
+  //   yourtasks.addEventListener("mouseover", () => {
+  //     setClassNameForYourTasks("block");
+  //   });
+  //   yourtasks.addEventListener("mouseout", () => {
+  //     setClassNameForYourTasks("hidden");
+  //   });
 
-  useEffect(() => {
-    const yourtasks = window.document.getElementById("yourTasks");
-    const workspace = window.document.getElementById("workspace");
-    yourtasks.addEventListener("mouseover", () => {
-      setClassNameForYourTasks("block");
-    });
-    yourtasks.addEventListener("mouseout", () => {
-      setClassNameForYourTasks("hidden");
-    });
-
-    workspace.addEventListener("mouseover", () => {
-      setClassNameForWorkSpace("block");
-    });
-    workspace.addEventListener("mouseout", () => {
-      setClassNameForWorkSpace("hidden");
-    });
-  }, []);
+  //   workspace.addEventListener("mouseover", () => {
+  //     setClassNameForWorkSpace("block");
+  //   });
+  //   workspace.addEventListener("mouseout", () => {
+  //     setClassNameForWorkSpace("hidden");
+  //   });
+  // }, []);
 
   useEffect(() => {
     // console.log("CreateWorkspacePopupNum", CreateWorkspacePopupNum);
   }, [CreateWorkspacePopupNum]);
 
-  if (
-    url !== "/log-in" &&
-    url !== "/sign-up" &&
-    url !== "/CreateProfile" &&
-    url !== "/" &&
-    url !== "/verify-email"
-  ) {
-    return (
-      <>
+  return (
+    <>
+      {isVerticalNavbar ? ( //vertical navbar
+        <nav className="fixed w-screen top-0">
+          <div className=" flex flex-row justify-center m-3 items-center ">
+            <ul className="flex flex-row items-center justify-between w-[70%]">
+              <li className="">
+                <h1 className="text-2xl font-bold">Task Manager</h1>
+              </li>
+              <li className="flex gap-10">
+                {url === "/CreateProfile" ||
+                url === "/log-in" ||
+                url === "/sign-up"
+                  ? null
+                  : url === "/" && (
+                      <>
+                        <div className="flex justify-evenly gap-7">
+                          <button
+                            className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-1 transition-all hover:text-black text-white bg-thm-clr-1"
+                            onClick={() => {
+                              router.push("/sign-up");
+                            }}
+                          >
+                            <span>Sign up</span>
+                          </button>
+
+                          <button
+                            className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-2 transition-all hover:text-black text-black bg-thm-clr-2"
+                            onClick={() => {
+                              router.push("/log-in");
+                            }}
+                          >
+                            <span>Sign in</span>
+                          </button>
+                        </div>
+                      </>
+                    )}
+
+                <ThemeToggle />
+              </li>
+            </ul>
+          </div>
+        </nav>
+      ) : (
         <nav className="fixed top-0 left-0 p-2 dark:bg-gray-800 transition-all duration-1000 bg-gray-100 flex flex-col min-h-screen lg:w-[240px]">
           <div className="flex justify-between gap-5 items-center my-4 mx-auto">
             <h1 className="text-xl font-bold text-black dark:text-slate-200">
               Task Manager
             </h1>
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
           </div>
           <div>
             <div
@@ -355,8 +329,6 @@ const NavbarComponent = () => {
                               onClick={() => {
                                 if (section.title === "Add new task") {
                                   setAddTaskPopupNum(AddTaskPopupNum + 1);
-
-
                                 } else {
                                   router.push(section.url);
                                 }
@@ -470,12 +442,10 @@ const NavbarComponent = () => {
                     className={`${
                       item.name === "Log out"
                         ? "text-red-500 dark:text-red-500"
-                        : "text-black"
-                    } ${
-                      url === item.url
+                        : url === item.url
                         ? "text-thm-clr-1 dark:text-blue-500"
                         : "text-black dark:text-slate-200"
-                    } cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md p-2`}
+                    }  cursor-pointer m-2 flex flex-row gap-2 items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md p-2`}
                     onClick={() => {
                       if (item.name === "Log out") {
                         auth.signOut();
@@ -493,59 +463,7 @@ const NavbarComponent = () => {
             </div>
           </div>
         </nav>
-        <CreateWorkSpacePopup
-          createPopupNum={CreateWorkspacePopupNum}
-          uname={username}
-          uniqID={uid}
-          workspacearray={workspaceArray}
-          email={email}
-          name={User !== null ? User.name : ""}
-          photoUrl={photoURL}
-        />
-        <AddTaskPopup addTaskPopupNum={AddTaskPopupNum} username={username}/>
-      </>
-    );
-  }
-  return (
-    <>
-      <nav className="fixed w-screen top-0">
-        <div className=" flex flex-row justify-center m-3 items-center ">
-          <ul className="flex flex-row items-center justify-between w-[70%]">
-            <li className="">
-              <h1 className="text-2xl font-bold">Task Manager</h1>
-            </li>
-            <li className="">
-              {url === "/CreateProfile" ||
-              url === "/log-in" ||
-              url === "/sign-up"
-                ? null
-                : url === "/" && (
-                    <>
-                      <div className="flex justify-evenly gap-7">
-                        <button
-                          className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-1 transition-all hover:text-black text-white bg-thm-clr-1"
-                          onClick={() => {
-                            router.push("/sign-up");
-                          }}
-                        >
-                          <span>Sign up</span>
-                        </button>
-
-                        <button
-                          className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-2 transition-all hover:text-black text-black bg-thm-clr-2"
-                          onClick={() => {
-                            router.push("/log-in");
-                          }}
-                        >
-                          <span>Sign in</span>
-                        </button>
-                      </div>
-                    </>
-                  )}
-            </li>
-          </ul>
-        </div>
-      </nav>
+      )}
     </>
   );
 };

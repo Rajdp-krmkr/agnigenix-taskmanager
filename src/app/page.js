@@ -1,44 +1,12 @@
 "use client";
-import DottedBg from "@/components/dottedBg";
-import IsUserExist from "@/Firebase Functions/IsUserExist";
-import { auth } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "@firebase/auth";
+import DottedBg from "@/ui components/dottedBg/dottedBg";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
 
-  const [user, setUser] = useState(null);
+  
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        console.log(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
-
-  if (user) {
-    const { uid } = user;
-    const { emailVerified } = user;
-    console.log(user);
-    if (emailVerified) {
-      IsUserExist({ uid })
-        .then((user) => {
-          console.log(user);
-          router.push(`/Dashboard/${user.username}`);
-        })
-        .catch(() => {
-          router.push(`/CreateProfile?id=${uid}`);
-        });
-    } else {
-      router.push("/verify-email");
-    }
-  }
   return (
     <>
       <DottedBg />
