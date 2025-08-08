@@ -1,9 +1,8 @@
 "use client";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUserContext } from "@/context/userContext";
-import { GetUserDataByUsername } from "@/Firebase Functions/GetuserData";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React  from "react";
 
 const Page = () => {
   const router = useRouter();

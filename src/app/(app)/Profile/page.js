@@ -1,15 +1,8 @@
 "use client";
 import { useUserContext } from "@/context/userContext";
-import GetUserData, {
-  GetUserDataByUsername,
-} from "@/Firebase Functions/GetuserData";
-import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
-import StoreUserData from "@/Firebase Functions/StoreUserData";
-import { auth } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "@firebase/auth";
 import Image from "next/image";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 const Page = () => {
   const router = useRouter();
