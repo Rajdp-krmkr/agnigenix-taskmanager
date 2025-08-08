@@ -16,7 +16,6 @@ import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications"
 import Link from "next/link";
 import { resetInvitedUsersArray } from "@/lib/features/slice";
 
-
 const CreateWorkSpacePopup = ({
   createPopupNum,
   uname,
@@ -139,7 +138,7 @@ const CreateWorkSpacePopup = ({
         customizedLogo,
         members,
         url: `/Workspaces/${workspaceTitle}/${workspaceID}/`,
-        projects: []
+        projects: [],
         //!members will come soon
       };
       // console.log(object);
@@ -156,7 +155,7 @@ const CreateWorkSpacePopup = ({
               LogoLetter: LogoLetter,
               customizedLogo: customizedLogo,
               members: members,
-              
+
               url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
             };
             // WorkspaceArray.push(NewWorkspace);
@@ -454,7 +453,7 @@ const CreateWorkSpacePopup = ({
                 </div>
               </div>
               <div>
-                <label class="switch">
+                <label className="switch">
                   <input
                     type="checkbox"
                     checked={isPrivate}

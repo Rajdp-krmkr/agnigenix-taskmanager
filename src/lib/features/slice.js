@@ -1,15 +1,6 @@
 import GetUserData from "@/Firebase Functions/GetuserData";
 import { createSlice } from "@reduxjs/toolkit";
 
-let email = "";
-let uid = "";
-
-const getUserdata = () => {
-  GetUserData({ uid })
-    .then((data) => {})
-    .catch((error) => {});
-};
-
 const initialState = {
   invitedUsers: [],
   email: "",

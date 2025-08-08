@@ -120,12 +120,12 @@ const Page = () => {
               }}
             >
               <button className="btn p-1">
-                <span class="circle1"></span>
-                <span class="circle2"></span>
-                <span class="circle3"></span>
-                <span class="circle4"></span>
-                <span class="circle5"></span>
-                <span class="text">Submit</span>
+                <span className="circle1"></span>
+                <span className="circle2"></span>
+                <span className="circle3"></span>
+                <span className="circle4"></span>
+                <span className="circle5"></span>
+                <span className="text">Submit</span>
               </button>
             </div>
           </div>
@@ -142,13 +142,13 @@ const Page = () => {
               }}
             >
               Sign-up with
-              <span class="m-1 font-bold text-lg">
-                <span class="text-[#4285F4]">G</span>
-                <span class="text-[#EA4335]">o</span>
-                <span class="text-[#FBBC05]">o</span>
-                <span class="text-[#4285F4]">g</span>
-                <span class="text-[#34A853]">l</span>
-                <span class="text-[#EA4335]">e</span>
+              <span className="m-1 font-bold text-lg">
+                <span className="text-[#4285F4]">G</span>
+                <span className="text-[#EA4335]">o</span>
+                <span className="text-[#FBBC05]">o</span>
+                <span className="text-[#4285F4]">g</span>
+                <span className="text-[#34A853]">l</span>
+                <span className="text-[#EA4335]">e</span>
               </span>
             </button>
             <button

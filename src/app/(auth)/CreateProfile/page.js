@@ -59,7 +59,7 @@ const PageComponent = () => {
         GetUserData({ uid })
           .then((res) => {
             if (res && res.username) {
-              router.push(`/Profile/${res.username}`);
+              router.push(`/Profile`);
             }
           })
           .catch((error) => {
@@ -156,7 +156,7 @@ const PageComponent = () => {
         StoreUserData({ uid, name, username, photoURL, email })
           .then((res) => {
             console.log(res);
-            router.push(`/Profile/${username}`);
+            router.push(`/Profile`);
           })
           .catch((error) => {
             console.log(error);
@@ -220,12 +220,12 @@ const PageComponent = () => {
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
               {shouldWait ? (
-                <div class="typewriter m-5">
-                  <div class="slide">
+                <div className="typewriter m-5">
+                  <div className="slide">
                     <i></i>
                   </div>
-                  <div class="paper"></div>
-                  <div class="keyboard"></div>
+                  <div className="paper"></div>
+                  <div className="keyboard"></div>
                 </div>
               ) : (
                 <button
@@ -236,13 +236,13 @@ const PageComponent = () => {
                     }
                   }}
                 >
-                  <span class="circle1"></span>
-                  <span class="circle2"></span>
-                  <span class="circle3"></span>
-                  <span class="circle4"></span>
-                  <span class="circle5"></span>
+                  <span className="circle1"></span>
+                  <span className="circle2"></span>
+                  <span className="circle3"></span>
+                  <span className="circle4"></span>
+                  <span className="circle5"></span>
 
-                  <span class="text">Create profile</span>
+                  <span className="text">Create profile</span>
                 </button>
               )}
             </div>

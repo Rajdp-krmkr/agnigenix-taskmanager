@@ -133,12 +133,12 @@ const Page = () => {
           <div className="my-6 w-full flex flex-col items-center">
             {TasksArray === null ? (
               <>
-                <div class="typewriter absolute top-[35vh] self-center">
-                  <div class="slide">
+                <div className="typewriter absolute top-[35vh] self-center">
+                  <div className="slide">
                     <i></i>
                   </div>
-                  <div class="paper"></div>
-                  <div class="keyboard"></div>
+                  <div className="paper"></div>
+                  <div className="keyboard"></div>
                 </div>
               </>
             ) : TasksArray.length > 0 ? (

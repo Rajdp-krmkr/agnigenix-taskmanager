@@ -1,7 +1,7 @@
 import { db } from "@/lib/firebaseConfig";
 import { collection, doc, getDoc, getDocs } from "@firebase/firestore";
 
-const isUserAuthenticated = ({ username, uid }) => {
+const isUserAuthenticated = (username, uid) => {
   return new Promise(async (resolve, reject) => {
     try {
       // Check if username is valid
@@ -9,7 +9,7 @@ const isUserAuthenticated = ({ username, uid }) => {
         console.error("Invalid username: Username is required.");
         return reject(false);
       }
-      
+
       // console.log("Checking username:", username);
 
       // Create a document reference in the "users" collection with the given username
@@ -51,8 +51,6 @@ export const CheckIfUserAssignedToWorkspace = (
         const membersArray = data.members;
         const title = data.workspaceTitle;
         // const projects = data.projects;
-
-        
 
         let isAssigned = false;
 

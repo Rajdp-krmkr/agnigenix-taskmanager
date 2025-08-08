@@ -232,7 +232,7 @@ const Page = () => {
               ) : (
                 <>
                   <div className="h-full w-full flex justify-center items-center">
-                    <div class="loader w-9 h-9 border-[4px] border-white"></div>
+                    <div className="loader w-9 h-9 border-[4px] border-white"></div>
                   </div>
                 </>
               )}

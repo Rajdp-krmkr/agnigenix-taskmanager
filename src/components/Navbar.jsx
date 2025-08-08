@@ -36,12 +36,19 @@ import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
 import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 import ThemeToggle from "./ThemeToggle";
 import AddTaskPopup from "./AddTaskPopup";
+import { useUserContext } from "@/context/userContext";
 
 const NavbarComponent = () => {
   const router = useRouter();
   const [url, setUrl] = useState("");
-  const [User, setUser] = useState(null);
-  const [uid, setUid] = useState(null);
+  const {
+    user,
+    setUser,
+    isUserLoggedIn,
+    setIsUserLoggedIn,
+    isLoading,
+    setIsLoading,
+  } = useUserContext();
 
   const [ClassNameForWorkSpace, setClassNameForWorkSpace] = useState("hidden");
   const [classNameForYourTasks, setClassNameForYourTasks] = useState("hidden");
@@ -73,12 +80,12 @@ const NavbarComponent = () => {
     console.log(username);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log("User is signed in", user.uid);
-        // console.log(user, "User");
-        setUid(user.uid);
+        // console.log("user is signed in", user.uid);
+        // console.log(user, "user");
+        // setUid(user.uid);
       } else {
-        // console.log("User is signed out");
-        // console.log(user, "User");
+        // console.log("user is signed out");
+        // console.log(user, "user");
         if (
           url !== "/log-in" &&
           url !== "/sign-up" &&
@@ -92,10 +99,10 @@ const NavbarComponent = () => {
   }, []);
 
   useEffect(() => {
-    if ((uid !== null || uid !== "") && username !== null) {
-      isUserAuthenticated({ username, uid })
+    if ((user?.uid !== null || user?.uid !== "") && username !== null) {
+      isUserAuthenticated(username, user?.uid)
         .then((res) => {
-          // console.log("User is authenticated", res);
+          // console.log("user is authenticated", res);
           if (
             url === "/log-in" ||
             url === "/sign-up" ||
@@ -139,14 +146,14 @@ const NavbarComponent = () => {
           }
         });
     }
-  }, [uid, username]);
+  }, [user?.uid, username]);
   // console.log(username);
 
   const searchparams = useSearchParams();
   const id = searchparams.get("id");
-  useEffect(() => {
-    setUid(id);
-  }, [id]);
+  // useEffect(() => {
+  //   setUid(id);
+  // }, [id]);
 
   useEffect(() => {
     // console.log(url);
@@ -194,18 +201,18 @@ const NavbarComponent = () => {
             <div
               className="bg-white dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex flex-row items-center gap-2 p-2 rounded-lg m-2"
               onClick={() => {
-                router.push(`/Profile/${username}`);
+                router.push(`/Profile`);
               }}
             >
-              {User == null ? (
+              {user == null ? (
                 // <div className="flex justify-center items-center w-full">
-                <div class="loader w-9 h-9 border-[4px] border-white"></div>
+                <div className="loader w-9 h-9 border-[4px] border-white"></div>
               ) : (
                 // </div>
                 <>
                   <div className="profilePhoto relative w-10 h-10 ">
                     <Image
-                      src={User !== null ? User.photoURL : ""}
+                      src={user !== null ? user.photoURL : ""}
                       className="rounded-2xl"
                       fill
                       alt="profile-picture"
@@ -214,11 +221,11 @@ const NavbarComponent = () => {
                   </div>
                   <div className="flex flex-col">
                     <h2 className="text-[14px] font-semibold">
-                      {User !== null ? User.name : "name"}
+                      {user !== null ? user.name : "name"}
                     </h2>
                     {/* //TODO: loader component will be added*/}
                     <p className="text-xs text-gray-400">
-                      {User !== null ? User.username : "username"}
+                      {user !== null ? user.username : "username"}
                     </p>
                   </div>
                 </>
@@ -232,13 +239,13 @@ const NavbarComponent = () => {
                   {
                     name: "Dashboard",
                     icon: <MdOutlineDashboard />,
-                    url: `/Dashboard/${username}`,
+                    url: `/Dashboard`,
                     activatedIcon: <MdDashboard />,
                   },
                   {
                     name: "Notifications",
                     icon: <IoMdNotificationsOutline />,
-                    url: `/Notifications/all/${username}`,
+                    url: `/Notifications/all/${user?.username}`,
                     activatedIcon: <IoMdNotificationsOutline />,
                   },
                   {
@@ -249,22 +256,22 @@ const NavbarComponent = () => {
                     subSections: [
                       {
                         title: "Due tasks",
-                        url: `/YourTasks/DueTasks/${username}`,
+                        url: `/YourTasks/DueTasks/${user?.username}`,
                         icon: <TbCalendarDue />,
                       },
                       {
                         title: "Completed tasks",
-                        url: `/YourTasks/CompletedTasks/${username}`,
+                        url: `/YourTasks/CompletedTasks/${user?.username}`,
                         icon: <BsClipboardCheck />,
                       },
                       {
                         title: "Uncompleted tasks",
-                        url: `/YourTasks/UncompletedTasks/${username}`,
+                        url: `/YourTasks/UncompletedTasks/${user?.username}`,
                         icon: <BiTaskX />,
                       },
                       {
                         title: "All tasks",
-                        url: `/YourTasks/AllTasks/${username}`,
+                        url: `/YourTasks/AllTasks/${user?.username}`,
                         icon: <GoTasklist />,
                       },
                       {
@@ -281,7 +288,7 @@ const NavbarComponent = () => {
                     url: `#`,
                     activatedIcon: <MdOutlineWork />,
                     subSections: workspaceArray,
-                    // subSections: User.workspace,
+                    // subSections: user.workspace,
                   },
                 ].map((item, index) => (
                   <li
@@ -434,7 +441,7 @@ const NavbarComponent = () => {
                             <button
                               className="bg-thm-clr-1 my-4 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
                               onClick={() => {
-                                // router.push(`/CreateWorkspace/${username}`);
+                                // router.push(`/CreateWorkspace/${user?.username}`);
                                 setCreateWorkspacePopupNum(
                                   CreateWorkspacePopupNum + 1
                                 );
@@ -459,7 +466,7 @@ const NavbarComponent = () => {
                   {
                     name: "Settings",
                     icon: <MdOutlineSettings />,
-                    url: `/Settings/${username}`,
+                    url: `/Settings/${user?.username}`,
                     activatedIcon: "",
                   },
                   {
@@ -497,14 +504,17 @@ const NavbarComponent = () => {
         </nav>
         <CreateWorkSpacePopup
           createPopupNum={CreateWorkspacePopupNum}
-          uname={username}
-          uniqID={uid}
+          uname={user?.username}
+          uniqID={user?.uid}
           workspacearray={workspaceArray}
           email={email}
-          name={User !== null ? User.name : ""}
+          name={user !== null ? user.name : ""}
           photoUrl={photoURL}
         />
-        <AddTaskPopup addTaskPopupNum={AddTaskPopupNum} username={username} />
+        <AddTaskPopup
+          addTaskPopupNum={AddTaskPopupNum}
+          username={user?.username}
+        />
       </>
     );
   }

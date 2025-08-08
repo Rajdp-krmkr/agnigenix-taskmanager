@@ -38,8 +38,7 @@ const GetUserData = (user) => {
 
 export default GetUserData;
 
-const GetUserDataByUsername = (user) => {
-  const { username } = user;
+const GetUserDataByUsername = (username) => {
   return new Promise(async (resolve, reject) => {
     const docRef = doc(db, "users", username);
     const docSnap = await getDoc(docRef);

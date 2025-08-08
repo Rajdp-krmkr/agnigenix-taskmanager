@@ -1,44 +1,59 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
+import UserContextProvider, { useUserContext } from "@/context/userContext";
 import IsUserExist from "@/Firebase Functions/IsUserExist";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "@firebase/auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
 
-  const [user, setUser] = useState(null);
+  const {
+    user,
+    setUser,
+    isUserLoggedIn,
+    setIsUserLoggedIn,
+    isLoading,
+    setIsLoading,
+  } = useUserContext();
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUser(user);
+  //       console.log(user);
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   });
+  // }, []);
+
+  // if (user) {
+  //   const { uid } = user;
+  //   const { emailVerified } = user;
+  //   console.log(user);
+  //   if (emailVerified) {
+  //     IsUserExist({ uid })
+  //       .then((user) => {
+  //         console.log(user);
+  //         router.push(`/Dashboard/${user.username}`);
+  //       })
+  //       .catch(() => {
+  //         router.push(`/CreateProfile?id=${uid}`);
+  //       });
+  //   } else {
+  //     router.push("/verify-email");
+  //   }
+  // }
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        console.log(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
-
-  if (user) {
-    const { uid } = user;
-    const { emailVerified } = user;
-    console.log(user);
-    if (emailVerified) {
-      IsUserExist({ uid })
-        .then((user) => {
-          console.log(user);
-          router.push(`/Dashboard/${user.username}`);
-        })
-        .catch(() => {
-          router.push(`/CreateProfile?id=${uid}`);
-        });
-    } else {
-      router.push("/verify-email");
+    if (user) {
+      router.push(`/Dashboard/${user.username}`);
+      console.log("Null user: ", user);
     }
-  }
+  }, [isLoading, user, isUserLoggedIn, router]);
+
   return (
     <>
       <DottedBg />

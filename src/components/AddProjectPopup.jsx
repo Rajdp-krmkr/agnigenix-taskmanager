@@ -276,7 +276,7 @@ const AddProjectPopup = ({
                 </div>
               </div>
               <div>
-                <label class="switch">
+                <label className="switch">
                   <input
                     type="checkbox"
                     checked={isPrivate}
