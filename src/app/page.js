@@ -49,7 +49,7 @@ export default function Home() {
 
   useEffect(() => {
     if (user) {
-      router.push(`/Dashboard/${user.username}`);
+      router.push(`/Dashboard/`);
       console.log("Null user: ", user);
     }
   }, [isLoading, user, isUserLoggedIn, router]);

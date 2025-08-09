@@ -64,10 +64,11 @@ const PageComponent = () => {
           })
           .catch((error) => {
             console.error("Error fetching user data:", error);
+
             // Handle the case where the user data is not found
           });
       } catch (error) {
-        console.log("Problem in getting user data:", error);
+        console.log("Problem in getting user data: ", error);
       }
     }
   }, [uid]);
@@ -110,21 +111,6 @@ const PageComponent = () => {
     return true;
   }
 
-  // {Example usage
-  // const usernamesToTest = [
-  //   "john_doe",    // valid
-  //   "john-doe",    // valid
-  //   "johndoe123",  // valid
-  //   "admin@site",  // invalid (special characters like @ not allowed)
-  //   "john doe",    // invalid (spaces not allowed)
-  //   "jo",          // invalid (too short)
-  //   "thisusernameiswaytoolong", // invalid (too long)
-  //   "_johndoe",    // invalid (cannot start with underscore)
-  //   "johndoe-",    // valid
-  //   "john__doe",   // valid
-  //   "john--doe"    // valid
-  // ];}
-
   const debouncedUsername = useDebounce(username, 500);
   useEffect(() => {
     console.log("debouncedUsername: ", debouncedUsername);
@@ -153,7 +139,14 @@ const PageComponent = () => {
     } else {
       if (IsUsernameExist === false) {
         setShouldWait(true);
-        StoreUserData({ uid, name, username, photoURL, email })
+        StoreUserData({
+          uid,
+          name,
+          username,
+          photoURL,
+          email,
+          emailVerified: user.emailVerified,
+        })
           .then((res) => {
             console.log(res);
             router.push(`/Profile`);

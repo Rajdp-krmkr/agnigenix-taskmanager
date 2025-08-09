@@ -17,21 +17,25 @@ const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isProfileCreated, setIsProfileCreated] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  const fetchUser = () => {
+    return onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // const docRef = doc(db, "users", user.uid);
-        // const docSnap = await getDoc(docRef);
-
+        // all the users are stores based on username as id
+        // so fetching the users by searching queries
         const docCollectionRef = collection(db, "users");
         const q = query(docCollectionRef, where("uid", "==", user.uid));
         const docSnap = await getDocs(q);
 
         console.log("User data:", docSnap.docs[0].data());
 
-        if (!docSnap.empty) {
-          setUser(docSnap.docs[0].data());
+        if (!docSnap.empty && docSnap.docs.length > 0) {
+          const userData = docSnap.docs[0].data();
+          setUser(userData);
+          setEmailVerified(userData.emailVerified);
+          setIsProfileCreated(userData?.username != null);
         }
         setIsUserLoggedIn(true);
       } else {
@@ -40,6 +44,10 @@ const UserContextProvider = ({ children }) => {
       }
       setIsLoading(false);
     });
+  };
+
+  useEffect(() => {
+    const unsubscribe = fetchUser();
     return () => unsubscribe();
   }, []);
 
@@ -52,6 +60,11 @@ const UserContextProvider = ({ children }) => {
         setIsUserLoggedIn,
         isLoading,
         setIsLoading,
+        fetchUser,
+        emailVerified,
+        setEmailVerified,
+        isProfileCreated,
+        setIsProfileCreated,
       }}
     >
       {children}

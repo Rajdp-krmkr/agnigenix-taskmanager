@@ -12,24 +12,65 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "@firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
+import { doc, getDoc, setDoc } from "@firebase/firestore";
 
 const Page = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const {
+    user,
+    setUser,
+    isUserLoggedIn,
+    setIsUserLoggedIn,
+    isLoading,
+    setIsLoading,
+    fetchUser,
+    emailVerified,
+    setEmailVerified,
+    isProfileCreated,
+    setIsProfileCreated,
+  } = useUserContext();
 
   const SignUpWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-      .then((result) => {
+      .then(async (result) => {
         console.log("loggedin", result);
+        await fetchUser();
+        //! error: doc id must be username, but is this step, username is undefined
+        const docRef = doc(db, "users", result.user.uid);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+          await setDoc(docRef, {
+            bio: "",
+            email: result.user.email,
+            jobRole: "",
+            name: null,
+            photoURL: result.user.photoURL,
+            socialMediaAcounts: [],
+            uid: result.user.uid,
+            username: null,
+            workspaces: [],
+          });
+        }
+        if (user.emailVerified) {
+          if (user.username == null) {
+            router.push(`/CreateProfile?id=${user.uid}`);
+          } else {
+            router.push(`/Dashboard/`);
+          }
+        } else {
+          router.push("/verify-email");
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
   const SignUpWithGithub = () => {
     const provider = new GithubAuthProvider();
     signInWithPopup(auth, provider)
@@ -41,7 +82,7 @@ const Page = () => {
       });
   };
 
-  const handleClick = () => {
+  const handleClickEmailSignup = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         sendEmailVerification(auth.currentUser)
@@ -62,18 +103,6 @@ const Page = () => {
       });
   };
 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
-
   if (user) {
     if (user.emailVerified) {
       router.push(`/CreateProfile?id=${user.uid}`);
@@ -81,6 +110,7 @@ const Page = () => {
       router.push("/verify-email");
     }
   }
+
   return (
     <>
       <DottedBg />
@@ -116,7 +146,7 @@ const Page = () => {
             <div
               className="AuthBtn flex justify-center items-center m-3"
               onClick={() => {
-                handleClick();
+                handleClickEmailSignup();
               }}
             >
               <button className="btn p-1">

@@ -77,7 +77,6 @@ const NavbarComponent = () => {
   }, [uname]);
 
   useEffect(() => {
-    console.log(username);
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // console.log("user is signed in", user.uid);
@@ -99,8 +98,8 @@ const NavbarComponent = () => {
   }, []);
 
   useEffect(() => {
-    if ((user?.uid !== null || user?.uid !== "") && username !== null) {
-      isUserAuthenticated(username, user?.uid)
+    if ((user?.uid !== null || user?.uid !== "") && user?.username !== null) {
+      isUserAuthenticated(user?.username, user?.uid)
         .then((res) => {
           // console.log("user is authenticated", res);
           if (
@@ -113,11 +112,11 @@ const NavbarComponent = () => {
           } else {
             // console.log(username);
             if (
-              username !== null &&
-              username !== "" &&
-              username !== undefined
+              user?.username !== null &&
+              user?.username !== "" &&
+              user?.username !== undefined
             ) {
-              GetUserDataByUsername({ username })
+              GetUserDataByUsername({ username: user?.username })
                 .then((result) => {
                   setUser(result);
                   console.log("adding workspace...");
@@ -146,7 +145,7 @@ const NavbarComponent = () => {
           }
         });
     }
-  }, [user?.uid, username]);
+  }, [user]);
   // console.log(username);
 
   const searchparams = useSearchParams();
@@ -212,7 +211,7 @@ const NavbarComponent = () => {
                 <>
                   <div className="profilePhoto relative w-10 h-10 ">
                     <Image
-                      src={user !== null ? user.photoURL : ""}
+                      src={user !== null ? user?.photoURL : ""}
                       className="rounded-2xl"
                       fill
                       alt="profile-picture"
@@ -221,11 +220,11 @@ const NavbarComponent = () => {
                   </div>
                   <div className="flex flex-col">
                     <h2 className="text-[14px] font-semibold">
-                      {user !== null ? user.name : "name"}
+                      {user !== null ? user?.name : "name"}
                     </h2>
                     {/* //TODO: loader component will be added*/}
                     <p className="text-xs text-gray-400">
-                      {user !== null ? user.username : "username"}
+                      {user !== null ? user?.username : "username"}
                     </p>
                   </div>
                 </>
@@ -466,7 +465,7 @@ const NavbarComponent = () => {
                   {
                     name: "Settings",
                     icon: <MdOutlineSettings />,
-                    url: `/Settings/${user?.username}`,
+                    url: `/Settings`,
                     activatedIcon: "",
                   },
                   {

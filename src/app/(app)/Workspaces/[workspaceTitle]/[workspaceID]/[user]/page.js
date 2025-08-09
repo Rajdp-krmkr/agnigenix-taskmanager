@@ -16,8 +16,6 @@ const Page = () => {
   const workspaceID = params.workspaceID;
   const username = params.user;
 
-  // console.log(workspaceTitle, workspaceID, username);
-
   const [isUserAssigned, setisUserAssigned] = useState(null);
   const [isWorkspaceFound, setIsWorkspaceFound] = useState(null);
   const [UserAssignmentMessage, setUserAssignmentMessage] = useState(null);

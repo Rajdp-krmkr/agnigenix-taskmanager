@@ -1,91 +1,112 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
-import { auth } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "@firebase/auth";
+import { useUserContext } from "@/context/userContext";
+import { auth, db } from "@/lib/firebaseConfig";
+import { onAuthStateChanged, sendEmailVerification } from "@firebase/auth";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "@firebase/firestore";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-
 const Page = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
 
-  const [User, setUser] = useState(null);
-  const [uid, setUid] = useState(null);
-  // useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        setEmail(user.email);
-        console.log("user", user);
-        setUid(user.uid);
-      } else {
-        setUser(null);
-      }
-    });
-  // }, [router]);
+  const {
+    user,
+    emailVerified,
+    setEmailVerified,
+    isProfileCreated,
+    isLoading,
+    setIsLoading,
+  } = useUserContext();
+
+  const [authStateUser, setAuthStateUser] = useState(null);
 
   useEffect(() => {
-    if (User) {
-      if (User.emailVerified) {
-        setTimeout(() => {
-          router.push(`/CreateProfile?id=${uid}`);    //!not redirecting automatically
-        }, 2000);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthStateUser(user);
+      } else {
+        setAuthStateUser(null);
       }
-    }
-  }, [User]);
+    });
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
-  //     if (user) {
-  //       setUser(user);
-  //       setEmail(user.email);
-  //       setUid(user.uid);
-  //       await user.reload();
-  //       console.log("user", user);
+    return () => unsubscribe();
+  }, []);
 
-  //       // If the user is verified, navigate after 2 seconds
-  //       if (user.emailVerified) {
-  //         console.log("Email verified. Redirecting...");
-  //         setTimeout(() => {
-  //           router.push(`/CreateProfile?id=${user.uid}`);
-  //         }, 2000); // 2-second delay
-  //       }
-  //     } else {
-  //       setUser(null);
-  //     }
-  //   });
+  useEffect(() => {
+    const sendVerificationEmail = async () => {
+      if (user && !isLoading && authStateUser) {
+        if (!authStateUser.emailVerified)
+          await sendEmailVerification(authStateUser)
+            .then(() => {
+              console.log("Verification email sent");
+            })
+            .catch((error) => {
+              console.error("Error sending verification email:", error);
+            });
+        else {
+          if (!emailVerified) {
+            const docCollectionRef = collection(db, "users");
+            const q = query(docCollectionRef, where("uid", "==", user.uid));
+            const docSnap = await getDocs(q);
+            const data = docSnap.docs[0].data();
+            // await updateDoc(docSnap.docs[0].ref, {
+            //   emailVerified: true,
+            // });
+            await updateDoc(doc(db, "users", data.username), {
+              emailVerified: true,
+            });
+          }
 
-  //   // Cleanup the listener when the component unmounts
-  //   return () => unsubscribe();
-  // }, [auth, router]);
+          if (!isProfileCreated) {
+            setTimeout(() => {
+              router.push(`/CreateProfile?id=${user.uid}`);
+            }, 3000);
+          } else {
+            setTimeout(() => {
+              router.push(`/Dashboard`);
+            }, 3000);
+          }
+        }
+      }
+    };
+    sendVerificationEmail();
+  }, [user, isLoading]);
 
-  // useEffect(() => {
-  //   console.log(auth.currentUser);
-  //   setEmail(auth.currentUser.email);
-  //   setUid(auth.currentUser.uid);
-  //   setUser(auth.currentUser);
-  //   auth.currentUser.reload();
-  //   if (auth.currentUser.emailVerified) {
-  //     router.push(`/CreateProfile?id=${auth.currentUser?.uid}`);
-  //   }
-  // }, [auth, router]);
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center items-center">
+        <div className="typewriter absolute top-[40vh] self-center">
+          <div className="slide">
+            <i></i>
+          </div>
+          <div className="paper"></div>
+          <div className="keyboard"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <DottedBg />
       <div className="h-screen w-screen flex flex-col justify-center items-center">
-        {User?.emailVerified ? (
-          <>
-            <h1 className="font-bold text-xl text-green-500">
-              Your email is verified ✅
-            </h1>
-          </>
+        {emailVerified || authStateUser?.emailVerified ? (
+          <h1 className="font-bold text-xl text-green-500">
+            Your email is verified ✅
+          </h1>
         ) : (
           <>
             <p className="font-bold text-lg m-5">
               A email verification link is sent to your email{" "}
-              <span className="text-blue-500">{email}</span>
+              <span className="text-blue-500">{user?.email}</span>
             </p>
             <p className="m-1">Please verify your email to proceed</p>
             <p className="text-red-500 font-semibold m-2">
