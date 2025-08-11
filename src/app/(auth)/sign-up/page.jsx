@@ -16,6 +16,7 @@ import { auth, db } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, setDoc } from "@firebase/firestore";
 import { useUserContext } from "@/context/userContext";
+import Link from "next/link";
 
 const Page = () => {
   const router = useRouter();
@@ -35,42 +36,46 @@ const Page = () => {
     setIsProfileCreated,
   } = useUserContext();
 
-  const SignUpWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        console.log("loggedin", result);
-        await fetchUser();
-        //! error: doc id must be username, but is this step, username is undefined
-        const docRef = doc(db, "users", result.user.uid);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-          await setDoc(docRef, {
-            bio: "",
-            email: result.user.email,
-            jobRole: "",
-            name: null,
-            photoURL: result.user.photoURL,
-            socialMediaAcounts: [],
-            uid: result.user.uid,
-            username: null,
-            workspaces: [],
-            emailVerified: true,
-          });
-        }
-        if (user?.emailVerified) {
-          if (user?.username == null) {
-            router.push(`/CreateProfile?id=${user.uid}`);
-          } else {
-            router.push(`/Dashboard/`);
-          }
+  const SignUpWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log("loggedin", result);
+
+      // Check if user document already exists
+      const userDocRef = doc(db, "users", result.user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        // Create user document if it doesn't exist
+        await setDoc(userDocRef, {
+          bio: "",
+          email: result.user.email,
+          jobRole: "",
+          name: result.user.displayName,
+          photoURL: result.user.photoURL,
+          socialMediaAcounts: [],
+          uid: result.user.uid,
+          username: null,
+          workspaces: [],
+          emailVerified: true, // Google accounts are pre-verified
+          userCreatedAt: new Date(),
+        });
+
+        // Redirect to create profile for new users
+        router.push(`/CreateProfile?id=${result.user.uid}`);
+      } else {
+        // Check if profile is complete
+        const userData = userDocSnap.data();
+        if (userData.username == null) {
+          router.push(`/CreateProfile?id=${result.user.uid}`);
         } else {
-          router.push("/verify-email");
+          router.push(`/Dashboard/`);
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      }
+    } catch (error) {
+      console.error("Google signup error:", error);
+    }
   };
 
   const SignUpWithGithub = () => {
@@ -84,34 +89,62 @@ const Page = () => {
       });
   };
 
-  const handleClickEmailSignup = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        sendEmailVerification(auth.currentUser)
-          .then(() => {
-            console.log("email verification link sent");
-          })
-          .catch((error) => {
-            console.log("Error in sending email verification link", error);
-          });
+  const handleClickEmailSignup = async () => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-        const user = userCredential.user;
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(error, errorCode, errorMessage);
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        bio: "",
+        email: user.email,
+        jobRole: "",
+        name: user.displayName || "",
+        photoURL:
+          user.photoURL ||
+          "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        socialMediaAcounts: [],
+        uid: user.uid,
+        username: null,
+        workspaces: [],
+        emailVerified: false,
+        userCreatedAt: new Date(),
       });
+
+      // Send verification email
+      await sendEmailVerification(user);
+      console.log("Email verification link sent");
+
+      // Redirect to verify-email page
+      router.push("/verify-email");
+    } catch (error) {
+      console.error("Error in signup:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
-  if (user) {
-    if (user?.emailVerified) {
-      router.push(`/CreateProfile?id=${user.uid}`);
-    } else {
-      router.push("/verify-email");
+  useEffect(() => {
+    if (!isLoading && isUserLoggedIn) {
+      if (isProfileCreated) {
+        router.replace(`/Dashboard/`);
+      } else if (emailVerified) {
+        router.replace(`/CreateProfile?id=${user.uid}`);
+      } else if (user && !emailVerified) {
+        router.replace("/verify-email");
+      }
     }
-  }
+  }, [
+    isLoading,
+    user,
+    isUserLoggedIn,
+    router,
+    isProfileCreated,
+    emailVerified,
+  ]);
 
   return (
     <>
@@ -194,6 +227,13 @@ const Page = () => {
                 <Image fill src={GithubLogo} alt="github-logo" />
               </div>
             </button>
+          </div>
+
+          <div className="text-center mt-4">
+            <span className="text-gray-600">Already have an account? </span>
+            <Link href="/log-in" className="text-blue-500 hover:underline">
+              Log in
+            </Link>
           </div>
         </div>
       </div>

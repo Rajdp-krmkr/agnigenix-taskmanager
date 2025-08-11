@@ -17,42 +17,33 @@ export default function Home() {
     setIsUserLoggedIn,
     isLoading,
     setIsLoading,
+    fetchUser,
+    emailVerified,
+    setEmailVerified,
+    isProfileCreated,
+    setIsProfileCreated,
   } = useUserContext();
-  // useEffect(() => {
-  //   onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setUser(user);
-  //       console.log(user);
-  //     } else {
-  //       setUser(null);
-  //     }
-  //   });
-  // }, []);
-
-  // if (user) {
-  //   const { uid } = user;
-  //   const { emailVerified } = user;
-  //   console.log(user);
-  //   if (emailVerified) {
-  //     IsUserExist({ uid })
-  //       .then((user) => {
-  //         console.log(user);
-  //         router.push(`/Dashboard/`);
-  //       })
-  //       .catch(() => {
-  //         router.push(`/CreateProfile?id=${uid}`);
-  //       });
-  //   } else {
-  //     router.push("/verify-email");
-  //   }
-  // }
 
   useEffect(() => {
-    if (user) {
-      router.push(`/Dashboard/`);
-      console.log("Null user: ", user);
+    if (!isLoading) {
+      if (isProfileCreated) {
+        router.replace(`/Dashboard/`);
+        console.log("Null user: ", user);
+      } else if (emailVerified) {
+        router.replace(`/CreateProfile?id=${user.uid}`);
+      } else if (isUserLoggedIn) {
+        //user authenticated but doc not created
+        router.push("/sign-up");
+      }
     }
-  }, [isLoading, user, isUserLoggedIn, router]);
+  }, [
+    isLoading,
+    user,
+    isUserLoggedIn,
+    router,
+    isProfileCreated,
+    emailVerified,
+  ]);
 
   return (
     <>

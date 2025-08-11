@@ -2,7 +2,7 @@
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUserContext } from "@/context/userContext";
 import { useParams, useRouter } from "next/navigation";
-import React  from "react";
+import React from "react";
 
 const Page = () => {
   const router = useRouter();
@@ -16,6 +16,11 @@ const Page = () => {
     setIsUserLoggedIn,
     isLoading,
     setIsLoading,
+    fetchUser,
+    emailVerified,
+    setEmailVerified,
+    isProfileCreated,
+    setIsProfileCreated,
   } = useUserContext();
 
   if (isLoading) {

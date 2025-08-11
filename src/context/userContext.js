@@ -21,26 +21,46 @@ const UserContextProvider = ({ children }) => {
   const [isProfileCreated, setIsProfileCreated] = useState(false);
 
   const fetchUser = () => {
-    return onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // all the users are stores based on username as id
-        // so fetching the users by searching queries
-        const docCollectionRef = collection(db, "users");
-        const q = query(docCollectionRef, where("uid", "==", user.uid));
-        const docSnap = await getDocs(q);
+    return onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        try {
+          // Fetch user data from Firestore
+          const docCollectionRef = collection(db, "users");
+          const q = query(docCollectionRef, where("uid", "==", authUser.uid));
+          const docSnap = await getDocs(q);
 
-        // console.log("User data:", docSnap.docs[0].data());
+          if (!docSnap.empty && docSnap.docs.length > 0) {
+            const userData = docSnap.docs[0].data();
+            setUser(userData);
 
-        if (!docSnap.empty && docSnap.docs.length > 0) {
-          const userData = docSnap.docs[0].data();
-          setUser(userData);
-          setEmailVerified(userData.emailVerified);
-          setIsProfileCreated(userData?.username != null);
-        } 
-        setIsUserLoggedIn(true);
+            // Check email verification status from both Auth and Firestore
+            const isEmailVerified =
+              authUser.emailVerified || userData.emailVerified;
+            setEmailVerified(isEmailVerified);
+
+            // Check if profile is created (has username)
+            setIsProfileCreated(
+              userData?.username != null && userData?.username !== ""
+            );
+          } else {
+            // User authenticated but no document in Firestore
+            setUser(null);
+            setEmailVerified(false);
+            setIsProfileCreated(false);
+          }
+          setIsUserLoggedIn(true);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+          setEmailVerified(false);
+          setIsProfileCreated(false);
+          setIsUserLoggedIn(false);
+        }
       } else {
         setUser(null);
         setIsUserLoggedIn(false);
+        setEmailVerified(false);
+        setIsProfileCreated(false);
       }
       setIsLoading(false);
     });

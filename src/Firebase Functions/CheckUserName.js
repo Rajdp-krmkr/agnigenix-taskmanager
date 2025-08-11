@@ -1,5 +1,12 @@
 import { db } from "@/lib/firebaseConfig";
-import { doc, getDoc, getDocs } from "@firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "@firebase/firestore";
 
 const CheckUserName = async (username) => {
   // const docRef = doc(db, "users", username);

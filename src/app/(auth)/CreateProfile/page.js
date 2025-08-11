@@ -56,25 +56,23 @@ const PageComponent = () => {
   }, []);
 
   useEffect(() => {
-    if (uid !== "" || uid !== null) {
-      console.log(uid);
-      try {
-        GetUserData({ uid })
-          .then((res) => {
-            if (res && res.username) {
-              router.push(`/Profile`);
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching user data:", error);
-
-            // Handle the case where the user data is not found
-          });
-      } catch (error) {
-        console.log("Problem in getting user data: ", error);
+    const checkExistingProfile = async () => {
+      const currentUid = uid || user?.uid;
+      if (currentUid) {
+        try {
+          const userData = await GetUserData({ uid: currentUid });
+          if (userData && userData.username) {
+            // User already has a profile, redirect to dashboard
+            router.push(`/Dashboard`);
+          }
+        } catch (error) {
+          console.log("User data not found, continuing with profile creation");
+        }
       }
-    }
-  }, [uid]);
+    };
+
+    checkExistingProfile();
+  }, [uid, user, router]);
 
   function validateUsername(username) {
     if (username.length < 3 || username.length > 15) {
@@ -136,28 +134,35 @@ const PageComponent = () => {
     }
   }, [debouncedUsername]);
 
-  const handleClick = () => {
-    if (name === "" || username === "") {
+  const handleClick = async () => {
+    if (!name || !username) {
       alert("Please fill in all fields");
-    } else {
-      if (IsUsernameExist === false) {
-        setShouldWait(true);
-        StoreUserData({
-          uid,
-          name,
-          username,
-          photoURL,
-          email,
-          emailVerified: user.emailVerified,
-        })
-          .then((res) => {
-            console.log(res);
-            router.push(`/Profile`);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
+      return;
+    }
+
+    if (IsUsernameExist !== false) {
+      alert("Please choose a valid username");
+      return;
+    }
+
+    try {
+      setShouldWait(true);
+
+      await StoreUserData({
+        uid: uid || user?.uid,
+        name,
+        username,
+        photoURL,
+        email: email || user?.email,
+        emailVerified: true, // Profile creation means email is verified
+      });
+
+      console.log("Profile created successfully");
+      router.push(`/Dashboard`);
+    } catch (error) {
+      console.error("Error creating profile:", error);
+      alert("Error creating profile. Please try again.");
+      setShouldWait(false);
     }
   };
 
