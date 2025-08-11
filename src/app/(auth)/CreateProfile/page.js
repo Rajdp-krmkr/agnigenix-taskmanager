@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
+import { useUserContext } from "@/context/userContext";
 
 const PageComponent = () => {
   const router = useRouter();
@@ -24,6 +25,8 @@ const PageComponent = () => {
 
   const [IsUsernameExist, setIsUsernameExist] = useState(null);
   const [usernameMessage, setUsernameMessage] = useState(null);
+
+  const { user } = useUserContext();
 
   const searchparams = useSearchParams();
   const id = searchparams.get("id");
@@ -126,7 +129,7 @@ const PageComponent = () => {
         })
         .catch((error) => {
           console.log("res: ", error);
-          setIsUsernameExist(error);
+          setIsUsernameExist(false);
           setUsernameMessage("Username is available");
           console.log("username is available");
         });

@@ -37,7 +37,7 @@ export default function Home() {
   //     IsUserExist({ uid })
   //       .then((user) => {
   //         console.log(user);
-  //         router.push(`/Dashboard/${user.username}`);
+  //         router.push(`/Dashboard/`);
   //       })
   //       .catch(() => {
   //         router.push(`/CreateProfile?id=${uid}`);

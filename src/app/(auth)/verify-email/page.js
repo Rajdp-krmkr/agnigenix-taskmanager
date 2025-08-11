@@ -53,14 +53,7 @@ const Page = () => {
             });
         else {
           if (!emailVerified) {
-            const docCollectionRef = collection(db, "users");
-            const q = query(docCollectionRef, where("uid", "==", user.uid));
-            const docSnap = await getDocs(q);
-            const data = docSnap.docs[0].data();
-            // await updateDoc(docSnap.docs[0].ref, {
-            //   emailVerified: true,
-            // });
-            await updateDoc(doc(db, "users", data.username), {
+            await updateDoc(doc(db, "users", user.uid), {
               emailVerified: true,
             });
           }

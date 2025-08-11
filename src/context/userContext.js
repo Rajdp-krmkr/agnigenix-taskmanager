@@ -29,14 +29,14 @@ const UserContextProvider = ({ children }) => {
         const q = query(docCollectionRef, where("uid", "==", user.uid));
         const docSnap = await getDocs(q);
 
-        console.log("User data:", docSnap.docs[0].data());
+        // console.log("User data:", docSnap.docs[0].data());
 
         if (!docSnap.empty && docSnap.docs.length > 0) {
           const userData = docSnap.docs[0].data();
           setUser(userData);
           setEmailVerified(userData.emailVerified);
           setIsProfileCreated(userData?.username != null);
-        }
+        } 
         setIsUserLoggedIn(true);
       } else {
         setUser(null);

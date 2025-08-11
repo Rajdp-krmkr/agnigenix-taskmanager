@@ -15,6 +15,7 @@ import {
 import { auth, db } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, setDoc } from "@firebase/firestore";
+import { useUserContext } from "@/context/userContext";
 
 const Page = () => {
   const router = useRouter();
@@ -54,10 +55,11 @@ const Page = () => {
             uid: result.user.uid,
             username: null,
             workspaces: [],
+            emailVerified: true,
           });
         }
-        if (user.emailVerified) {
-          if (user.username == null) {
+        if (user?.emailVerified) {
+          if (user?.username == null) {
             router.push(`/CreateProfile?id=${user.uid}`);
           } else {
             router.push(`/Dashboard/`);
@@ -104,7 +106,7 @@ const Page = () => {
   };
 
   if (user) {
-    if (user.emailVerified) {
+    if (user?.emailVerified) {
       router.push(`/CreateProfile?id=${user.uid}`);
     } else {
       router.push("/verify-email");
