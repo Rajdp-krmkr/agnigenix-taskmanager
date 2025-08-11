@@ -22,9 +22,8 @@ export default function RootLayout({ children }) {
         className={`${poppins.className} dark:bg-[#151c26] transition-all duration-1000 dark:text-white`}
       >
         <Providers>
-          <UserContextProvider
-            value={{ user: null, isUserLoggedIn: false, isLoading: true }}
-          >
+          <UserContextProvider>
+            <Navbar />
             {children}
           </UserContextProvider>
         </Providers>

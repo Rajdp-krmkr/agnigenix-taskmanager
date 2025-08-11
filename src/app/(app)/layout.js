@@ -1,15 +1,27 @@
-import Navbar from "@/components/Navbar";
-
-export const metadata = {
-  title: "AgniGenix-TaskManager",
-  description: "Manage your tasks efficiently",
-};
+"use client";
+import { useState, useEffect } from "react";
 
 export default function AppLayout({ children }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    // Listen for sidebar collapse state changes
+    const handleSidebarToggle = (event) => {
+      setIsCollapsed(event.detail.isCollapsed);
+    };
+
+    window.addEventListener("sidebarToggle", handleSidebarToggle);
+    return () =>
+      window.removeEventListener("sidebarToggle", handleSidebarToggle);
+  }, []);
+
   return (
-    <>
-      <Navbar />
-      <main>{children}</main>
-    </>
+    <main
+      className={`transition-all duration-300 lg:ml-[80px] ${
+        isCollapsed ? "lg:ml-[80px]" : "lg:ml-[240px]"
+      } min-h-screen pt-16 lg:pt-0`}
+    >
+      <div className="p-4">{children}</div>
+    </main>
   );
 }
