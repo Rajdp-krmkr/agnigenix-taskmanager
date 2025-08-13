@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
 import Link from "next/link";
 import { resetInvitedUsersArray } from "@/lib/features/slice";
+import { validateWorkspaceTitle } from "@/lib/utils/CreateWorkSpacePopup";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
@@ -51,9 +52,7 @@ const CreateWorkSpacePopup = ({
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [uid, setUid] = useState("");
-  // const [user, setUser] = useState(null);
   const [WorkspaceArray, setWorkspaceArray] = useState([]);
-
   const [workspaceMessage, setWorkspaceMessage] = useState(null);
 
   const ColorsArray = [
@@ -70,7 +69,6 @@ const CreateWorkSpacePopup = ({
 
   useEffect(() => {
     setWorkspaceArray(workspacearray);
-    // console.log(workspacearray);
   }, [workspacearray]);
 
   useEffect(() => {
@@ -292,46 +290,6 @@ const CreateWorkSpacePopup = ({
     }
   }, [members]);
 
-  function validateWorkspaceTitle(workspaceTitle) {
-    if (workspaceTitle.length < 2 || workspaceTitle.length > 15) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Workspace title must be between 2 and 15 characters.",
-      });
-      return false;
-    }
-    if (workspaceTitle.startsWith("_")) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Workspace title cannot start with an (_).",
-      });
-      return false;
-    }
-    if (workspaceTitle.startsWith("-")) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Workspace title cannot start with an (-).",
-      });
-      return false;
-    }
-    const workspaceTitleRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
-
-    if (!workspaceTitleRegex.test(workspaceTitle)) {
-      setWorkspaceMessage({
-        type: "error",
-        message:
-          "Workspace title can only contain letters, numbers, underscores (_), and hyphens (-).",
-      });
-      return false;
-    }
-
-    setWorkspaceMessage({
-      type: "success",
-      message: "Workspace title is valid.",
-    });
-    return true;
-  }
-
   useEffect(() => {
     validateWorkspaceTitle(workspaceTitle);
   }, [workspaceTitle]);
@@ -458,10 +416,7 @@ const CreateWorkSpacePopup = ({
                     type="checkbox"
                     checked={isPrivate}
                     onChange={(e) => {
-                      // console.log(e);
-                      // console.log(isPrivate);
                       setIsPrivate(!isPrivate);
-                      // console.log(isPrivate)
                     }}
                   />
                   <span>
@@ -503,9 +458,7 @@ const CreateWorkSpacePopup = ({
                 }}
               >
                 {isLoading && (
-                  <>
-                    <div className="loader border-gray-500/25 w-4 h-4 border-2"></div>
-                  </>
+                  <div className="loader border-gray-500/25 w-4 h-4 border-2"></div>
                 )}
                 Create Workspace
               </button>
@@ -515,7 +468,6 @@ const CreateWorkSpacePopup = ({
             <>
               <div className="w-[2px] bg-gray-300"></div>
               <div className="m-2 flex flex-col items-start ">
-                {" "}
                 {/*animation-widthIncreasing */}
                 <h2 className="font-bold my-1">Invite users</h2>
                 <UserSearchResults username={username} />

@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Providers from "@/lib/Provider";
 import UserContextProvider from "@/context/userContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -17,16 +18,19 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.className} dark:bg-[#151c26] transition-all duration-1000 dark:text-white`}
+        className={`${poppins.className} dark:bg-[#151c26] transition-all duration-300 dark:text-white`}
+        suppressHydrationWarning
       >
-        <Providers>
-          <UserContextProvider>
-            <Navbar />
-            {children}
-          </UserContextProvider>
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+            <UserContextProvider>
+              <Navbar />
+              {children}
+            </UserContextProvider>
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

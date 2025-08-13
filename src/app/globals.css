@@ -2,6 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme transition styles */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Prevent flash of unstyled content */
+html:not(.dark):not(.light) {
+  visibility: hidden;
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Light mode scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Theme toggle animation */
+.theme-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Ensure proper theme colors for specific elements */
+.dark .bg-white {
+  background-color: #374151 !important;
+}
+
+.dark .text-black {
+  color: #f9fafb !important;
+}
+
 .btn {
   font-weight: bold;
   color: white;
@@ -344,7 +408,6 @@
   }
 }
 
-
 .loader {
   border-radius: 50%;
   border: solid;
@@ -532,7 +595,7 @@
 
 .animation-widthIncreasing {
   animation: widthIncreasing 0.5s ease-in-out;
-} 
+}
 
 .workspaceScrollBar {
   scrollbar-width: none;

@@ -112,7 +112,7 @@ const NavbarComponent = () => {
 
         {/* Sidebar */}
         <nav
-          className={`fixed top-0 left-0 p-2 dark:bg-gray-800 transition-all duration-300 bg-gray-100 flex flex-col min-h-screen z-50 ${
+          className={`fixed top-0 left-0 p-2 bg-gray-50 dark:bg-gray-800 transition-all duration-300 flex flex-col min-h-screen z-50 border-r border-gray-200 dark:border-gray-700 ${
             isMobileMenuOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
@@ -120,34 +120,19 @@ const NavbarComponent = () => {
         >
           <div
             className={`flex ${
-              isCollapsed ? "justify-center" : "justify-between"
-            } gap-5 items-center my-4 mx-auto`}
+              isCollapsed
+                ? "flex-col justify-center items-center"
+                : "justify-between"
+            } gap-3 items-center my-4 mx-auto`}
           >
-            {!isCollapsed && (
-              <h1 className="text-xl font-bold text-black dark:text-slate-200">
-                Task Manager
-              </h1>
-            )}
-            {/* {isCollapsed && (
-              <div className="flex flex-col items-center">
-                <h1 className="text-lg font-bold text-black dark:text-slate-200">
-                  TM
-                </h1>
-                <ThemeToggle />
-              </div>
-            )} */}
-            <div className="flex items-center gap-2">
-              {!isCollapsed && <ThemeToggle />}
-              {/* Desktop Collapse Button */}
+            {isCollapsed ? (
               <button
                 onClick={handleCollapseToggle}
                 className="hidden lg:block p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                title="Expand sidebar"
               >
                 <svg
-                  className={`w-5 h-5 transition-transform ${
-                    isCollapsed ? "rotate-180" : ""
-                  }`}
+                  className="w-5 h-5 rotate-180"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -160,26 +145,57 @@ const NavbarComponent = () => {
                   />
                 </svg>
               </button>
-              {/* Mobile Close Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="lg:hidden p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+            ) : (
+              <>
+                <h1 className="text-xl font-bold text-black dark:text-slate-200">
+                  Task Manager
+                </h1>
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  {/* Desktop Collapse Button */}
+                  <button
+                    onClick={handleCollapseToggle}
+                    className="hidden lg:block p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  >
+                    <svg
+                      className={`w-5 h-5 transition-transform ${
+                        isCollapsed ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                      />
+                    </svg>
+                  </button>
+                  {/* Mobile Close Button */}
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="lg:hidden p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* User Profile Section */}
@@ -218,7 +234,7 @@ const NavbarComponent = () => {
                       <h2 className="text-[14px] font-semibold">
                         {user.name || "User"}
                       </h2>
-                      <p className="text-xs text-gray-400">@{user.username}</p>
+                      <p className="text-xs text-gray-400">{user.username}</p>
                     </div>
                   )}
                 </>
@@ -568,11 +584,9 @@ const NavbarComponent = () => {
 
 const Navbar = () => {
   return (
-    <>
-      <Suspense>
-        <NavbarComponent />
-      </Suspense>
-    </>
+    <Suspense>
+      <NavbarComponent />
+    </Suspense>
   );
 };
 
