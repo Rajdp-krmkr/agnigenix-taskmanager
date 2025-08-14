@@ -1,298 +1,219 @@
-import CreateWorkspace, {
-  updateWorkspaceinUsers,
-} from "@/Firebase Functions/CreateWorkspace";
-import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
-import useDebounce from "@/Firebase Functions/useDebounce";
-import { auth } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "@firebase/auth";
-import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { GrStatusInfoSmall } from "react-icons/gr";
+import { useSelector, useDispatch } from "react-redux";
+import { resetInvitedUsersArray } from "@/lib/features/slice";
 import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
 import UserSearchResults from "./userSearchResults";
 import { generateCustomCode } from "./getCustomCode";
-import { useSelector, useDispatch } from "react-redux";
-import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
-import Link from "next/link";
-import { resetInvitedUsersArray } from "@/lib/features/slice";
 import { validateWorkspaceTitle } from "@/lib/utils/CreateWorkSpacePopup";
+import CreateWorkspace, {
+  updateWorkspaceinUsers,
+} from "@/Firebase Functions/CreateWorkspace";
+import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
+import { createDateInfo } from "@/lib/utils/CreateDateInfo";
+import { useUserContext } from "@/context/userContext";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
-  uname,
-  name,
-  uniqID,
+  currentUserUsername,
+  currentUserFullName,
+  currentUserid,
   workspacearray,
-  email,
-  photoUrl,
+  currentUserEmail,
+  currentUserphotoUrl,
 }) => {
-  const router = useRouter();
   const dispatch = useDispatch();
   const invitedUsers = useSelector((state) => state.invitedUsers.invitedUsers);
-  const [members, setMembers] = useState([]);
+  const { user, setUser } = useUserContext();
 
-  useEffect(() => {
-    if (invitedUsers.length > 0) {
-      // console.log("invitedUsers", invitedUsers);
-      // setMembers(invitedUsers);
-    }
-  }, [invitedUsers]);
-
+  // UI State
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
     useState(false);
+  const [isCustomizingIcon, setIsCustomizingIcon] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Form State
   const [workspaceTitle, setWorkspaceTitle] = useState("");
   const [workspaceDescription, setWorkspaceDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const [isCustomizingIcon, setIsCustomizingIcon] = useState(false);
   const [LogoLetter, setLogoLetter] = useState("W");
-  const [customizedLogo, setCustomizedLogo] = useState(null);
+  const [customizedLogo, setCustomizedLogo] = useState({
+    textColor: "",
+    bg: "",
+  });
 
+  // Validation and Error State
   const [fillAllTheFields, setFillAllTheFields] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [uid, setUid] = useState("");
-  const [WorkspaceArray, setWorkspaceArray] = useState([]);
   const [workspaceMessage, setWorkspaceMessage] = useState(null);
 
+  // Constants
   const ColorsArray = [
-    null,
-    { text: "white", bg: "bg-black" },
-    { text: "white", bg: "bg-red-500" },
-    { text: "white", bg: "bg-green-500" },
-    { text: "white", bg: "bg-purple-500" },
-    { text: "white", bg: "bg-yellow-500" },
-    { text: "white", bg: "bg-cyan-500" },
-    { text: "white", bg: "bg-blue-500" },
-    { text: "white", bg: "bg-orange-500" },
+    { textColor: "white", bg: "bg-black" },
+    { textColor: "white", bg: "bg-red-500" },
+    { textColor: "white", bg: "bg-green-500" },
+    { textColor: "white", bg: "bg-purple-500" },
+    { textColor: "white", bg: "bg-yellow-500" },
+    { textColor: "white", bg: "bg-cyan-500" },
+    { textColor: "white", bg: "bg-blue-500" },
+    { textColor: "white", bg: "bg-orange-500" },
   ];
 
-  useEffect(() => {
-    setWorkspaceArray(workspacearray);
-  }, [workspacearray]);
-
+  // Show popup when createPopupNum changes
   useEffect(() => {
     if (createPopupNum > 0) {
       setShowCreateWorkspacePopup(true);
     }
   }, [createPopupNum]);
 
-  useEffect(() => {
-    if (uname !== undefined) setUsername(uname);
-  }, [uname]);
+  // Helper functions
+  const resetForm = () => {
+    setWorkspaceTitle("");
+    setWorkspaceDescription("");
+    setIsPrivate(false);
+    setLogoLetter("W");
+    setCustomizedLogo(null);
+    setFillAllTheFields(null);
+    setWorkspaceMessage(null);
+    setIsCustomizingIcon(false);
+    setShowCreateWorkspacePopup(false);
+  };
 
-  useEffect(() => {
-    setUid(uniqID);
-  }, [uniqID]);
-
-  const handleclick = () => {
+  const validateForm = () => {
     if (workspaceTitle === "" && LogoLetter === "") {
       setFillAllTheFields({
         message: "Please fill the fields",
         status: "error",
       });
+      return false;
     } else if (workspaceTitle === "" && LogoLetter !== "") {
-      setFillAllTheFields({
-        message: "Please add a title",
-        status: "error",
-      });
+      setFillAllTheFields({ message: "Please add a title", status: "error" });
+      return false;
     } else if (workspaceTitle !== "" && LogoLetter === "") {
+      setFillAllTheFields({ message: "Please fill the logo", status: "error" });
+      return false;
+    }
+
+    if (!validateWorkspaceTitle(workspaceTitle, setWorkspaceMessage)) {
       setFillAllTheFields({
-        message: "Please fill the logo",
+        message: "Invalid workspace title",
         status: "error",
       });
-    } else {
-      setFillAllTheFields(null);
+      return false;
+    }
 
-      if (validateWorkspaceTitle(workspaceTitle)) {
-        setIsLoading(true);
-        setMembers([
-          ...invitedUsers,
-          {
-            username: username,
-            name: name,
-            uid: uid,
-            isAdmin: true,
-            isPendingInvitation: false,
-            photoURL: photoUrl,
-          },
-        ]);
+    setFillAllTheFields(null);
+    return true;
+  };
+
+  const sendInvitationNotifications = async (workspaceObj, membersList) => {
+    const notificationID = generateCustomCode(14);
+    const dateInfo = createDateInfo();
+    const hoursLeftMsg = "This invitation will expire after 24 hours.";
+
+    for (let i = 0; i < invitedUsers.length; i++) {
+      try {
+        await PostNotifications(membersList[i].username, notificationID, {
+          Body: hoursLeftMsg,
+          isRead: false,
+          isSeen: false,
+          Title: `${currentUserFullName} (${currentUserUsername}) has invited you to join ${workspaceTitle}`,
+          Time: dateInfo.time,
+          uid: notificationID,
+          Type: "invitation",
+          invitationExpirationDate: dateInfo.expirationDate,
+          isInvitationAccepted: null,
+          isInvitationExpired: false,
+          workSpace: workspaceObj,
+        });
+        console.log(
+          `Successfully sent invitation to ${membersList[i].username}`
+        );
+      } catch (err) {
+        console.log(
+          `Failed to send invitation to ${membersList[i].username}`,
+          err
+        );
       }
     }
   };
 
-  useEffect(() => {
-    console.log("members: ", members);
-    if (members.length == invitedUsers.length + 1) {
+  const handleCreateWorkspace = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+
+    try {
       const workspaceID = generateCustomCode(14);
-      // console.log(workspaceID);
-      const object = {
-        // This is the object that will be added to the workspaces collection
+      const membersList = [
+        ...invitedUsers,
+        {
+          username: currentUserUsername,
+          name: currentUserFullName,
+          uid: currentUserid,
+          isAdmin: true,
+          isInvitationAccepted: true,
+          joinedAt: new Date(),
+        },
+      ];
+
+      const workspaceDoc = {
         workspaceTitle,
         workspaceDescription,
         workspaceID,
         isPrivate,
-        LogoLetter,
-        customizedLogo,
-        members,
-        url: `/Workspaces/${workspaceTitle}/${workspaceID}/`,
+        logo: {
+          text: LogoLetter,
+          bg: customizedLogo?.bg,
+          textColor: customizedLogo?.textColor,
+        },
+        admin: [currentUserid],
+        members: membersList,
         projects: [],
-        //!members will come soon
       };
-      // console.log(object);
-      CreateWorkspace(workspaceID, object)
-        .then((res) => {
-          setIsLoading(true);
-          if (res == workspaceID) {
-            console.log("Workspace Created Successfully");
-            const NewWorkspace = {
-              // This is the object that will be added to the user's workspaces array
-              workspaceTitle,
-              workspaceID,
-              isPrivate: isPrivate,
-              LogoLetter: LogoLetter,
-              customizedLogo: customizedLogo,
-              members: members,
 
-              url: `/Workspaces/${workspaceTitle}/${workspaceID}/${username}`,
-            };
-            // WorkspaceArray.push(NewWorkspace);
+      const res = await CreateWorkspace(workspaceDoc);
 
-            const workspaceArrayUpdated = [...workspacearray];
-            workspaceArrayUpdated.push(NewWorkspace);
+      if (res == workspaceID) {
+        console.log("Workspace Created Successfully");
 
-            const notificationID = generateCustomCode(14);
+        const newWorkspace = {
+          workspaceTitle,
+          workspaceID,
+          isPrivate,
+          logo: {
+            text: LogoLetter,
+            bg: customizedLogo.bg,
+            textColor: customizedLogo.textColor,
+          },
+        };
 
-            function dateFunction() {
-              const d = new Date();
+        // Send invitation notifications
+        if (invitedUsers.length > 0) {
+          await sendInvitationNotifications(workspaceDoc, membersList);
+        }
 
-              const date = d.getDate();
-              const month =
-                d.getMonth() + 1 == 1
-                  ? "Jan"
-                  : d.getMonth() + 1 == 2
-                  ? "Feb"
-                  : d.getMonth() + 1 == 3
-                  ? "Mar"
-                  : d.getMonth() + 1 == 4
-                  ? "Apr"
-                  : d.getMonth() + 1 == 5
-                  ? "May"
-                  : d.getMonth() + 1 == 6
-                  ? "Jun"
-                  : d.getMonth() + 1 == 7
-                  ? "Jul"
-                  : d.getMonth() + 1 == 8
-                  ? "Aug"
-                  : d.getMonth() + 1 == 9
-                  ? "Sep"
-                  : d.getMonth() + 1 == 10
-                  ? "Oct"
-                  : d.getMonth() + 1 == 11
-                  ? "Nov"
-                  : "Dec";
-              const year = d.getFullYear();
-              const hours = d.getHours();
-              const minutes =
-                d.getMinutes() < 10 ? `0${d.getMinutes()}` : d.getMinutes();
-
-              return {
-                expirationDate: {
-                  date: date,
-                  month: d.getMonth() + 1,
-                  year: year,
-                  hours: hours,
-                  minutes: minutes,
-                },
-                time: `${hours}:${minutes}     ${date} ${month}, ${year}`,
-              };
-            }
-            function hoursLeft() {
-              const newDate = new Date();
-              if (
-                newDate.getDate() == dateFunction().expirationDate.date &&
-                newDate.getMonth() + 1 == dateFunction().expirationDate.month &&
-                newDate.getFullYear() == dateFunction().expirationDate.year
-              ) {
-                return `This invitation will expire after 24 hours.`;
-              } else if (
-                newDate.getDate() > dateFunction().expirationDate.date ||
-                newDate.getMonth() + 1 > dateFunction().expirationDate.month ||
-                newDate.getFullYear() > dateFunction().expirationDate.year
-              ) {
-                return "";
-              }
-            }
-
-            for (let i = 0; i < invitedUsers.length; i++) {
-              PostNotifications(members[i].username, notificationID, {
-                Body: `${hoursLeft()}`,
-                isRead: false,
-                isSeen: false,
-                Title: `${name} (${username}) has invited you to join ${workspaceTitle}`,
-                Time: dateFunction().time,
-                uid: notificationID,
-                Type: "invitation",
-                invitationExpirationDate: dateFunction().expirationDate,
-                isInvitationAccepted: null,
-                isInvitationExpired: false,
-                workSpace: object,
-              })
-                .then(() => {
-                  console.log(
-                    `Successfully send invitation to ${members[i].username}`
-                  );
-                })
-                .catch((err) => {
-                  console.log(
-                    `failed to send invitation to ${members[i].username}`,
-                    err
-                  );
-                });
-            }
-
-            updateWorkspaceinUsers(username, [...workspaceArrayUpdated])
-              .then(() => {
-                console.log("Workspace added to user");
-                setIsLoading(false);
-
-                setIsCustomizingIcon(false);
-                setShowCreateWorkspacePopup(false);
-                setWorkspaceTitle("");
-                setWorkspaceDescription("");
-                setIsPrivate(false);
-                setLogoLetter("W");
-                setCustomizedLogo(null);
-                setFillAllTheFields(null);
-                setMembers([]);
-              })
-              .catch((err) => {
-                console.error("Error adding workspace to user", err);
-                setIsLoading(false);
-
-                setIsCustomizingIcon(false);
-                // setShowCreateWorkspacePopup(false);
-                setWorkspaceTitle("");
-                setWorkspaceDescription("");
-                setIsPrivate(false);
-                setLogoLetter("W");
-                setCustomizedLogo(null);
-                setFillAllTheFields(null);
-                setMembers([]);
-              });
-          }
-          dispatch(resetInvitedUsersArray());
-        })
-        .catch((err) => {
-          setIsLoading(true);
-          console.error("Error creating workspace", err);
+        // Update user's workspace array
+        membersList.map(async (member) => {
+          await updateWorkspaceinUsers(member.uid, newWorkspace);
         });
-    }
-  }, [members]);
 
-  useEffect(() => {
-    validateWorkspaceTitle(workspaceTitle);
-  }, [workspaceTitle]);
+        console.log("Workspace added to user");
+        dispatch(resetInvitedUsersArray());
+        setUser((prevUser) => ({
+          ...prevUser,
+          workspaces: [...prevUser.workspaces, newWorkspace],
+        }));
+        resetForm();
+      }
+    } catch (err) {
+      console.error("Error creating workspace", err);
+      setWorkspaceMessage({
+        type: "error",
+        message: "Failed to create workspace",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -301,14 +222,7 @@ const CreateWorkSpacePopup = ({
           showCreateWorkspacePopup ? "flex" : "hidden"
         } absolute justify-center items-center w-screen h-screen top-0 left-0 bg-black/50  backdrop-blur-sm z-20 overflow-x-hidden`}
         onClick={() => {
-          setShowCreateWorkspacePopup(false);
-          setIsCustomizingIcon(false);
-          setCustomizedLogo(null);
-          setFillAllTheFields(null);
-          setIsPrivate(false);
-          if (LogoLetter === "") {
-            setLogoLetter("W");
-          }
+          resetForm();
         }}
       >
         <div
@@ -346,7 +260,7 @@ const CreateWorkSpacePopup = ({
                   className={`${
                     customizedLogo === null
                       ? "hover:bg-gray-300 text-gray-400"
-                      : `text-${customizedLogo.text} ${customizedLogo.bg}`
+                      : `text-${customizedLogo.textColor} ${customizedLogo.bg}`
                   } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg border-gray-400 dark:border-gray-500`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -430,16 +344,7 @@ const CreateWorkSpacePopup = ({
               <button
                 className="bg-gray-400 dark:bg-gray-900 dark:hover:bg-black hover:bg-gray-500 transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
                 onClick={() => {
-                  setShowCreateWorkspacePopup(false);
-                  setIsCustomizingIcon(false);
-                  setCustomizedLogo(null);
-                  setFillAllTheFields(null);
-                  setWorkspaceTitle("");
-                  setWorkspaceDescription("");
-                  setIsPrivate(false);
-                  if (LogoLetter === "") {
-                    setLogoLetter("W");
-                  }
+                  resetForm();
                 }}
               >
                 Cancel
@@ -453,7 +358,7 @@ const CreateWorkSpacePopup = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!isLoading) {
-                    handleclick();
+                    handleCreateWorkspace();
                   }
                 }}
               >
@@ -470,7 +375,7 @@ const CreateWorkSpacePopup = ({
               <div className="m-2 flex flex-col items-start ">
                 {/*animation-widthIncreasing */}
                 <h2 className="font-bold my-1">Invite users</h2>
-                <UserSearchResults username={username} />
+                <UserSearchResults username={currentUserUsername} />
               </div>
             </>
           )}
@@ -512,7 +417,7 @@ const CreateWorkSpacePopup = ({
                       colors !== null ? colors.bg : "bg-transparent"
                     } ${
                       colors !== null
-                        ? `text-${colors.text}`
+                        ? `text-${colors.textColor}`
                         : "text-gray-400 border-2 border-gray-300"
                     } cursor-pointer hover:border-2 hover:border-gray-400 font-semibold text-center flex items-center justify-center text-xs rounded-lg  w-6 h-6`}
                     onClick={() => {

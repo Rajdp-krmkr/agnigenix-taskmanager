@@ -1,4 +1,4 @@
-export function validateWorkspaceTitle(workspaceTitle) {
+export function validateWorkspaceTitle(workspaceTitle, setWorkspaceMessage) {
   if (workspaceTitle.length < 2 || workspaceTitle.length > 15) {
     setWorkspaceMessage({
       type: "error",

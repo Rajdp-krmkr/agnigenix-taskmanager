@@ -1,18 +1,22 @@
 "use client";
 import React from "react";
-import realTimeUserSearch, { realTimeUserSearchForProject } from "@/Firebase Functions/realTimeUserSearch";
+import realTimeUserSearch, {
+  realTimeUserSearchForProject,
+} from "@/Firebase Functions/realTimeUserSearch";
 import { useEffect, useState } from "react";
-import UsersOfSearchResults, { UsersOfSearchResultsForProject } from "./usersOfSearchResults";
+import UsersOfSearchResults, {
+  UsersOfSearchResultsForProject,
+} from "./usersOfSearchResults";
 import { useSelector } from "react-redux";
 
 const UserSearchResults = ({ username }) => {
-  // const username = params.user;
   const [searchresultsArray, setSearchResultsArray] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [usersArray, setUsersArray] = useState([]);
 
   const getSearchResults = (searchQuery) => {
+    //TODO change to lowercase
     const upperCasedSearchQuery = searchQuery.toUpperCase();
 
     const arr = [];
@@ -41,6 +45,7 @@ const UserSearchResults = ({ username }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        //TODO: use debounce
         const users = await realTimeUserSearch(); // Await the promise to resolve
         const modifiedUsers = users.map((user) => {
           return {
@@ -86,6 +91,7 @@ const UserSearchResults = ({ username }) => {
             </div>
           ) : (
             searchresultsArray.map((user, index) => {
+              console.log(user, username);
               if (user.username !== username) {
                 return (
                   <>
@@ -102,8 +108,6 @@ const UserSearchResults = ({ username }) => {
 };
 
 export default UserSearchResults;
-
-
 
 export const UserSearchResultsForProjects = ({
   username,

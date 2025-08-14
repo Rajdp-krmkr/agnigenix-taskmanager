@@ -8,7 +8,7 @@ const realTimeUserSearch = () => {
       const querySnapshot = await getDocs(docs);
 
       const usersList = querySnapshot.docs.map((doc) => ({
-        username: doc.id, // Document ID (UID)
+        username: doc.data().username, // Document ID (UID)
         name: doc.data().name, // Internal document data
         email: doc.data().email, // Internal document data
         photoURL: doc.data().photoURL, // Internal document
@@ -49,4 +49,3 @@ export const realTimeUserSearchForProject = (workspaceMembersArray) => {
     }
   });
 };
-

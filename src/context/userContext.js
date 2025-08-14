@@ -19,6 +19,8 @@ const UserContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [emailVerified, setEmailVerified] = useState(false);
   const [isProfileCreated, setIsProfileCreated] = useState(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
+  const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(true);
 
   const fetchUser = () => {
     return onAuthStateChanged(auth, async (authUser) => {
@@ -85,6 +87,10 @@ const UserContextProvider = ({ children }) => {
         setEmailVerified,
         isProfileCreated,
         setIsProfileCreated,
+        currentWorkspace,
+        setCurrentWorkspace,
+        isLoadingWorkspace,
+        setIsLoadingWorkspace,
       }}
     >
       {children}

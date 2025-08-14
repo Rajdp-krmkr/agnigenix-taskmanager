@@ -1,7 +1,11 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addInvitedUser, removeInvitedUser } from "@/lib/features/slice";
+import {
+  addInvitedUser,
+  invitedUsersSlice,
+  removeInvitedUser,
+} from "@/lib/features/slice";
 
 const UsersOfSearchResults = ({ user, index }) => {
   const dispatch = useDispatch();
@@ -15,6 +19,10 @@ const UsersOfSearchResults = ({ user, index }) => {
     console.log(isUserInvited);
   }, [isUserInvited]);
 
+  useEffect(() => {
+    console.log("InvitedUser", InvitedUser);
+  }, [InvitedUser]);
+
   const [invitingButtons, setInvitingButtons] = useState(false);
 
   return (
@@ -22,11 +30,14 @@ const UsersOfSearchResults = ({ user, index }) => {
       key={index}
       className={`${
         isUserInvited
-          ? "bg-gray-200 dark:bg-gray-700"
-          : "bg-white dark:bg-gray-500"
-      } cursor-pointer hover:shadow-md flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2`}
-      onClick={() => {
-        setInvitingButtons(!invitingButtons);
+          ? "bg-gray-200 dark:bg-green-700"
+          : "bg-white dark:bg-gray-500 hover:shadow-md"
+      } cursor-pointer flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2`}
+      onMouseEnter={() => {
+        setInvitingButtons(true);
+      }}
+      onMouseLeave={() => {
+        setInvitingButtons(false);
       }}
     >
       <div className="flex flex-row gap-2 items-center">
@@ -60,29 +71,14 @@ const UsersOfSearchResults = ({ user, index }) => {
                     username: user.username,
                     isAdmin: false,
                     uid: user.uid,
-                    isPendingInvitation: true,
-                    isInvitationAccepted: null,
-                    photoURL: user.photoURL,
+                    isInvitationAccepted: false,
                   })
                 );
                 setInvitingButtons(false);
               }}
+              title="Send invitation"
             >
               ✅
-            </button>
-            <button
-              className="hover:scale-110"
-              onClick={(e) => {
-                e.preventDefault();
-                dispatch(
-                  removeInvitedUser({
-                    username: user.username,
-                  })
-                );
-                setInvitingButtons(false);
-              }}
-            >
-              ❌
             </button>
           </>
         ) : (
@@ -149,8 +145,11 @@ export const UsersOfSearchResultsForProject = ({
           ? "bg-gray-200 dark:bg-gray-700"
           : "bg-white dark:bg-gray-500"
       } cursor-pointer hover:shadow-md flex flex-row justify-between transition-all shadow-sm p-2 rounded-lg m-2`}
-      onClick={() => {
-        setInvitingButtons(!invitingButtons);
+      onMouseEnter={() => {
+        setInvitingButtons(true);
+      }}
+      onMouseLeave={() => {
+        setInvitingButtons(false);
       }}
     >
       <div className="flex flex-row gap-2 items-center">
@@ -191,6 +190,7 @@ export const UsersOfSearchResultsForProject = ({
                 );
                 setInvitingButtons(false);
               }}
+              title="Send invitation"
             >
               ✅
             </button>

@@ -26,8 +26,17 @@ import { useUserContext } from "@/context/userContext";
 const NavbarComponent = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isUserLoggedIn, isLoading, emailVerified, isProfileCreated } =
-    useUserContext();
+  const {
+    user,
+    isUserLoggedIn,
+    isLoading,
+    emailVerified,
+    isProfileCreated,
+    currentWorkspace,
+    setCurrentWorkspace,
+    isLoadingWorkspace,
+    setIsLoadingWorkspace,
+  } = useUserContext();
 
   const [openTasksSection, setOpenTasksSection] = useState(false);
   const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
@@ -293,7 +302,7 @@ const NavbarComponent = () => {
                     ],
                   },
                   {
-                    name: "Workspace",
+                    name: "Workspaces",
                     icon: <MdOutlineWorkOutline />,
                     url: `#`,
                     activatedIcon: <MdOutlineWork />,
@@ -308,7 +317,7 @@ const NavbarComponent = () => {
                           : "text-black dark:text-slate-200"
                       } ${
                         (item.name === "Your tasks" && openTasksSection) ||
-                        (item.name === "Workspace" && openWorkSpaceSection)
+                        (item.name === "Workspaces" && openWorkSpaceSection)
                           ? "bg-gray-200 dark:bg-gray-700"
                           : ""
                       } flex flex-row gap-2 ${
@@ -320,7 +329,7 @@ const NavbarComponent = () => {
                             setIsCollapsed(false); // Expand when accessing submenus in collapsed mode
                           }
                           setOpenTasksSection(!openTasksSection);
-                        } else if (item.name === "Workspace") {
+                        } else if (item.name === "Workspaces") {
                           if (isCollapsed) {
                             setIsCollapsed(false); // Expand when accessing submenus in collapsed mode
                           }
@@ -346,12 +355,12 @@ const NavbarComponent = () => {
                         <div
                           className={`${
                             (item.name === "Your tasks" && openTasksSection) ||
-                            (item.name === "Workspace" && openWorkSpaceSection)
+                            (item.name === "Workspaces" && openWorkSpaceSection)
                               ? "block rotate-90"
                               : "hidden"
                           } transition-all`}
                         >
-                          {(item.name === "Workspace" ||
+                          {(item.name === "Workspaces" ||
                             item.name === "Your tasks") && (
                             <IoMdArrowDropright />
                           )}
@@ -383,6 +392,7 @@ const NavbarComponent = () => {
                                   if (section.title === "Add new task") {
                                     setAddTaskPopupNum(AddTaskPopupNum + 1);
                                   } else {
+                                    //TODO: should be changed
                                     router.push(section.url);
                                     setIsMobileMenuOpen(false); // Close mobile menu
                                   }
@@ -398,7 +408,7 @@ const NavbarComponent = () => {
                         )}
 
                       {/* Submenu for Workspace */}
-                      {item.name === "Workspace" &&
+                      {item.name === "Workspaces" &&
                         openWorkSpaceSection &&
                         !isCollapsed && (
                           <div className="flex flex-col">
@@ -414,29 +424,32 @@ const NavbarComponent = () => {
                                     key={index}
                                     className={`
                                     ${
-                                      pathname === subSection.url
-                                        ? "text-thm-clr-1 dark:text-blue-500"
-                                        : "text-black dark:text-slate-200"
+                                      pathname ==
+                                      `/Workspaces/${subSection?.workspaceID}`
+                                        ? "text-thm-clr-1 dark:text-blue-500 bg-gray-200 dark:bg-gray-700"
+                                        : "text-black dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                     }
-                                    cursor-pointer transition-all hover:bg-gray-200 dark:hover:bg-gray-700 my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
+                                    cursor-pointer transition-all my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
                                     onClick={() => {
-                                      router.push(subSection.url);
+                                      setCurrentWorkspace(subSection);
+                                      router.push(
+                                        `/Workspaces/${subSection?.workspaceID}`
+                                      );
                                       setIsMobileMenuOpen(false); // Close mobile menu
                                     }}
                                   >
                                     <div className="icon flex gap-2 items-center font-bold">
                                       <span
                                         className={`${
-                                          subSection.customizedLogo?.bg ||
-                                          "bg-gray-200"
+                                          subSection.logo?.bg || "bg-gray-200"
                                         } ${
-                                          subSection.customizedLogo?.text
-                                            ? `text-${subSection.customizedLogo.text}`
+                                          subSection.logo?.textColor
+                                            ? `text-${subSection.logo.textColor}`
                                             : "text-gray-600"
                                         } cursor-pointer font-semibold text-center flex items-center justify-center text-xs rounded-lg w-6 h-6`}
                                       >
                                         <span>
-                                          {subSection.LogoLetter ||
+                                          {subSection.logo.text ||
                                             subSection.workspaceTitle?.[0] ||
                                             "W"}
                                         </span>
@@ -530,12 +543,12 @@ const NavbarComponent = () => {
         {/* Popups */}
         <CreateWorkSpacePopup
           createPopupNum={CreateWorkspacePopupNum}
-          uname={user?.username}
-          uniqID={user?.uid}
+          currentUserUsername={user?.username}
+          currentUserid={user?.uid}
           workspacearray={user?.workspaces || []}
-          email={user?.email}
-          name={user?.name || ""}
-          photoUrl={user?.photoURL}
+          currentUserEmail={user?.email}
+          currentUserFullName={user?.name || ""}
+          currentUserphotoUrl={user?.photoURL}
         />
         <AddTaskPopup
           addTaskPopupNum={AddTaskPopupNum}

@@ -1,30 +1,23 @@
 import { db } from "@/lib/firebaseConfig";
-import { doc, getDoc, setDoc, updateDoc } from "@firebase/firestore";
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "@firebase/firestore";
 
-const CreateWorkspace = (
-  workspaceID,
-  {
+const CreateWorkspace = (workspaceDoc) => {
+  const {
     workspaceTitle,
     workspaceDescription,
+    workspaceID,
     isPrivate,
-    LogoLetter,
-    customizedLogo,
+    logo,
+    admin,
     members,
-    url,
-  }
-) => {
+    projects,
+  } = workspaceDoc;
+
   return new Promise(async (resolve, reject) => {
     try {
       const docRef = doc(db, "workspaces", workspaceID);
-      await setDoc(docRef, {
-        workspaceTitle: workspaceTitle,
-        workspaceDescription: workspaceDescription,
-        isPrivate: isPrivate,
-        LogoLetter: LogoLetter,
-        customizedLogo: customizedLogo,
-        members: [...members],
-        url: url,
-      });
+      await setDoc(docRef, workspaceDoc);
+
       console.log("Document written with ID: ", docRef.id);
       console.log(workspaceID);
       resolve(workspaceID);
@@ -36,15 +29,14 @@ const CreateWorkspace = (
 
 export default CreateWorkspace;
 
-export const updateWorkspaceinUsers = (username, [...WorkspaceArray]) => {
+export const updateWorkspaceinUsers = (userid, newWorkSpace) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const docRef = doc(db, "users", username);
+      const docRef = doc(db, "users", userid);
       await updateDoc(docRef, {
-        workspaces: WorkspaceArray,
+        workspaces: arrayUnion(newWorkSpace),
       });
       console.log("Document written with ID: ", docRef.id);
-
       resolve();
     } catch (error) {
       reject(error);
