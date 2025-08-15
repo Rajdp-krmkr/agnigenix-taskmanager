@@ -1,5 +1,6 @@
 "use client";
 import AddProjectPopup from "@/components/AddProjectPopup";
+import { useUserContext } from "@/context/userContext";
 import { CheckIfUserAssignedToWorkspace } from "@/Firebase Functions/isUserAuthenticated";
 import getProjects from "@/Firebase Functions/projects";
 import Image from "next/image";
@@ -25,6 +26,7 @@ const Page = () => {
   const [AddProjectActivateNum, setAddProjectActivateNum] = useState(0);
 
   const [ProjectsArray, setProjectsArray] = useState(null);
+  const { currentWorkspace, setCurrentWorkspace } = useUserContext();
 
   useEffect(() => {
     if (workspaceTitle && workspaceID && username) {
@@ -50,7 +52,6 @@ const Page = () => {
           setisUserAssigned(err.isAssigned);
           setUserAssignmentMessage(err.message);
           setMembersData(err.membersData);
-          // setProjectsArray(res.projects);
           setProjectsArray(null); //! important
         });
     }

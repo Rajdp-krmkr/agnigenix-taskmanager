@@ -34,8 +34,6 @@ const NavbarComponent = () => {
     isProfileCreated,
     currentWorkspace,
     setCurrentWorkspace,
-    isLoadingWorkspace,
-    setIsLoadingWorkspace,
   } = useUserContext();
 
   const [openTasksSection, setOpenTasksSection] = useState(false);

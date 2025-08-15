@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import UsersOfSearchResults, {
   UsersOfSearchResultsForProject,
 } from "./usersOfSearchResults";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 
 const UserSearchResults = ({ username }) => {
   const [searchresultsArray, setSearchResultsArray] = useState(null);
@@ -31,9 +31,8 @@ const UserSearchResults = ({ username }) => {
           arr.push(usersArray[i]);
         }
       }
-
       setSearchResultsArray(arr);
-    } else if (searchQuery === "") {
+    } else if (searchQuery == "") {
       setSearchResultsArray([]);
     }
   };
@@ -69,41 +68,38 @@ const UserSearchResults = ({ username }) => {
   }, [usersArray]);
 
   return (
-    <>
-      <div className="">
-        <input
-          type="text"
-          id="search"
-          value={searchQuery}
-          onChange={(e) => {
-            // console.log(e.target.value);
-            setSearchQuery(e.target.value);
-          }}
-          className="outline-thm-clr-1 rounded-xl p-3 border-2 dark:border-gray-500 w-full dark:bg-gray-500 dark:text-gray-100 dark:placeholder:text-gray-100 bg-gray-100 placeholder:text-xs text-sm"
-          placeholder="Type username or name"
-        />
-        <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
-          {searchresultsArray === null ? (
-            <div className="loader w-9 h-9 border-[4px] border-white"></div>
-          ) : searchresultsArray.length === 0 && searchQuery !== "" ? (
-            <div className="text-center py-2 text-gray-400 text-sm">
-              No results found
-            </div>
-          ) : (
-            searchresultsArray.map((user, index) => {
-              console.log(user, username);
-              if (user.username !== username) {
-                return (
-                  <>
-                    <UsersOfSearchResults index={index} user={user} />
-                  </>
-                );
-              }
-            })
-          )}
-        </div>
+    <div className="">
+      <input
+        type="text"
+        id="search"
+        value={searchQuery}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+        }}
+        className="outline-thm-clr-1 rounded-xl p-3 border-2 dark:border-gray-500 w-full dark:bg-gray-500 dark:text-gray-100 dark:placeholder:text-gray-100 bg-gray-100 placeholder:text-xs text-sm"
+        placeholder="Type username or name"
+      />
+      <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
+        {searchresultsArray === null ? (
+          <div className="loader w-9 h-9 border-[4px] border-white"></div>
+        ) : searchresultsArray.length === 0 && searchQuery !== "" ? (
+          <div className="text-center py-2 text-gray-400 text-sm">
+            No results found
+          </div>
+        ) : (
+          searchresultsArray.map((user, index) => {
+            console.log(user, username);
+            if (user.username !== username) {
+              return (
+                <>
+                  <UsersOfSearchResults index={index} user={user} />
+                </>
+              );
+            }
+          })
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

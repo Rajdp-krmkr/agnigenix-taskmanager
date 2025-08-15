@@ -11,6 +11,7 @@ import CreateWorkspace, {
 import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
 import { createDateInfo } from "@/lib/utils/CreateDateInfo";
 import { useUserContext } from "@/context/userContext";
+import { useRouter } from "next/navigation";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
@@ -22,8 +23,10 @@ const CreateWorkSpacePopup = ({
   currentUserphotoUrl,
 }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const invitedUsers = useSelector((state) => state.invitedUsers.invitedUsers);
-  const { user, setUser } = useUserContext();
+  const { user, setUser, currentWorkspace, setCurrentWorkspace } =
+    useUserContext();
 
   // UI State
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
@@ -202,7 +205,10 @@ const CreateWorkSpacePopup = ({
           ...prevUser,
           workspaces: [...prevUser.workspaces, newWorkspace],
         }));
+        setCurrentWorkspace(workspaceDoc);
+        router.push(`/Workspaces/${workspaceDoc.workspaceID}`);
         resetForm();
+        //!getting problem
       }
     } catch (err) {
       console.error("Error creating workspace", err);
