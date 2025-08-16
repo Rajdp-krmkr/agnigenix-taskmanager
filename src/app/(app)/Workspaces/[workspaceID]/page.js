@@ -3,6 +3,8 @@ import AddProjectPopup from "@/components/AddProjectPopup";
 import { useUserContext } from "@/context/userContext";
 import { CheckIfUserAssignedToWorkspace } from "@/Firebase Functions/isUserAuthenticated";
 import getProjects from "@/Firebase Functions/projects";
+import { db } from "@/lib/firebaseConfig";
+import { doc, getDoc } from "@firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -13,79 +15,79 @@ import { FaPlus } from "react-icons/fa6";
 const Page = () => {
   const router = useRouter();
   const params = useParams();
-  const workspaceTitle = params.workspaceTitle;
+  // const workspaceTitle = params.workspaceTitle;
+
   const workspaceID = params.workspaceID;
   const username = params.user;
 
   const [isUserAssigned, setisUserAssigned] = useState(null);
-  const [isWorkspaceFound, setIsWorkspaceFound] = useState(null);
-  const [UserAssignmentMessage, setUserAssignmentMessage] = useState(null);
   const [membersData, setMembersData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [AddProjectActivateNum, setAddProjectActivateNum] = useState(0);
 
-  const [ProjectsArray, setProjectsArray] = useState(null);
-  const { currentWorkspace, setCurrentWorkspace } = useUserContext();
+  const {
+    user,
+    setUser,
+    isUserLoggedIn,
+    setIsUserLoggedIn,
+    isLoading,
+    setIsLoading,
+    currentWorkspace,
+    setCurrentWorkspace,
+    isLoadingCurrentWorkspace,
+    setIsLoadingCurrentWorkspace,
+  } = useUserContext();
 
   useEffect(() => {
-    if (workspaceTitle && workspaceID && username) {
-      CheckIfUserAssignedToWorkspace(workspaceTitle, workspaceID, username)
-        .then((res) => {
-          setIsWorkspaceFound(res.isWorkspaceFound);
-          setisUserAssigned(res.isAssigned);
-          setUserAssignmentMessage(res.message);
-          setMembersData(res.membersData);
-          // setProjectsArray(res.projects);
-
-          getProjects(workspaceID)
-            .then((projects) => {
-              setProjectsArray(projects);
-              console.log("projects: ", projects);
-            })
-            .catch((err) => {
-              console.error("error in getting Projects: ", err);
-            });
-        })
-        .catch((err) => {
-          setIsWorkspaceFound(err.isWorkspaceFound);
-          setisUserAssigned(err.isAssigned);
-          setUserAssignmentMessage(err.message);
-          setMembersData(err.membersData);
-          setProjectsArray(null); //! important
-        });
-    }
-  }, [workspaceID, username]);
-
-  useEffect(() => {
-    if (isUserAssigned === false) {
-      console.log("User is not assigned to workspace");
-      router.push("/sign-up");
-    }
-  }, [isUserAssigned]);
-
-  useEffect(() => {
-    if (membersData !== null) {
-      for (let i = 0; i < membersData.length; i++) {
-        if (
-          membersData[i].username === username &&
-          membersData[i].isAdmin == true
-        ) {
-          setIsAdmin(true);
-          break;
+    const fetchWorkspace = async () => {
+      const docref = doc(db, "workspaces", workspaceID);
+      const docSnap = await getDoc(docref);
+      if (docSnap.exists()) {
+        setCurrentWorkspace(docSnap.data());
+        const membersArray = docSnap.data()?.members || [];
+        const member = membersArray.find((member) => member.uid == user.uid);
+        if (member) {
+          setisUserAssigned(true);
+          setIsAdmin(member?.isAdmin);
+          setMembersData(membersArray);
+        } else {
+          console.log("User is not assigned to workspace");
         }
+      } else {
+        console.log("No such document!");
       }
-    }
-  }, [membersData]);
+      setIsLoadingCurrentWorkspace(false);
+    };
+    if (isUserLoggedIn && !isLoading) fetchWorkspace();
+    else router.replace("/sign-up");
+  }, [user, isLoading, isUserLoggedIn]);
 
+  if (isLoadingCurrentWorkspace) {
+    return (
+      <div className="mt-7 lg:ml-[270px] lg:mr-[180px] m-10 flex flex-col justify-center items-center">
+        <div className="typewriter absolute top-[40vh] self-center">
+          <div className="slide">
+            <i></i>
+          </div>
+          <div className="paper"></div>
+          <div className="keyboard"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isUserAssigned) {
+    return <div>You have no permission</div>;
+  }
   return (
     <>
       <div className="ml-[250px]">
         <div className="fixed  w-full top-0  font-bold border-b-2 border-gray-200 dark:border-gray-800 p-2 flex flex-row ">
           <h1 className="text-xl dark:text-gray-300">
-            {!isWorkspaceFound || isWorkspaceFound === null
+            {currentWorkspace?.workspaceTitle === undefined
               ? "not found"
-              : workspaceTitle}
+              : currentWorkspace.workspaceTitle}
           </h1>
         </div>
         <div className="mt-12 p-2 flex flex-row gap-5">
@@ -241,7 +243,7 @@ const Page = () => {
         ProjectsArray={ProjectsArray}
         workspaceID={workspaceID}
         workspaceMembers={membersData}
-        workspaceTitle={workspaceTitle}
+        workspaceTitle={currentWorkspace?.workspaceTitle}
       />
     </>
   );

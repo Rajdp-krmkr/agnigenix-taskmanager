@@ -250,7 +250,7 @@ const NavbarComponent = () => {
           </div>
 
           {/* Navigation Menu */}
-          <div className="flex flex-col min-h-[80vh] mt-0 gap-10 justify-between">
+          <div className="flex flex-col flex-1 mt-0 gap-10 justify-between ">
             <div className="mt-1">
               <ul>
                 {[
@@ -429,7 +429,7 @@ const NavbarComponent = () => {
                                     }
                                     cursor-pointer transition-all my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
                                     onClick={() => {
-                                      setCurrentWorkspace(subSection);
+                                      // setCurrentWorkspace(subSection);
                                       router.push(
                                         `/Workspaces/${subSection?.workspaceID}`
                                       );
