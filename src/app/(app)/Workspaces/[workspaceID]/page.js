@@ -15,10 +15,8 @@ import { FaPlus } from "react-icons/fa6";
 const Page = () => {
   const router = useRouter();
   const params = useParams();
-  // const workspaceTitle = params.workspaceTitle;
 
   const workspaceID = params.workspaceID;
-  const username = params.user;
 
   const [isUserAssigned, setisUserAssigned] = useState(null);
   const [membersData, setMembersData] = useState(null);
@@ -239,7 +237,7 @@ const Page = () => {
       </div>
       <AddProjectPopup
         activateNum={AddProjectActivateNum}
-        username={username}
+        username={user.username}
         ProjectsArray={ProjectsArray}
         workspaceID={workspaceID}
         workspaceMembers={membersData}
