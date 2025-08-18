@@ -59,7 +59,7 @@ html:not(.dark):not(.light) {
 
 /* Ensure proper theme colors for specific elements */
 .dark .bg-white {
-  background-color: #374151 !important;
+  /* background-color: #374151 !important; */
 }
 
 .dark .text-black {

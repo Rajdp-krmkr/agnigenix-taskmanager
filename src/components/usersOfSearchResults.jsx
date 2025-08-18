@@ -67,8 +67,6 @@ const UsersOfSearchResults = ({ user, index }) => {
                 e.preventDefault();
                 dispatch(
                   addInvitedUser({
-                    name: user.name,
-                    username: user.username,
                     isAdmin: false,
                     uid: user.uid,
                     isInvitationAccepted: false,

@@ -4,7 +4,7 @@ import { useUserContext } from "@/context/userContext";
 import { CheckIfUserAssignedToWorkspace } from "@/Firebase Functions/isUserAuthenticated";
 import getProjects from "@/Firebase Functions/projects";
 import { db } from "@/lib/firebaseConfig";
-import { doc, getDoc } from "@firebase/firestore";
+import { collection, doc, getDoc, getDocs, where } from "@firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,9 @@ const Page = () => {
 
   const [isUserAssigned, setisUserAssigned] = useState(null);
   const [membersData, setMembersData] = useState(null);
+  const [isMembersLoading, setIsMembersLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [projectsArray, setProjectsArray] = useState([]);
 
   const [AddProjectActivateNum, setAddProjectActivateNum] = useState(0);
 
@@ -42,13 +44,15 @@ const Page = () => {
       const docref = doc(db, "workspaces", workspaceID);
       const docSnap = await getDoc(docref);
       if (docSnap.exists()) {
-        setCurrentWorkspace(docSnap.data());
-        const membersArray = docSnap.data()?.members || [];
+        const data = docSnap.data();
+        setCurrentWorkspace(data);
+        const membersArray = data?.members || [];
         const member = membersArray.find((member) => member.uid == user.uid);
         if (member) {
           setisUserAssigned(true);
           setIsAdmin(member?.isAdmin);
           setMembersData(membersArray);
+          setProjectsArray(data?.projects);
         } else {
           console.log("User is not assigned to workspace");
         }
@@ -60,6 +64,30 @@ const Page = () => {
     if (isUserLoggedIn && !isLoading) fetchWorkspace();
     else router.replace("/sign-up");
   }, [user, isLoading, isUserLoggedIn]);
+
+  useEffect(() => {
+    if (membersData) {
+      let temp = [];
+
+      membersData.forEach(async (member) => {
+        const q = query(
+          collection(db, "users"),
+          where("uid", "==", member.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          temp.push(doc.data());
+        });
+
+        // const memberRef = doc(db, "users", member.uid);
+        // const memberSnap = await getDoc(memberRef);
+        // if (memberSnap.exists()) {
+        //   temp.push(...memberSnap.data());
+        // }
+      });
+      setMembersData(temp);
+    }
+  }, [membersData, isMembersLoading]);
 
   if (isLoadingCurrentWorkspace) {
     return (
@@ -137,7 +165,6 @@ const Page = () => {
                             </h1>
                           ) : (
                             <>
-                              {" "}
                               <div className="w-[65px] h-5"></div>
                             </>
                           )}
@@ -178,56 +205,44 @@ const Page = () => {
             </div>
 
             <div className="m-4 h-[250px] overflow-auto workspaceScrollBar">
-              {ProjectsArray !== null ? (
-                <>
-                  {ProjectsArray.length > 0 ? (
-                    <>
-                      {ProjectsArray.map((project, index) => (
-                        <>
-                          <div
-                            key={index}
-                            className="flex flex-row justify-between items-center border-b-gray-600 border-b-2 p-2 dark:hover:bg-gray-700 hover:cursor-pointer hover:rounded-md transition-all"
-                          >
-                            <div className="flex flex-col">
-                              <h1 className="dark:text-gray-200 font-bold text-sm">
-                                {project.projectTitle}
-                              </h1>
-                              <h2 className="dark:text-gray-300 text-xs">
-                                {project.projectDescription}
-                              </h2>
-                            </div>
-                            <div className="">
-                              {project.isPrivate && (
-                                <div className=" flex fill-black dark:fill-slate-300 justify-center items-center">
-                                  <svg
-                                    className="lock-svgIcon w-4 h-4"
-                                    viewBox="-0.5 -0.5 16 16"
-                                  >
-                                    <path
-                                      d="M7.5 8.235c-0.1949375 0 -0.38187499999999996 0.0775 -0.5196875 0.2153125s-0.2153125 0.32475 -0.2153125 0.5196875v2.205c0 0.1949375 0.0775 0.38187499999999996 0.2153125 0.51975s0.32475 0.21525 0.5196875 0.21525c0.1949375 0 0.3819375 -0.07743749999999999 0.51975 -0.21525s0.21525 -0.32481250000000006 0.21525 -0.51975v-2.205c0 -0.1949375 -0.07743749999999999 -0.38187499999999996 -0.21525 -0.5196875s-0.32481250000000006 -0.2153125 -0.51975 -0.2153125Zm3.675 -2.94V3.825c0 -0.9746875 -0.3871875 -1.9094375 -1.076375 -2.598625S8.4746875 0.15 7.5 0.15c-0.9746875 0 -1.9094375 0.3871875 -2.598625 1.076375S3.825 2.8503125000000002 3.825 3.825v1.47c-0.5848125 0 -1.145625 0.23231249999999998 -1.5591875 0.6458125000000001C1.8523124999999998 6.354375 1.62 6.9152499999999995 1.62 7.5v5.145c0 0.58475 0.23231249999999998 1.145625 0.6458125000000001 1.5591875 0.41356249999999994 0.4135 0.974375 0.6458125000000001 1.5591875 0.6458125000000001h7.35c0.58475 0 1.145625 -0.23231249999999998 1.5591875 -0.6458125000000001 0.4135 -0.41356249999999994 0.6458125000000001 -0.9744375 0.6458125000000001 -1.5591875V7.5c0 -0.58475 -0.23231249999999998 -1.145625 -0.6458125000000001 -1.5591875 -0.41356249999999994 -0.4135 -0.9744375 -0.6458125000000001 -1.5591875 -0.6458125000000001ZM5.295 3.825c0 -0.5848125 0.23231249999999998 -1.145625 0.6458125000000001 -1.5591875C6.354375 1.8523124999999998 6.9152499999999995 1.62 7.5 1.62s1.145625 0.23231249999999998 1.5591875 0.6458125000000001c0.4135 0.41356249999999994 0.6458125000000001 0.974375 0.6458125000000001 1.5591875v1.47H5.295V3.825Zm6.615 8.82c0 0.1949375 -0.07743749999999999 0.3819375 -0.21525 0.51975s-0.32481250000000006 0.21525 -0.51975 0.21525H3.825c-0.1949375 0 -0.38187499999999996 -0.07743749999999999 -0.51975 -0.21525 -0.1378125 -0.1378125 -0.21525 -0.32481250000000006 -0.21525 -0.51975V7.5c0 -0.1949375 0.07743749999999999 -0.38187499999999996 0.21525 -0.5196875 0.137875 -0.1378125 0.32481250000000006 -0.2153125 0.51975 -0.2153125h7.35c0.1949375 0 0.3819375 0.0775 0.51975 0.2153125s0.21525 0.32475 0.21525 0.5196875v5.145Z"
-                                      fill=""
-                                      stroke-width="1"
-                                    ></path>
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </>
-                      ))}
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-full h-full flex justify-center items-center text-gray-400">
-                        No workspace found
+              {projectsArray.length > 0 ? (
+                projectsArray.map((project, index) => (
+                  <>
+                    <div
+                      key={index}
+                      className="flex flex-row justify-between items-center border-b-gray-600 border-b-2 p-2 dark:hover:bg-gray-700 hover:cursor-pointer hover:rounded-md transition-all"
+                    >
+                      <div className="flex flex-col">
+                        <h1 className="dark:text-gray-200 font-bold text-sm">
+                          {project.projectTitle}
+                        </h1>
+                        <h2 className="dark:text-gray-300 text-xs">
+                          {project.projectDescription}
+                        </h2>
                       </div>
-                    </>
-                  )}
-                </>
+                      <div className="">
+                        {project.isPrivate && (
+                          <div className=" flex fill-black dark:fill-slate-300 justify-center items-center">
+                            <svg
+                              className="lock-svgIcon w-4 h-4"
+                              viewBox="-0.5 -0.5 16 16"
+                            >
+                              <path
+                                d="M7.5 8.235c-0.1949375 0 -0.38187499999999996 0.0775 -0.5196875 0.2153125s-0.2153125 0.32475 -0.2153125 0.5196875v2.205c0 0.1949375 0.0775 0.38187499999999996 0.2153125 0.51975s0.32475 0.21525 0.5196875 0.21525c0.1949375 0 0.3819375 -0.07743749999999999 0.51975 -0.21525s0.21525 -0.32481250000000006 0.21525 -0.51975v-2.205c0 -0.1949375 -0.07743749999999999 -0.38187499999999996 -0.21525 -0.5196875s-0.32481250000000006 -0.2153125 -0.51975 -0.2153125Zm3.675 -2.94V3.825c0 -0.9746875 -0.3871875 -1.9094375 -1.076375 -2.598625S8.4746875 0.15 7.5 0.15c-0.9746875 0 -1.9094375 0.3871875 -2.598625 1.076375S3.825 2.8503125000000002 3.825 3.825v1.47c-0.5848125 0 -1.145625 0.23231249999999998 -1.5591875 0.6458125000000001C1.8523124999999998 6.354375 1.62 6.9152499999999995 1.62 7.5v5.145c0 0.58475 0.23231249999999998 1.145625 0.6458125000000001 1.5591875 0.41356249999999994 0.4135 0.974375 0.6458125000000001 1.5591875 0.6458125000000001h7.35c0.58475 0 1.145625 -0.23231249999999998 1.5591875 -0.6458125000000001 0.4135 -0.41356249999999994 0.6458125000000001 -0.9744375 0.6458125000000001 -1.5591875V7.5c0 -0.58475 -0.23231249999999998 -1.145625 -0.6458125000000001 -1.5591875 -0.41356249999999994 -0.4135 -0.9744375 -0.6458125000000001 -1.5591875 -0.6458125000000001ZM5.295 3.825c0 -0.5848125 0.23231249999999998 -1.145625 0.6458125000000001 -1.5591875C6.354375 1.8523124999999998 6.9152499999999995 1.62 7.5 1.62s1.145625 0.23231249999999998 1.5591875 0.6458125000000001c0.4135 0.41356249999999994 0.6458125000000001 0.974375 0.6458125000000001 1.5591875v1.47H5.295V3.825Zm6.615 8.82c0 0.1949375 -0.07743749999999999 0.3819375 -0.21525 0.51975s-0.32481250000000006 0.21525 -0.51975 0.21525H3.825c-0.1949375 0 -0.38187499999999996 -0.07743749999999999 -0.51975 -0.21525 -0.1378125 -0.1378125 -0.21525 -0.32481250000000006 -0.21525 -0.51975V7.5c0 -0.1949375 0.07743749999999999 -0.38187499999999996 0.21525 -0.5196875 0.137875 -0.1378125 0.32481250000000006 -0.2153125 0.51975 -0.2153125h7.35c0.1949375 0 0.3819375 0.0775 0.51975 0.2153125s0.21525 0.32475 0.21525 0.5196875v5.145Z"
+                                fill=""
+                                stroke-width="1"
+                              ></path>
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ))
               ) : (
                 <>
-                  <div className="h-full w-full flex justify-center items-center">
-                    <div className="loader w-9 h-9 border-[4px] border-white"></div>
+                  <div className="w-full h-full flex justify-center items-center text-gray-400">
+                    No projects found
                   </div>
                 </>
               )}
@@ -238,7 +253,7 @@ const Page = () => {
       <AddProjectPopup
         activateNum={AddProjectActivateNum}
         username={user.username}
-        ProjectsArray={ProjectsArray}
+        ProjectsArray={projectsArray}
         workspaceID={workspaceID}
         workspaceMembers={membersData}
         workspaceTitle={currentWorkspace?.workspaceTitle}

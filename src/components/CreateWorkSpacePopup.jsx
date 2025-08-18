@@ -149,8 +149,6 @@ const CreateWorkSpacePopup = ({
       const membersList = [
         ...invitedUsers,
         {
-          username: currentUserUsername,
-          name: currentUserFullName,
           uid: currentUserid,
           isAdmin: true,
           isInvitationAccepted: true,
@@ -178,16 +176,16 @@ const CreateWorkSpacePopup = ({
       if (res == workspaceID) {
         console.log("Workspace Created Successfully");
 
-        const newWorkspace = {
-          workspaceTitle,
-          workspaceID,
-          isPrivate,
-          logo: {
-            text: LogoLetter,
-            bg: customizedLogo.bg,
-            textColor: customizedLogo.textColor,
-          },
-        };
+        // const newWorkspace = {
+        //   workspaceTitle,
+        //   workspaceID,
+        //   isPrivate,
+        //   logo: {
+        //     text: LogoLetter,
+        //     bg: customizedLogo.bg,
+        //     textColor: customizedLogo.textColor,
+        //   },
+        // };
 
         // Send invitation notifications
         if (invitedUsers.length > 0) {
@@ -196,7 +194,7 @@ const CreateWorkSpacePopup = ({
 
         // Update user's workspace array
         membersList.map(async (member) => {
-          await updateWorkspaceinUsers(member.uid, newWorkspace);
+          await updateWorkspaceinUsers(member.uid, workspaceID);
         });
 
         console.log("Workspace added to user");

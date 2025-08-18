@@ -17,7 +17,7 @@ export default function AppLayout({ children }) {
 
   return (
     <main
-      className={`transition-all duration-300 lg:ml-[80px] ${
+      className={`transition-all duration-300 ${
         isCollapsed ? "lg:ml-[80px]" : "lg:ml-[240px]"
       } min-h-screen pt-16 lg:pt-0`}
     >

@@ -2,12 +2,16 @@
 import { auth } from "@/lib/firebaseConfig";
 import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
-
-import { MdOutlineDashboard, MdDashboard } from "react-icons/md";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
+import {
+  MdOutlineDashboard,
+  MdDashboard,
+  MdOutlineWorkOutline,
+  MdOutlineWork,
+  MdOutlineSettings,
+  MdLogout,
+} from "react-icons/md";
 import { FaTasks } from "react-icons/fa";
-import { MdOutlineWorkOutline, MdOutlineWork } from "react-icons/md";
-import { MdOutlineSettings, MdLogout } from "react-icons/md";
 import {
   IoMdArrowDropright,
   IoMdAdd,
@@ -22,45 +26,273 @@ import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 import ThemeToggle from "./ThemeToggle";
 import AddTaskPopup from "./AddTaskPopup";
 import { useUserContext } from "@/context/userContext";
+import { fetchWorkspaces } from "@/lib/utils/fetchWorkspaces";
+
+// Constants
+const AUTH_PAGES = [
+  "/log-in",
+  "/sign-up",
+  "/CreateProfile",
+  "/",
+  "/verify-email",
+];
+
+// Navigation configuration
+const createNavItems = (username) => [
+  {
+    name: "Dashboard",
+    icon: <MdOutlineDashboard />,
+    activeIcon: <MdDashboard />,
+    url: `/Dashboard`,
+  },
+  {
+    name: "Notifications",
+    icon: <IoMdNotificationsOutline />,
+    activeIcon: <IoMdNotificationsOutline />,
+    url: `/Notifications/all/${username}`,
+  },
+  {
+    name: "Your tasks",
+    icon: <FaTasks />,
+    hasSubMenu: true,
+    subItems: [
+      {
+        title: "Due tasks",
+        url: `/YourTasks/DueTasks/${username}`,
+        icon: <TbCalendarDue />,
+      },
+      {
+        title: "Completed tasks",
+        url: `/YourTasks/CompletedTasks/${username}`,
+        icon: <BsClipboardCheck />,
+      },
+      {
+        title: "Uncompleted tasks",
+        url: `/YourTasks/UncompletedTasks/${username}`,
+        icon: <BiTaskX />,
+      },
+      {
+        title: "All tasks",
+        url: `/YourTasks/AllTasks/${username}`,
+        icon: <GoTasklist />,
+      },
+      {
+        title: "Add new task",
+        action: "addTask",
+        icon: <IoMdAdd />,
+      },
+    ],
+  },
+  {
+    name: "Workspaces",
+    icon: <MdOutlineWorkOutline />,
+    activeIcon: <MdOutlineWork />,
+    hasSubMenu: true,
+    isWorkspace: true,
+  },
+];
+
+const BOTTOM_NAV_ITEMS = [
+  { name: "Settings", icon: <MdOutlineSettings />, url: `/Settings` },
+  { name: "Log out", icon: <MdLogout />, action: "logout" },
+];
+
+// Sub-components
+const CollapseButton = ({ isCollapsed, onClick, isMobile = false }) => (
+  <button
+    onClick={onClick}
+    className={`${
+      isMobile ? "lg:hidden" : "hidden lg:block"
+    } p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors`}
+    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+  >
+    {isMobile ? (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    ) : (
+      <svg
+        className={`w-5 h-5 transition-transform ${
+          isCollapsed ? "rotate-180" : ""
+        }`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+        />
+      </svg>
+    )}
+  </button>
+);
+
+const UserProfile = ({ user, isLoading, isCollapsed, onProfileClick }) => (
+  <div
+    className={`bg-white dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex ${
+      isCollapsed
+        ? "justify-center aspect-square"
+        : "flex-row items-center gap-2"
+    } p-2 rounded-lg m-2`}
+    onClick={onProfileClick}
+    title={isCollapsed && user ? `${user.name} (@${user.username})` : ""}
+  >
+    {isLoading || !user ? (
+      <div className="loader w-9 h-9 border-[4px] border-gray-300 dark:border-gray-600"></div>
+    ) : (
+      <>
+        <div className="profilePhoto relative w-10 h-10 aspect-square">
+          <Image
+            src={
+              user.photoURL ||
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            }
+            className="rounded-2xl aspect-square"
+            fill
+            alt="profile-picture"
+          />
+        </div>
+        {!isCollapsed && (
+          <div className="flex flex-col">
+            <h2 className="text-[14px] font-semibold">{user.name || "User"}</h2>
+            <p className="text-xs text-gray-400">{user.username}</p>
+          </div>
+        )}
+      </>
+    )}
+  </div>
+);
+
+const NavItem = ({
+  item,
+  isActive,
+  isCollapsed,
+  onClick,
+  isExpanded = false,
+}) => (
+  <div
+    className={`${
+      isActive
+        ? "text-thm-clr-1 dark:text-blue-500"
+        : "text-black dark:text-slate-200"
+    } ${isExpanded ? "bg-gray-200 dark:bg-gray-700" : ""} flex flex-row gap-2 ${
+      isCollapsed ? "justify-center" : "justify-between"
+    } items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer m-2 p-2 rounded-md`}
+    onClick={onClick}
+    title={isCollapsed ? item.name : ""}
+  >
+    <div
+      className={`flex items-center gap-2 ${
+        isCollapsed ? "justify-center" : "flex-row"
+      }`}
+    >
+      <div className="text-lg">{item.icon}</div>
+      {!isCollapsed && <h2 className="text-sm font-semibold">{item.name}</h2>}
+    </div>
+    {!isCollapsed && item.hasSubMenu && (
+      <div className={`${isExpanded ? "rotate-90" : ""} transition-all`}>
+        <IoMdArrowDropright />
+      </div>
+    )}
+  </div>
+);
+
+const SubMenuItem = ({ item, isActive, onClick }) => (
+  <div
+    className={`${
+      isActive
+        ? "text-thm-clr-1 dark:text-blue-500"
+        : "text-black dark:text-slate-200"
+    } ${
+      item.title === "Add new task"
+        ? "bg-thm-clr-1 text-white hover:bg-thm-clr-2 dark:hover:text-black"
+        : "hover:bg-gray-200 dark:hover:bg-gray-700"
+    } cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs transition-all`}
+    onClick={onClick}
+  >
+    <div className="text-lg">{item.icon}</div>
+    <span>{item.title}</span>
+  </div>
+);
+
+const WorkspaceItem = ({ workspace, isActive, onClick }) => (
+  <div
+    className={`${
+      isActive
+        ? "text-thm-clr-1 dark:text-blue-500 bg-gray-200 dark:bg-gray-700"
+        : "text-black dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+    } cursor-pointer transition-all my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
+    onClick={onClick}
+  >
+    <div className="flex gap-2 items-center">
+      <span
+        className={`${workspace.logo?.bg || "bg-gray-200"} ${
+          workspace.logo?.textColor
+            ? `text-${workspace.logo.textColor}`
+            : "text-gray-600"
+        } font-semibold text-center flex items-center justify-center text-xs rounded-lg w-6 h-6`}
+      >
+        {workspace.logo?.text || workspace.workspaceTitle?.[0] || "W"}
+      </span>
+      <span>{workspace.workspaceTitle}</span>
+    </div>
+    {workspace.isPrivate && (
+      <svg
+        className="w-3 h-3 fill-black dark:fill-slate-300"
+        viewBox="-0.5 -0.5 16 16"
+      >
+        <path d="M7.5 8.235c-0.1949375 0 -0.38187499999999996 0.0775 -0.5196875 0.2153125s-0.2153125 0.32475 -0.2153125 0.5196875v2.205c0 0.1949375 0.0775 0.38187499999999996 0.2153125 0.51975s0.32475 0.21525 0.5196875 0.21525c0.1949375 0 0.3819375 -0.07743749999999999 0.51975 -0.21525s0.21525 -0.32481250000000006 0.21525 -0.51975v-2.205c0 -0.1949375 -0.07743749999999999 -0.38187499999999996 -0.21525 -0.5196875s-0.32481250000000006 -0.2153125 -0.51975 -0.2153125Zm3.675 -2.94V3.825c0 -0.9746875 -0.3871875 -1.9094375 -1.076375 -2.598625S8.4746875 0.15 7.5 0.15c-0.9746875 0 -1.9094375 0.3871875 -2.598625 1.076375S3.825 2.8503125000000002 3.825 3.825v1.47c-0.5848125 0 -1.145625 0.23231249999999998 -1.5591875 0.6458125000000001C1.8523124999999998 6.354375 1.62 6.9152499999999995 1.62 7.5v5.145c0 0.58475 0.23231249999999998 1.145625 0.6458125000000001 1.5591875 0.41356249999999994 0.4135 0.974375 0.6458125000000001 1.5591875 0.6458125000000001h7.35c0.58475 0 1.145625 -0.23231249999999998 1.5591875 -0.6458125000000001 0.4135 -0.41356249999999994 0.6458125000000001 -0.9744375 0.6458125000000001 -1.5591875V7.5c0 -0.58475 -0.23231249999999998 -1.145625 -0.6458125000000001 -1.5591875 -0.41356249999999994 -0.4135 -0.9744375 -0.6458125000000001 -1.5591875 -0.6458125000000001ZM5.295 3.825c0 -0.5848125 0.23231249999999998 -1.145625 0.6458125000000001 -1.5591875C6.354375 1.8523124999999998 6.9152499999999995 1.62 7.5 1.62s1.145625 0.23231249999999998 1.5591875 0.6458125000000001c0.4135 0.41356249999999994 0.6458125000000001 0.974375 0.6458125000000001 1.5591875v1.47H5.295V3.825Zm6.615 8.82c0 0.1949375 -0.07743749999999999 0.3819375 -0.21525 0.51975s-0.32481250000000006 0.21525 -0.51975 0.21525H3.825c-0.1949375 0 -0.38187499999999996 -0.07743749999999999 -0.51975 -0.21525 -0.1378125 -0.1378125 -0.21525 -0.32481250000000006 -0.21525 -0.51975V7.5c0 -0.1949375 0.07743749999999999 -0.38187499999999996 0.21525 -0.5196875 0.137875 -0.1378125 0.32481250000000006 -0.2153125 0.51975 -0.2153125h7.35c0.1949375 0 0.3819375 0.0775 0.51975 0.2153125s0.21525 0.32475 0.21525 0.5196875v5.145Z" />
+      </svg>
+    )}
+  </div>
+);
 
 const NavbarComponent = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const {
-    user,
-    isUserLoggedIn,
-    isLoading,
-    emailVerified,
-    isProfileCreated,
-    currentWorkspace,
-    setCurrentWorkspace,
-  } = useUserContext();
+  const { user, isUserLoggedIn, isLoading, isProfileCreated } =
+    useUserContext();
 
-  const [openTasksSection, setOpenTasksSection] = useState(false);
-  const [openWorkSpaceSection, setOpenWorkSpaceSection] = useState(false);
-  const [CreateWorkspacePopupNum, setCreateWorkspacePopupNum] = useState(0);
-  const [AddTaskPopupNum, setAddTaskPopupNum] = useState(0);
+  // State management
+  const [expandedSections, setExpandedSections] = useState({
+    tasks: false,
+    workspaces: false,
+  });
+  const [popupCounters, setPopupCounters] = useState({
+    workspace: 0,
+    task: 0,
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [isWorkspacesLoading, setIsWorkspacesLoading] = useState(true);
 
-  // Check if current page should show the sidebar navbar
-  const shouldShowSidebar = () => {
-    const authPages = [
-      "/log-in",
-      "/sign-up",
-      "/CreateProfile",
-      "/",
-      "/verify-email",
-    ];
-    return !authPages.includes(pathname) && isUserLoggedIn && isProfileCreated;
-  };
+  // Memoized navigation items
+  const navItems = useMemo(
+    () => createNavItems(user?.username),
+    [user?.username]
+  );
 
-  // Check if current page should show the top navbar (for landing page)
-  const shouldShowTopNavbar = () => {
-    return pathname === "/" && !isUserLoggedIn;
-  };
+  // Page visibility logic
+  const shouldShowSidebar = () =>
+    !AUTH_PAGES.includes(pathname) && isUserLoggedIn && isProfileCreated;
 
-  // Handle logout
+  const shouldShowTopNavbar = () => pathname === "/" && !isUserLoggedIn;
+
+  // Event handlers
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -70,12 +302,9 @@ const NavbarComponent = () => {
     }
   };
 
-  // Handle sidebar collapse toggle
   const handleCollapseToggle = () => {
     const newCollapsedState = !isCollapsed;
     setIsCollapsed(newCollapsedState);
-
-    // Dispatch custom event to communicate with app layout
     window.dispatchEvent(
       new CustomEvent("sidebarToggle", {
         detail: { isCollapsed: newCollapsedState },
@@ -83,7 +312,55 @@ const NavbarComponent = () => {
     );
   };
 
-  // Render sidebar navbar for authenticated users
+  const toggleSection = (section) => {
+    if (isCollapsed) setIsCollapsed(false);
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const handleNavigation = (url) => {
+    router.push(url);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAction = (action) => {
+    switch (action) {
+      case "logout":
+        handleLogout();
+        break;
+      case "addTask":
+        setPopupCounters((prev) => ({ ...prev, task: prev.task + 1 }));
+        break;
+      case "addWorkspace":
+        setPopupCounters((prev) => ({
+          ...prev,
+          workspace: prev.workspace + 1,
+        }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Fetch workspaces effect
+  useEffect(() => {
+    const fetchWorkspace = async () => {
+      if (!user?.workspaces) return;
+      try {
+        const res = await fetchWorkspaces(user.workspaces);
+        setWorkspaces(res);
+      } catch (error) {
+        console.error("Error fetching workspaces:", error);
+      } finally {
+        setIsWorkspacesLoading(false);
+      }
+    };
+    fetchWorkspace();
+  }, [user]);
+
+  // Sidebar render
   if (shouldShowSidebar()) {
     return (
       <>
@@ -125,6 +402,7 @@ const NavbarComponent = () => {
               : "-translate-x-full lg:translate-x-0"
           } ${isCollapsed ? "lg:w-[80px]" : "w-[240px]"}`}
         >
+          {/* Header */}
           <div
             className={`flex ${
               isCollapsed
@@ -133,25 +411,10 @@ const NavbarComponent = () => {
             } gap-3 items-center my-4 mx-auto`}
           >
             {isCollapsed ? (
-              <button
+              <CollapseButton
+                isCollapsed={isCollapsed}
                 onClick={handleCollapseToggle}
-                className="hidden lg:block p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title="Expand sidebar"
-              >
-                <svg
-                  className="w-5 h-5 rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+              />
             ) : (
               <>
                 <h1 className="text-xl font-bold text-black dark:text-slate-200">
@@ -159,353 +422,132 @@ const NavbarComponent = () => {
                 </h1>
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
-                  {/* Desktop Collapse Button */}
-                  <button
+                  <CollapseButton
+                    isCollapsed={isCollapsed}
                     onClick={handleCollapseToggle}
-                    className="hidden lg:block p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                  >
-                    <svg
-                      className={`w-5 h-5 transition-transform ${
-                        isCollapsed ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                      />
-                    </svg>
-                  </button>
-                  {/* Mobile Close Button */}
-                  <button
+                  />
+                  <CollapseButton
+                    isCollapsed={isCollapsed}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="lg:hidden p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+                    isMobile
+                  />
                 </div>
               </>
             )}
           </div>
 
-          {/* User Profile Section */}
-          <div>
-            <div
-              className={`bg-white dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer hover:shadow-md transition-all shadow-sm flex ${
-                isCollapsed
-                  ? "justify-center aspect-square"
-                  : "flex-row items-center gap-2"
-              }  p-2 rounded-lg m-2`}
-              onClick={() => {
-                router.push(`/Profile`);
-                setIsMobileMenuOpen(false); // Close mobile menu
-              }}
-              title={
-                isCollapsed && user ? `${user.name} (@${user.username})` : ""
-              }
-            >
-              {isLoading || !user ? (
-                <div className="loader w-9 h-9 border-[4px] border-gray-300 dark:border-gray-600"></div>
-              ) : (
-                <>
-                  <div className="profilePhoto relative w-10 h-10 aspect-square">
-                    <Image
-                      src={
-                        user.photoURL ||
-                        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                      }
-                      className="rounded-2xl aspect-square"
-                      fill
-                      alt="profile-picture"
-                    />
-                  </div>
-                  {!isCollapsed && (
-                    <div className="flex flex-col">
-                      <h2 className="text-[14px] font-semibold">
-                        {user.name || "User"}
-                      </h2>
-                      <p className="text-xs text-gray-400">{user.username}</p>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+          {/* User Profile */}
+          <UserProfile
+            user={user}
+            isLoading={isLoading}
+            isCollapsed={isCollapsed}
+            onProfileClick={() => handleNavigation("/Profile")}
+          />
 
           {/* Navigation Menu */}
-          <div className="flex flex-col flex-1 mt-0 gap-10 justify-between ">
+          <div className="flex flex-col flex-1 mt-0 gap-10 justify-between">
             <div className="mt-1">
               <ul>
-                {[
-                  {
-                    name: "Dashboard",
-                    icon: <MdOutlineDashboard />,
-                    url: `/Dashboard`,
-                    activatedIcon: <MdDashboard />,
-                  },
-                  {
-                    name: "Notifications",
-                    icon: <IoMdNotificationsOutline />,
-                    url: `/Notifications/all/${user?.username}`,
-                    activatedIcon: <IoMdNotificationsOutline />,
-                  },
-                  {
-                    name: "Your tasks",
-                    icon: <FaTasks />,
-                    url: `#`,
-                    activatedIcon: "",
-                    subSections: [
-                      {
-                        title: "Due tasks",
-                        url: `/YourTasks/DueTasks/${user?.username}`,
-                        icon: <TbCalendarDue />,
-                      },
-                      {
-                        title: "Completed tasks",
-                        url: `/YourTasks/CompletedTasks/${user?.username}`,
-                        icon: <BsClipboardCheck />,
-                      },
-                      {
-                        title: "Uncompleted tasks",
-                        url: `/YourTasks/UncompletedTasks/${user?.username}`,
-                        icon: <BiTaskX />,
-                      },
-                      {
-                        title: "All tasks",
-                        url: `/YourTasks/AllTasks/${user?.username}`,
-                        icon: <GoTasklist />,
-                      },
-                      {
-                        title: "Add new task",
-                        url: `#`,
-                        icon: <IoMdAdd />,
-                      },
-                    ],
-                  },
-                  {
-                    name: "Workspaces",
-                    icon: <MdOutlineWorkOutline />,
-                    url: `#`,
-                    activatedIcon: <MdOutlineWork />,
-                    subSections: user?.workspaces || [],
-                  },
-                ].map((item, index) => (
-                  <li key={index} className="">
-                    <div
-                      className={`${
-                        pathname === item.url
-                          ? "text-thm-clr-1 dark:text-blue-500"
-                          : "text-black dark:text-slate-200"
-                      } ${
-                        (item.name === "Your tasks" && openTasksSection) ||
-                        (item.name === "Workspaces" && openWorkSpaceSection)
-                          ? "bg-gray-200 dark:bg-gray-700"
-                          : ""
-                      } flex flex-row gap-2 ${
-                        isCollapsed ? "justify-center" : "justify-between"
-                      } items-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer m-2 p-2 rounded-md`}
+                {navItems.map((item, index) => (
+                  <li key={index}>
+                    <NavItem
+                      item={item}
+                      isActive={pathname === item.url}
+                      isCollapsed={isCollapsed}
+                      isExpanded={
+                        (item.name === "Your tasks" &&
+                          expandedSections.tasks) ||
+                        (item.name === "Workspaces" &&
+                          expandedSections.workspaces)
+                      }
                       onClick={() => {
-                        if (item.name === "Your tasks") {
-                          if (isCollapsed) {
-                            setIsCollapsed(false); // Expand when accessing submenus in collapsed mode
+                        if (item.hasSubMenu) {
+                          if (item.isWorkspace) {
+                            toggleSection("workspaces");
+                          } else {
+                            toggleSection("tasks");
                           }
-                          setOpenTasksSection(!openTasksSection);
-                        } else if (item.name === "Workspaces") {
-                          if (isCollapsed) {
-                            setIsCollapsed(false); // Expand when accessing submenus in collapsed mode
-                          }
-                          setOpenWorkSpaceSection(!openWorkSpaceSection);
                         } else {
-                          router.push(item.url);
-                          setIsMobileMenuOpen(false); // Close mobile menu
+                          handleNavigation(item.url);
                         }
                       }}
-                      title={isCollapsed ? item.name : ""}
-                    >
-                      <div
-                        className={`flex items-center gap-2 ${
-                          isCollapsed ? "justify-center" : "flex-row"
-                        }`}
-                      >
-                        <div className="text-lg">{item.icon}</div>
-                        {!isCollapsed && (
-                          <h2 className="text-sm font-semibold">{item.name}</h2>
-                        )}
-                      </div>
-                      {!isCollapsed && (
-                        <div
-                          className={`${
-                            (item.name === "Your tasks" && openTasksSection) ||
-                            (item.name === "Workspaces" && openWorkSpaceSection)
-                              ? "block rotate-90"
-                              : "hidden"
-                          } transition-all`}
-                        >
-                          {(item.name === "Workspaces" ||
-                            item.name === "Your tasks") && (
-                            <IoMdArrowDropright />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {/* Submenu for Your Tasks */}
-                    <div className={`${isCollapsed ? "hidden" : "ml-6"} m-2`}>
-                      {item.name === "Your tasks" &&
-                        openTasksSection &&
-                        !isCollapsed && (
-                          <div className="transition-all">
-                            {item.subSections.map((section, index) => (
-                              <div
-                                key={index}
-                                className={`
-                                ${
-                                  pathname === section.url
-                                    ? "text-thm-clr-1 dark:text-blue-500"
-                                    : "text-black dark:text-slate-200"
-                                }
-                                ${
-                                  section.title === "Add new task"
-                                    ? "bg-thm-clr-1 text-white transition-all dark:hover:text-black hover:bg-thm-clr-2"
-                                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
-                                }
-                                cursor-pointer my-1 rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs`}
-                                onClick={() => {
-                                  if (section.title === "Add new task") {
-                                    setAddTaskPopupNum(AddTaskPopupNum + 1);
-                                  } else {
-                                    //TODO: should be changed
-                                    router.push(section.url);
-                                    setIsMobileMenuOpen(false); // Close mobile menu
-                                  }
-                                }}
-                              >
-                                <div className="icon text-lg font-bold">
-                                  {section.icon}
-                                </div>
-                                <span>{section.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                    />
 
-                      {/* Submenu for Workspace */}
-                      {item.name === "Workspaces" &&
-                        openWorkSpaceSection &&
-                        !isCollapsed && (
-                          <div className="flex flex-col">
-                            <div className="workspaceScrollBar max-h-[268px] overflow-auto">
-                              {!item.subSections ||
-                              item.subSections.length === 0 ? (
-                                <span className="text-gray-400 text-xs">
-                                  No workspace found
-                                </span>
-                              ) : (
-                                item.subSections.map((subSection, index) => (
-                                  <div
-                                    key={index}
-                                    className={`
-                                    ${
-                                      pathname ==
-                                      `/Workspaces/${subSection?.workspaceID}`
-                                        ? "text-thm-clr-1 dark:text-blue-500 bg-gray-200 dark:bg-gray-700"
-                                        : "text-black dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    {/* Sub-menus */}
+                    {!isCollapsed && (
+                      <div className="ml-6 m-2">
+                        {/* Tasks Submenu */}
+                        {item.name === "Your tasks" &&
+                          expandedSections.tasks && (
+                            <div className="transition-all">
+                              {item.subItems.map((subItem, subIndex) => (
+                                <SubMenuItem
+                                  key={subIndex}
+                                  item={subItem}
+                                  isActive={pathname === subItem.url}
+                                  onClick={() => {
+                                    if (subItem.action) {
+                                      handleAction(subItem.action);
+                                    } else {
+                                      handleNavigation(subItem.url);
                                     }
-                                    cursor-pointer transition-all my-1 rounded-md flex flex-row items-center justify-between gap-2 p-2 font-semibold text-xs`}
-                                    onClick={() => {
-                                      // setCurrentWorkspace(subSection);
-                                      router.push(
-                                        `/Workspaces/${subSection?.workspaceID}`
-                                      );
-                                      setIsMobileMenuOpen(false); // Close mobile menu
-                                    }}
-                                  >
-                                    <div className="icon flex gap-2 items-center font-bold">
-                                      <span
-                                        className={`${
-                                          subSection.logo?.bg || "bg-gray-200"
-                                        } ${
-                                          subSection.logo?.textColor
-                                            ? `text-${subSection.logo.textColor}`
-                                            : "text-gray-600"
-                                        } cursor-pointer font-semibold text-center flex items-center justify-center text-xs rounded-lg w-6 h-6`}
-                                      >
-                                        <span>
-                                          {subSection.logo.text ||
-                                            subSection.workspaceTitle?.[0] ||
-                                            "W"}
-                                        </span>
-                                      </span>
-                                      <span>{subSection.workspaceTitle}</span>
-                                    </div>
-                                    {subSection.isPrivate && (
-                                      <div className="flex fill-black dark:fill-slate-300 justify-center items-center">
-                                        <svg
-                                          className="lock-svgIcon w-3 h-3"
-                                          viewBox="-0.5 -0.5 16 16"
-                                        >
-                                          <path
-                                            d="M7.5 8.235c-0.1949375 0 -0.38187499999999996 0.0775 -0.5196875 0.2153125s-0.2153125 0.32475 -0.2153125 0.5196875v2.205c0 0.1949375 0.0775 0.38187499999999996 0.2153125 0.51975s0.32475 0.21525 0.5196875 0.21525c0.1949375 0 0.3819375 -0.07743749999999999 0.51975 -0.21525s0.21525 -0.32481250000000006 0.21525 -0.51975v-2.205c0 -0.1949375 -0.07743749999999999 -0.38187499999999996 -0.21525 -0.5196875s-0.32481250000000006 -0.2153125 -0.51975 -0.2153125Zm3.675 -2.94V3.825c0 -0.9746875 -0.3871875 -1.9094375 -1.076375 -2.598625S8.4746875 0.15 7.5 0.15c-0.9746875 0 -1.9094375 0.3871875 -2.598625 1.076375S3.825 2.8503125000000002 3.825 3.825v1.47c-0.5848125 0 -1.145625 0.23231249999999998 -1.5591875 0.6458125000000001C1.8523124999999998 6.354375 1.62 6.9152499999999995 1.62 7.5v5.145c0 0.58475 0.23231249999999998 1.145625 0.6458125000000001 1.5591875 0.41356249999999994 0.4135 0.974375 0.6458125000000001 1.5591875 0.6458125000000001h7.35c0.58475 0 1.145625 -0.23231249999999998 1.5591875 -0.6458125000000001 0.4135 -0.41356249999999994 0.6458125000000001 -0.9744375 0.6458125000000001 -1.5591875V7.5c0 -0.58475 -0.23231249999999998 -1.145625 -0.6458125000000001 -1.5591875 -0.41356249999999994 -0.4135 -0.9744375 -0.6458125000000001 -1.5591875 -0.6458125000000001ZM5.295 3.825c0 -0.5848125 0.23231249999999998 -1.145625 0.6458125000000001 -1.5591875C6.354375 1.8523124999999998 6.9152499999999995 1.62 7.5 1.62s1.145625 0.23231249999999998 1.5591875 0.6458125000000001c0.4135 0.41356249999999994 0.6458125000000001 0.974375 0.6458125000000001 1.5591875v1.47H5.295V3.825Zm6.615 8.82c0 0.1949375 -0.07743749999999999 0.3819375 -0.21525 0.51975s-0.32481250000000006 0.21525 -0.51975 0.21525H3.825c-0.1949375 0 -0.38187499999999996 -0.07743749999999999 -0.51975 -0.21525 -0.1378125 -0.1378125 -0.21525 -0.32481250000000006 -0.21525 -0.51975V7.5c0 -0.1949375 0.07743749999999999 -0.38187499999999996 0.21525 -0.5196875 0.137875 -0.1378125 0.32481250000000006 -0.2153125 0.51975 -0.2153125h7.35c0.1949375 0 0.3819375 0.0775 0.51975 0.2153125s0.21525 0.32475 0.21525 0.5196875v5.145Z"
-                                            fill=""
-                                            strokeWidth="1"
-                                          />
-                                        </svg>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))
-                              )}
+                                  }}
+                                />
+                              ))}
                             </div>
-                            <button
-                              className="bg-thm-clr-1 my-4 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
-                              onClick={() => {
-                                setCreateWorkspacePopupNum(
-                                  CreateWorkspacePopupNum + 1
-                                );
-                              }}
-                            >
-                              <IoMdAdd />
-                              <span>Add new workspace</span>
-                            </button>
-                          </div>
-                        )}
-                    </div>
+                          )}
+
+                        {/* Workspaces Submenu */}
+                        {item.name === "Workspaces" &&
+                          expandedSections.workspaces && (
+                            <div className="flex flex-col">
+                              <div className="workspaceScrollBar max-h-[268px] overflow-auto">
+                                {isWorkspacesLoading ? (
+                                  <div>Loading...</div>
+                                ) : workspaces.length === 0 ? (
+                                  <span className="text-gray-400 text-xs">
+                                    No workspace found
+                                  </span>
+                                ) : (
+                                  workspaces.map(
+                                    (workspace, workspaceIndex) => (
+                                      <WorkspaceItem
+                                        key={workspaceIndex}
+                                        workspace={workspace}
+                                        isActive={
+                                          pathname ===
+                                          `/Workspaces/${workspace?.workspaceID}`
+                                        }
+                                        onClick={() =>
+                                          handleNavigation(
+                                            `/Workspaces/${workspace?.workspaceID}`
+                                          )
+                                        }
+                                      />
+                                    )
+                                  )
+                                )}
+                              </div>
+                              <button
+                                className="bg-thm-clr-1 my-4 text-white transition-all hover:text-black hover:bg-thm-clr-2 cursor-pointer rounded-md flex flex-row items-center gap-2 p-2 font-semibold text-xs"
+                                onClick={() => handleAction("addWorkspace")}
+                              >
+                                <IoMdAdd />
+                                <span>Add new workspace</span>
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Bottom Navigation - Settings and Logout */}
+            {/* Bottom Navigation */}
             <div>
               <ul>
-                {[
-                  {
-                    name: "Settings",
-                    icon: <MdOutlineSettings />,
-                    url: `/Settings`,
-                  },
-                  {
-                    name: "Log out",
-                    icon: <MdLogout />,
-                    url: "/",
-                  },
-                ].map((item, index) => (
+                {BOTTOM_NAV_ITEMS.map((item, index) => (
                   <li
                     key={index}
                     className={`${
@@ -518,11 +560,10 @@ const NavbarComponent = () => {
                       isCollapsed ? "justify-center" : "items-center"
                     } hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md p-2`}
                     onClick={() => {
-                      if (item.name === "Log out") {
-                        handleLogout();
+                      if (item.action) {
+                        handleAction(item.action);
                       } else {
-                        router.push(item.url);
-                        setIsMobileMenuOpen(false); // Close mobile menu
+                        handleNavigation(item.url);
                       }
                     }}
                     title={isCollapsed ? item.name : ""}
@@ -540,23 +581,23 @@ const NavbarComponent = () => {
 
         {/* Popups */}
         <CreateWorkSpacePopup
-          createPopupNum={CreateWorkspacePopupNum}
-          currentUserUsername={user?.username}
-          currentUserid={user?.uid}
+          createPopupNum={popupCounters.workspace}
+          uname={user?.username}
+          name={user?.name || ""}
+          uniqID={user?.uid}
           workspacearray={user?.workspaces || []}
-          currentUserEmail={user?.email}
-          currentUserFullName={user?.name || ""}
-          currentUserphotoUrl={user?.photoURL}
+          email={user?.email}
+          photoUrl={user?.photoURL}
         />
         <AddTaskPopup
-          addTaskPopupNum={AddTaskPopupNum}
+          addTaskPopupNum={popupCounters.task}
           username={user?.username}
         />
       </>
     );
   }
 
-  // Render top navbar for landing page
+  // Top navbar for landing page
   if (shouldShowTopNavbar()) {
     return (
       <nav className="fixed w-screen top-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
@@ -573,13 +614,13 @@ const NavbarComponent = () => {
                   className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-1 transition-all hover:text-black text-white bg-thm-clr-1"
                   onClick={() => router.push("/sign-up")}
                 >
-                  <span>Sign up</span>
+                  Sign up
                 </button>
                 <button
                   className="p-1 px-5 rounded-md hover:bg-transparent font-semibold border-2 border-thm-clr-2 transition-all hover:text-black text-black bg-thm-clr-2"
                   onClick={() => router.push("/log-in")}
                 >
-                  <span>Sign in</span>
+                  Sign in
                 </button>
               </div>
             </li>
@@ -589,16 +630,7 @@ const NavbarComponent = () => {
     );
   }
 
-  // Return null for auth pages (no navbar)
   return null;
 };
 
-const Navbar = () => {
-  return (
-    <Suspense>
-      <NavbarComponent />
-    </Suspense>
-  );
-};
-
-export default Navbar;
+export default NavbarComponent;

@@ -1,5 +1,11 @@
 import { db } from "@/lib/firebaseConfig";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "@firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "@firebase/firestore";
 
 const CreateWorkspace = (workspaceDoc) => {
   const {
@@ -29,12 +35,12 @@ const CreateWorkspace = (workspaceDoc) => {
 
 export default CreateWorkspace;
 
-export const updateWorkspaceinUsers = (userid, newWorkSpace) => {
+export const updateWorkspaceinUsers = (userid, workspaceID) => {
   return new Promise(async (resolve, reject) => {
     try {
       const docRef = doc(db, "users", userid);
       await updateDoc(docRef, {
-        workspaces: arrayUnion(newWorkSpace),
+        workspaces: arrayUnion(workspaceID),
       });
       console.log("Document written with ID: ", docRef.id);
       resolve();
