@@ -31,14 +31,6 @@ const AddProjectPopup = ({
   const dispatch = useDispatch();
   const [members, setMembers] = useState([]);
 
-  console.log(
-    activateNum,
-    username,
-    ProjectsArray,
-    workspaceID,
-    workspaceMembers
-  );
-
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
     useState(false);
 
@@ -73,10 +65,10 @@ const AddProjectPopup = ({
     { text: "white", bg: "bg-orange-500" },
   ];
 
-  useEffect(() => {
-    setprojectsArray(projectsArray);
-    console.log(projectsArray);
-  }, [projectsArray]);
+  // useEffect(() => {
+  //   setprojectsArray(projectsArray);
+  //   console.log(projectsArray);
+  // }, [projectsArray]);
 
   useEffect(() => {
     if (activateNum > 0) {

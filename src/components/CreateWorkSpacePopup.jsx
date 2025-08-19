@@ -167,6 +167,7 @@ const CreateWorkSpacePopup = ({
           textColor: customizedLogo?.textColor,
         },
         admin: [currentUserid],
+        creator: currentUserid,
         members: membersList,
         projects: [],
       };
@@ -175,17 +176,6 @@ const CreateWorkSpacePopup = ({
 
       if (res == workspaceID) {
         console.log("Workspace Created Successfully");
-
-        // const newWorkspace = {
-        //   workspaceTitle,
-        //   workspaceID,
-        //   isPrivate,
-        //   logo: {
-        //     text: LogoLetter,
-        //     bg: customizedLogo.bg,
-        //     textColor: customizedLogo.textColor,
-        //   },
-        // };
 
         // Send invitation notifications
         if (invitedUsers.length > 0) {
