@@ -1,3 +1,6 @@
+import { collection, doc, serverTimestamp, setDoc } from "@firebase/firestore";
+import { db } from "../firebaseConfig";
+
 export const createProjectInFirestore = async (projectData) => {
   try {
     const projectRef = doc(collection(db, "projects"));
