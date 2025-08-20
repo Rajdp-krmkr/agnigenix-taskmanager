@@ -1,23 +1,27 @@
-import CreateWorkspace, {
-  updateWorkspaceinUsers,
-} from "@/Firebase Functions/CreateWorkspace";
-import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
-import useDebounce from "@/Firebase Functions/useDebounce";
-import { auth } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "@firebase/auth";
-import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { GrStatusInfoSmall } from "react-icons/gr";
-import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
+import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import Image from "next/image";
+import { db } from "@/lib/firebaseConfig";
+import { collection, doc, setDoc, serverTimestamp } from "@firebase/firestore";
+import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
+import { resetInvitedUsersArray } from "@/lib/features/slice";
+import { generateCustomCode } from "./getCustomCode";
 import UserSearchResults, {
   UserSearchResultsForProjects,
 } from "./userSearchResults";
-import { generateCustomCode } from "./getCustomCode";
-import { useSelector, useDispatch } from "react-redux";
-import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
-import Link from "next/link";
-import { resetInvitedUsersArray } from "@/lib/features/slice";
-import createProject from "@/Firebase Functions/createProject";
+import { GrStatusInfoSmall } from "react-icons/gr";
+import {
+  MdOutlineDoNotDisturbAlt,
+  MdPersonAdd,
+  MdAssignment,
+  MdContentCopy,
+  MdLink,
+} from "react-icons/md";
+import { IoMdAdd, IoMdClose } from "react-icons/io";
+import { FaCalendarAlt, FaExclamationTriangle, FaLink } from "react-icons/fa";
+import { ColorsArray } from "@/lib/utils/LogoColorsArray";
+import { createProjectInFirestore } from "@/lib/utils/createProject";
 
 const AddProjectPopup = ({
   activateNum,
@@ -26,380 +30,1003 @@ const AddProjectPopup = ({
   workspaceID,
   workspaceMembers,
   workspaceTitle,
+  userid,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [members, setMembers] = useState([]);
+  const invitedUsers = useSelector(
+    (state) => state.invitedUsers.invitedUsersArray
+  );
 
-  const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =
-    useState(false);
+  // Popup state
+  const [showCreateProjectPopup, setShowCreateProjectPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [projectTitle, setprojectTitle] = useState("");
-  const [workspaceDescription, setWorkspaceDescription] = useState("");
-  const [isPrivate, setIsPrivate] = useState(false);
+  // Project form fields
+  const [projectTitle, setProjectTitle] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [assignees, setAssignees] = useState([]);
+  const [inviteUsers, setInviteUsers] = useState([]);
+  const [createdBy, setCreatedBy] = useState(username);
+
+  // Icon customization
   const [isCustomizingIcon, setIsCustomizingIcon] = useState(false);
-  const [LogoLetter, setLogoLetter] = useState("P");
+  const [logoLetter, setLogoLetter] = useState("P");
   const [customizedLogo, setCustomizedLogo] = useState(null);
 
-  const [fillAllTheFields, setFillAllTheFields] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [uid, setUid] = useState("");
-  // const [user, setUser] = useState(null);
-  const [projectsArray, setprojectsArray] = useState([]);
+  // Validation & messages
+  const [validationMessage, setValidationMessage] = useState(null);
+  const [showAssigneeSearch, setShowAssigneeSearch] = useState(false);
+  const [showInviteSearch, setShowInviteSearch] = useState(false);
 
-  useEffect(() => {
-    setprojectsArray(ProjectsArray);
-  }, [ProjectsArray]);
+  // Copy link functionality
+  const [showAssigneeCopyLink, setShowAssigneeCopyLink] = useState(false);
+  const [showInviteCopyLink, setShowInviteCopyLink] = useState(false);
+  const [copiedAssigneeLink, setCopiedAssigneeLink] = useState(false);
+  const [copiedViewLink, setCopiedViewLink] = useState(false);
+  const [copiedEditLink, setCopiedEditLink] = useState(false);
 
-  const [workspaceMessage, setWorkspaceMessage] = useState(null);
+  // Show all workspace members
+  const [showAllMembers, setShowAllMembers] = useState(true);
 
-  const ColorsArray = [
-    null,
-    { text: "white", bg: "bg-black" },
-    { text: "white", bg: "bg-red-500" },
-    { text: "white", bg: "bg-green-500" },
-    { text: "white", bg: "bg-purple-500" },
-    { text: "white", bg: "bg-yellow-500" },
-    { text: "white", bg: "bg-cyan-500" },
-    { text: "white", bg: "bg-blue-500" },
-    { text: "white", bg: "bg-orange-500" },
+  // Priority options
+  const priorityOptions = [
+    { value: "low", label: "Low", color: "text-green-600", bg: "bg-green-100" },
+    {
+      value: "medium",
+      label: "Medium",
+      color: "text-yellow-600",
+      bg: "bg-yellow-100",
+    },
+    { value: "high", label: "High", color: "text-red-600", bg: "bg-red-100" },
+    {
+      value: "urgent",
+      label: "Urgent",
+      color: "text-red-800",
+      bg: "bg-red-200",
+    },
   ];
 
-  // useEffect(() => {
-  //   setprojectsArray(projectsArray);
-  //   console.log(projectsArray);
-  // }, [projectsArray]);
+  // Role options for invited users
+  const roleOptions = [
+    { value: "view", label: "View Only" },
+    { value: "edit", label: "Edit Access" },
+  ];
 
+  // Show popup when activateNum changes
   useEffect(() => {
     if (activateNum > 0) {
-      setShowCreateWorkspacePopup(true);
+      setShowCreateProjectPopup(true);
     }
   }, [activateNum]);
 
-  const handleclick = () => {
-    const projectid = generateCustomCode(7);
-    if (validateprojectTitle(projectTitle)) {
-      setIsLoading(true);
-      const projectObject = {
-        projectTitle,
-        projectDescription: workspaceDescription,
-        projectID: projectid,
-        isPrivate,
-        projectLogoLetter: LogoLetter,
-        customizedProjectLogo: customizedLogo,
-        url: `/Workspaces/${workspaceTitle}/${workspaceID}/p/${projectTitle}/${projectid}/${username}`,
-        // members: members,
-      };
+  // Validation function
+  const validateProjectForm = () => {
+    if (!projectTitle.trim()) {
+      setValidationMessage({
+        type: "error",
+        message: "Project title is required",
+      });
+      return false;
+    }
+    if (projectTitle.length < 2 || projectTitle.length > 50) {
+      setValidationMessage({
+        type: "error",
+        message: "Project title must be between 2 and 50 characters",
+      });
+      return false;
+    }
+    if (!startDate) {
+      setValidationMessage({
+        type: "error",
+        message: "Start date is required",
+      });
+      return false;
+    }
+    if (!endDate) {
+      setValidationMessage({ type: "error", message: "End date is required" });
+      return false;
+    }
+    if (new Date(startDate) >= new Date(endDate)) {
+      setValidationMessage({
+        type: "error",
+        message: "End date must be after start date",
+      });
+      return false;
+    }
+    setValidationMessage({
+      type: "success",
+      message: "Project details are valid",
+    });
+    return true;
+  };
 
-      createProject(workspaceID, projectid, projectObject)
-        .then((res) => {
-          console.log("Project Created");
-          setIsLoading(false);
-          setShowCreateWorkspacePopup(false);
-        })
-        .catch((err) => {
-          console.log("error in creating project", err);
-          setIsLoading(false);
-          setShowCreateWorkspacePopup(false);
-        });
+  // Handle assignee selection
+  const handleAssigneeSelect = (user) => {
+    if (!assignees.find((assignee) => assignee.user_id === user.uid)) {
+      setAssignees([
+        ...assignees,
+        {
+          user_id: user.uid,
+          username: user.username,
+          name: user.name,
+          photoURL: user.photoURL,
+          role: "edit", // Default role for assignees
+        },
+      ]);
+    }
+    setShowAssigneeSearch(false);
+  };
+
+  // Handle assignee removal
+  const removeAssignee = (userId) => {
+    setAssignees(assignees.filter((assignee) => assignee.user_id !== userId));
+  };
+
+  // Handle invite user with role selection
+  const handleInviteUserWithRole = (user, role) => {
+    if (!inviteUsers.find((invite) => invite.user_id === user.uid)) {
+      setInviteUsers([
+        ...inviteUsers,
+        {
+          user_id: user.uid,
+          username: user.username,
+          name: user.name,
+          photoURL: user.photoURL,
+          role: role,
+        },
+      ]);
+    }
+    setShowInviteSearch(false);
+  };
+
+  // Remove invited user
+  const removeInvitedUser = (userId) => {
+    setInviteUsers(inviteUsers.filter((invite) => invite.user_id !== userId));
+  };
+
+  // Helper function to get available workspace members
+  const getAvailableWorkspaceMembers = () => {
+    // const newWorkSpaceMembers = workspaceMembers.filter(
+    //   (member) => member.uid !== userid
+    // );
+    return (
+      workspaceMembers?.filter(
+        (member) =>
+          !assignees.find((assignee) => assignee.user_id == member.uid) &&
+          !inviteUsers.find((invite) => invite.user_id == member.uid) &&
+          member.uid !== userid
+      ) || []
+    );
+  };
+
+  // Copy link functions
+  const generateAssigneeInviteLink = () => {
+    const baseUrl = window.location.origin;
+    const params = new URLSearchParams({
+      workspaceId: workspaceID,
+      role: "edit",
+      type: "assignee",
+      invitedBy: username,
+    });
+    return `${baseUrl}/invite/workspace?${params.toString()}`;
+  };
+
+  const generateExternalInviteLink = (role = "view") => {
+    const baseUrl = window.location.origin;
+    const params = new URLSearchParams({
+      workspaceId: workspaceID,
+      role: role,
+      type: "external",
+      invitedBy: username,
+    });
+    return `${baseUrl}/invite/workspace?${params.toString()}`;
+  };
+
+  const copyAssigneeLink = async () => {
+    try {
+      const link = generateAssigneeInviteLink();
+      await navigator.clipboard.writeText(link);
+      setCopiedAssigneeLink(true);
+      setTimeout(() => setCopiedAssigneeLink(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy assignee link:", error);
     }
   };
 
-  useEffect(() => {}, []);
+  const copyInviteLink = async (role = "view") => {
+    try {
+      const link = generateExternalInviteLink(role);
+      await navigator.clipboard.writeText(link);
 
-  function validateprojectTitle(projectTitle) {
-    if (projectTitle.length < 2 || projectTitle.length > 15) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Project title must be between 2 and 15 characters.",
-      });
-      return false;
+      if (role === "view") {
+        setCopiedViewLink(true);
+        setTimeout(() => setCopiedViewLink(false), 2000);
+      } else {
+        setCopiedEditLink(true);
+        setTimeout(() => setCopiedEditLink(false), 2000);
+      }
+    } catch (error) {
+      console.error("Failed to copy invite link:", error);
     }
-    if (projectTitle.startsWith("_")) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Project title cannot start with an (_).",
-      });
-      return false;
-    }
-    if (projectTitle.startsWith("-")) {
-      setWorkspaceMessage({
-        type: "error",
-        message: "Project title cannot start with an (-).",
-      });
-      return false;
-    }
-    const projectTitleRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+  };
 
-    if (!projectTitleRegex.test(projectTitle)) {
-      setWorkspaceMessage({
-        type: "error",
-        message:
-          "Project title can only contain letters, numbers, underscores (_), and hyphens (-).",
-      });
-      return false;
+  // Send notifications to invited users
+  const sendProjectNotifications = async (projectId, projectTitle) => {
+    const allUsers = [...assignees, ...inviteUsers];
+
+    for (const user of allUsers) {
+      if (user.username !== username) {
+        // Don't notify the creator
+        try {
+          await PostNotifications(
+            user.username,
+            `You've been invited to project "${projectTitle}"`,
+            "project_invitation",
+            {
+              projectId,
+              workspaceId: workspaceID,
+              role: user.role,
+              invitedBy: username,
+            }
+          );
+        } catch (error) {
+          console.error(
+            `Failed to send notification to ${user.username}:`,
+            error
+          );
+        }
+      }
     }
+  };
 
-    setWorkspaceMessage({
-      type: "success",
-      message: "Project title is valid.",
-    });
-    return true;
-  }
+  // Handle project creation
+  const handleCreateProject = async () => {
+    if (!validateProjectForm()) return;
 
-  useEffect(() => {
-    validateprojectTitle(projectTitle);
-  }, [projectTitle]);
+    setIsLoading(true);
+    try {
+      const projectId = generateCustomCode(12);
+
+      // Prepare project data according to new schema
+      const projectData = {
+        workspace_id: workspaceID,
+        title: projectTitle.trim(),
+        description: projectDescription.trim(),
+        deadlines: {
+          start_date: startDate,
+          end_date: endDate,
+        },
+        priority,
+        members: [
+          // Creator gets full access
+          {
+            user_id: username, // Assuming username is the user ID
+            role: "admin",
+          },
+          // Add assignees with edit access
+          ...assignees.map((assignee) => ({
+            user_id: assignee.user_id,
+            role: assignee.role,
+          })),
+          // Add invited users with specified roles
+          ...inviteUsers.map((invite) => ({
+            user_id: invite.user_id,
+            role: invite.role,
+          })),
+        ],
+        created_by: userid,
+        logo: {
+          letter: logoLetter,
+          customized: customizedLogo,
+        },
+        status: "active",
+      };
+
+      // Create project in Firestore
+      const projectId_final = await createProjectInFirestore(projectData);
+
+      // Send notifications
+      await sendProjectNotifications(projectId_final, projectTitle);
+
+      // Reset form and close popup
+      resetForm();
+      setShowCreateProjectPopup(false);
+
+      // Optionally redirect to project page
+      router.refresh(); // Refresh to show new project
+    } catch (error) {
+      console.error("Error creating project:", error);
+      setValidationMessage({
+        type: "error",
+        message: "Failed to create project. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset form function
+  const resetForm = () => {
+    setProjectTitle("");
+    setProjectDescription("");
+    setStartDate("");
+    setEndDate("");
+    setPriority("medium");
+    setAssignees([]);
+    setInviteUsers([]);
+    setLogoLetter("P");
+    setCustomizedLogo(null);
+    setValidationMessage(null);
+    setIsCustomizingIcon(false);
+    setShowAssigneeSearch(false);
+    setShowInviteSearch(false);
+    dispatch(resetInvitedUsersArray());
+  };
 
   return (
-    <>
+    <div
+      className={`${
+        showCreateProjectPopup ? "flex" : "hidden"
+      } fixed justify-center items-center w-screen h-screen top-0 left-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto`}
+      onClick={() => {
+        resetForm();
+        setShowCreateProjectPopup(false);
+      }}
+    >
       <div
-        className={`${
-          showCreateWorkspacePopup ? "flex" : "hidden"
-        } absolute justify-center items-center w-screen h-screen top-0 left-0 bg-black/50  backdrop-blur-sm z-20 overflow-x-hidden`}
-        onClick={() => {
-          setShowCreateWorkspacePopup(false);
-          setIsCustomizingIcon(false);
-          setCustomizedLogo(null);
-          setFillAllTheFields(null);
-          setIsPrivate(false);
-          if (LogoLetter === "") {
-            setLogoLetter("P");
-          }
-        }}
+        className="flex flex-col gap-4 min-w-[90%] max-w-[800px] max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl p-6 animate-PopUpAppear overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="flex flex-row justify-between gap-2 min-w-[40%] min-h-[50%] bg-[#dbdbdb] dark:bg-gray-700 rounded-3xl z-[21] p-4 animate-PopUpAppear"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsCustomizingIcon(false);
+        {/* Header */}
+        <div className="flex justify-between items-center border-b pb-4">
+          <div className="flex flex-col justify-center items-start">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              Create New Project{" "}
+              <span className="text-lg text-blue-600 dark:text-blue-400 font-medium">
+                (under {workspaceTitle} workspace)
+              </span>
+            </h1>
+            <p className="text-sm text-gray-400">
+              Don&apos;t worry, you can update project info at project settings
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              resetForm();
+              setShowCreateProjectPopup(false);
+            }}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+          >
+            <IoMdClose className="text-xl text-gray-600 dark:text-gray-300" />
+          </button>
+        </div>
 
-            if (LogoLetter === "") {
-              setLogoLetter("P");
-            }
-          }}
-        >
-          <div className={`mx-5 ${!isPrivate && "w-full"} transition-all`}>
-            <div className="text-xl mt-1">
-              <h1 className="font-bold">Create Project</h1>
-              {/* <p className="text-gray-400 text-xs font-normal">
-                Create a project for your team to collaborate and work
-                together
-              </p> */}
-            </div>
-            <div className="flex flex-col gap-2 my-4">
-              <label htmlFor="projectTitle" className="text-sm font-bold ">
-                Icon & project title{" "}
-                <span
-                  className={`${
-                    fillAllTheFields !== null ? "text-red-500" : "hidden"
-                  }`}
-                >
-                  ({fillAllTheFields?.message})
-                </span>
+        {/* Validation Message */}
+        {validationMessage && (
+          <div
+            className={`p-3 rounded-lg text-sm ${
+              validationMessage.type === "error"
+                ? "bg-red-100 text-red-700 border border-red-200"
+                : "bg-green-100 text-green-700 border border-green-200"
+            }`}
+          >
+            {validationMessage.message}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Basic Info */}
+          <div className="space-y-4">
+            {/* Project Title & Icon */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Project Icon & Title
               </label>
-              <div className="flex flex-row gap-2 justify-start items-center w-full">
+              <div className="flex gap-3 items-center">
                 <div
                   className={`${
                     customizedLogo === null
-                      ? "hover:bg-gray-300 text-gray-400"
-                      : `text-${customizedLogo.text} ${customizedLogo.bg}`
-                  } cursor-pointer icon border-2 flex justify-center rounded-xl items-center h-10 w-10 text-lg border-gray-400 dark:border-gray-500`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCustomizingIcon(!isCustomizingIcon);
-                  }}
+                      ? "bg-gray-200 text-gray-500 hover:bg-gray-300"
+                      : `${customizedLogo.bg} ${customizedLogo.text}`
+                  } cursor-pointer border-2 border-gray-300 dark:border-gray-600 flex justify-center items-center h-12 w-12 rounded-xl text-lg font-bold transition-colors`}
+                  onClick={() => setIsCustomizingIcon(!isCustomizingIcon)}
                 >
-                  <span className="font-bold">{LogoLetter}</span>
+                  {logoLetter || "P"}
                 </div>
                 <input
                   type="text"
-                  id="projectTitle"
                   value={projectTitle}
-                  onChange={(e) => {
-                    setprojectTitle(e.target.value);
-                  }}
-                  className="outline-thm-clr-1 rounded-xl p-3 border-2 w-[92%] bg-gray-100 dark:border-gray-500 dark:bg-gray-500 dark:placeholder:text-gray-100 placeholder:text-xs text-sm"
-                  placeholder="Add a project title"
+                  onChange={(e) => setProjectTitle(e.target.value)}
+                  className="flex-1 outline-none border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter project title"
                 />
               </div>
-              {workspaceMessage !== null ? (
-                <div
-                  className={`${
-                    workspaceMessage.type === "error"
-                      ? "text-red-500"
-                      : "text-green-500"
-                  } text-end text-xs`}
-                >
-                  {workspaceMessage.message}
-                </div>
-              ) : (
-                <></>
-              )}
             </div>
-            <div className="flex flex-col gap-2 my-4">
-              <label
-                htmlFor="workspaceDescription"
-                className="text-sm font-bold "
-              >
-                Project Description{" "}
-                <span className="font-semibold text-gray-400">(optional)</span>
+
+            {/* Project Description */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Description{" "}
+                <span className="text-gray-500 font-normal">(optional)</span>
               </label>
-              <input
-                type="text"
-                value={workspaceDescription}
-                onChange={(e) => {
-                  setWorkspaceDescription(e.target.value);
-                }}
-                id="workspaceDescription"
-                className="outline-thm-clr-1 rounded-xl p-3 border-2 bg-gray-100 dark:border-gray-500 dark:bg-gray-500 placeholder:text-xs dark:placeholder:text-gray-100 text-sm"
-                placeholder="Add a description"
+              <textarea
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                rows={3}
+                className="w-full outline-none border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-500 focus:border-blue-500 transition-colors resize-none"
+                placeholder="Describe your project..."
               />
             </div>
-            <div className="flex flex-row justify-between items-center gap-2 my-4">
+
+            {/* Deadlines */}
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="" className=" text-sm font-bold ">
-                  Make Private
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Start Date
                 </label>
-                <div className="flex flex-row gap-2 justify-start items-center w-full">
-                  <span className="text-xs text-gray-400">
-                    Private projects are only visible to invited members
-                  </span>
-                </div>
-              </div>
-              <div>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={isPrivate}
-                    onChange={(e) => {
-                      // console.log(e);
-                      // console.log(isPrivate);
-                      setIsPrivate(!isPrivate);
-                      // console.log(isPrivate)
-                    }}
-                  />
-                  <span>
-                    <em></em>
-                    <strong></strong>
-                  </span>
-                </label>
-              </div>
-            </div>
-            <div className="flex flex-row justify-between gap-2 my-5">
-              <button
-                className="bg-gray-400 dark:bg-gray-900 dark:hover:bg-black hover:bg-gray-500 transition-all text-white rounded-lg px-4 py-2 text-sm font-bold"
-                onClick={() => {
-                  setShowCreateWorkspacePopup(false);
-                  setIsCustomizingIcon(false);
-                  setCustomizedLogo(null);
-                  setFillAllTheFields(null);
-                  setprojectTitle("");
-                  setWorkspaceDescription("");
-                  setIsPrivate(false);
-                  if (LogoLetter === "") {
-                    setLogoLetter("P");
-                  }
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className={` ${
-                  isLoading
-                    ? "bg-gray-500 text-white"
-                    : "bg-thm-clr-1 hover:bg-thm-clr-2 hover:text-black text-white"
-                }  flex justify-center items-center gap-2 transition-all rounded-lg px-4 py-2 text-sm font-bold`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!isLoading) {
-                    handleclick();
-                  }
-                }}
-              >
-                {isLoading && (
-                  <>
-                    <div className="loader border-gray-500/25 w-4 h-4 border-2"></div>
-                  </>
-                )}
-                Create Project
-              </button>
-            </div>
-          </div>
-          {isPrivate && (
-            <>
-              <div className="w-[2px] bg-gray-300"></div>
-              <div className="m-2 flex flex-col items-start ">
-                {" "}
-                {/*animation-widthIncreasing */}
-                <h2 className="font-bold my-1">Invite users</h2>
-                <UserSearchResultsForProjects
-                  username={username}
-                  workspaceMembersArray={workspaceMembers}
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full outline-none border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 transition-colors"
                 />
               </div>
-            </>
-          )}
-          <div
-            className={`${
-              isCustomizingIcon ? "flex" : "hidden"
-            } flex-col gap-3 fixed top-[43.5vh] left-[18vw] bg-slate-200 shadow-md min-h-[15%] justify w-[220px] rounded-xl p-2`}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <div className="flex flex-row gap-2 items-center">
-              <label htmlFor="logoLetter">
-                <h1 className="text-xs font-bold my-1 text-gray-500">Logo:</h1>
-              </label>
-              <input
-                type="text"
-                value={LogoLetter}
-                id="logoLetter"
-                onChange={(e) => {
-                  if (e.target.value.length > 1) {
-                    setLogoLetter(e.target.value[0]);
-                  } else {
-                    setLogoLetter(e.target.value);
-                  }
-                }}
-                className="rounded-xl font-bold p-2 border-2 bg-slate-100 outline-thm-clr-1 placeholder:text-xs my-1 w-10 text-center text-sm text-gray-500"
-              />
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full outline-none border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:border-blue-500 transition-colors"
+                />
+              </div>
             </div>
-            <div className="bgcolors">
-              <h2 className="text-xs font-bold my-1 text-gray-500">
-                Background color
-              </h2>
-              <div className="grid grid-cols-7 grid-rows-2 gap-2">
-                {ColorsArray.map((colors, index) => (
-                  <span
-                    key={index}
-                    className={`${
-                      colors !== null ? colors.bg : "bg-transparent"
-                    } ${
-                      colors !== null
-                        ? `text-${colors.text}`
-                        : "text-gray-400 border-2 border-gray-300"
-                    } cursor-pointer hover:border-2 hover:border-gray-400 font-semibold text-center flex items-center justify-center text-xs rounded-lg  w-6 h-6`}
-                    onClick={() => {
-                      setCustomizedLogo(colors);
-                    }}
+
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Priority Level
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {priorityOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setPriority(option.value)}
+                    className={`p-3 rounded-xl border-2 transition-all ${
+                      priority === option.value
+                        ? `${option.bg} ${option.color} border-current`
+                        : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
                   >
-                    <span>
-                      {colors !== null ? (
-                        LogoLetter
-                      ) : (
-                        <MdOutlineDoNotDisturbAlt />
-                      )}
-                    </span>
-                  </span>
+                    <div className="flex items-center gap-2">
+                      <FaExclamationTriangle className="text-sm" />
+                      <span className="font-medium">{option.label}</span>
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
+
+          {/* Right Column - Members */}
+          <div className="space-y-4">
+            {/* Assignees Section */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Assignees{" "}
+                  <span className="text-gray-500">(Workspace Members)</span>
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      setShowAssigneeCopyLink(!showAssigneeCopyLink)
+                    }
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm border border-blue-300 dark:border-blue-700"
+                  >
+                    <FaLink className="text-sm" />
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={() => setShowAssigneeSearch(!showAssigneeSearch)}
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                  >
+                    <MdAssignment className="text-sm" />
+                    Search Members
+                  </button>
+                </div>
+              </div>
+
+              {/* Workspace Info */}
+
+              {/* Copy Link Section for Assignees */}
+              {showAssigneeCopyLink && (
+                <div className="mb-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">
+                        Assignee Invitation Link
+                      </h4>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        Share this link with workspace members to give them edit
+                        access to this project
+                      </p>
+                    </div>
+                    <button
+                      onClick={copyAssigneeLink}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        copiedAssigneeLink
+                          ? "bg-green-500 text-white"
+                          : "bg-blue-500 hover:bg-blue-600 text-white"
+                      }`}
+                    >
+                      {copiedAssigneeLink ? (
+                        <>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <MdContentCopy className="text-sm" />
+                          Copy Link
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Assignees List */}
+              {assignees.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {assignees.map((assignee) => (
+                    <div
+                      key={assignee.user_id}
+                      className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8">
+                          <Image
+                            src={
+                              assignee.photoURL ||
+                              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                            }
+                            alt={assignee.name}
+                            fill
+                            className="rounded-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800 dark:text-white text-sm">
+                            {assignee.name}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            @{assignee.username} • Edit Access
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeAssignee(assignee.user_id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <IoMdClose />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* All Workspace Members Display */}
+              {showAllMembers && (
+                <div className="mb-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                      All Workspace Members
+                    </h4>
+                    <button
+                      onClick={() => setShowAllMembers(false)}
+                      className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    >
+                      Hide
+                    </button>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto space-y-2 border border-blue-200 dark:border-blue-800 rounded-lg p-2 bg-blue-50/50 dark:bg-blue-900/10">
+                    {getAvailableWorkspaceMembers().map((member) => (
+                      <div
+                        key={member.uid}
+                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-100 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
+                        onClick={() => handleAssigneeSelect(member)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-8 h-8">
+                            <Image
+                              src={
+                                member.photoURL ||
+                                "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                              }
+                              alt={member.name}
+                              fill
+                              className="rounded-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800 dark:text-white text-sm">
+                              {member.name}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              @{member.username}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAssigneeSelect(member);
+                          }}
+                          className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                          Assign
+                        </button>
+                      </div>
+                    ))}
+                    {getAvailableWorkspaceMembers().length === 0 && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        All workspace members are already assigned
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Toggle Button for All Members */}
+              {!showAllMembers && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => setShowAllMembers(true)}
+                    className="w-full p-3 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-sm"
+                  >
+                    Show All Workspace Members (
+                    {getAvailableWorkspaceMembers().length} available)
+                  </button>
+                </div>
+              )}
+
+              {/* Assignee Search */}
+              {showAssigneeSearch && (
+                <div className="border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Search for specific workspace members:
+                  </p>
+                  <UserSearchResultsForProjects
+                    username={username}
+                    workspaceMembersArray={workspaceMembers}
+                    onUserSelect={handleAssigneeSelect}
+                    excludeUsers={assignees.map((a) => a.user_id)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Invite Users Section */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Invite Others{" "}
+                  <span className="text-gray-500">(External Users)</span>
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowInviteCopyLink(!showInviteCopyLink)}
+                    className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors text-sm border border-green-300 dark:border-green-700"
+                  >
+                    <FaLink className="text-sm" />
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={() => setShowInviteSearch(!showInviteSearch)}
+                    className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                  >
+                    <MdPersonAdd className="text-sm" />
+                    Send Invite
+                  </button>
+                </div>
+              </div>
+
+              {/* Copy Link Section for External Invites */}
+              {showInviteCopyLink && (
+                <div className="mb-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-semibold text-green-800 dark:text-green-200 mb-1">
+                        External User Invitation Links
+                      </h4>
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        Share these links with external users to invite them
+                        with specific permissions
+                      </p>
+                    </div>
+
+                    {/* View Access Link */}
+                    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-700">
+                      <div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-white">
+                          View Only Access
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Users can view project details but cannot edit
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => copyInviteLink("view")}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                          copiedViewLink
+                            ? "bg-green-500 text-white"
+                            : "bg-green-500 hover:bg-green-600 text-white"
+                        }`}
+                      >
+                        {copiedViewLink ? (
+                          <>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <MdContentCopy className="text-sm" />
+                            Copy Link
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Edit Access Link */}
+                    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-700">
+                      <div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-white">
+                          Edit Access
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Users can view and edit project details
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => copyInviteLink("edit")}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                          copiedEditLink
+                            ? "bg-green-500 text-white"
+                            : "bg-green-500 hover:bg-green-600 text-white"
+                        }`}
+                      >
+                        {copiedEditLink ? (
+                          <>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <MdContentCopy className="text-sm" />
+                            Copy Link
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Invited Users List */}
+              {inviteUsers.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {inviteUsers.map((user) => (
+                    <div
+                      key={user.user_id}
+                      className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8">
+                          <Image
+                            src={
+                              user.photoURL ||
+                              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                            }
+                            alt={user.name}
+                            fill
+                            className="rounded-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800 dark:text-white text-sm">
+                            {user.name}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            @{user.username} •{" "}
+                            {user.role === "view" ? "View Only" : "Edit Access"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={user.role}
+                          onChange={(e) => {
+                            setInviteUsers(
+                              inviteUsers.map((u) =>
+                                u.user_id === user.user_id
+                                  ? { ...u, role: e.target.value }
+                                  : u
+                              )
+                            );
+                          }}
+                          className="text-xs border rounded px-2 py-1 bg-white dark:bg-gray-600"
+                        >
+                          {roleOptions.map((role) => (
+                            <option key={role.value} value={role.value}>
+                              {role.label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => removeInvitedUser(user.user_id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <IoMdClose />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Invite Search */}
+              {showInviteSearch && (
+                <div className="border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Search and invite users with access level:
+                  </p>
+                  <UserSearchResults
+                    username={username}
+                    onUserSelect={(user, role) =>
+                      handleInviteUserWithRole(user, role)
+                    }
+                    showRoleSelector={true}
+                    roleOptions={roleOptions}
+                    excludeUsers={[
+                      ...assignees.map((a) => a.user_id),
+                      ...inviteUsers.map((u) => u.user_id),
+                    ]}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <button
+            onClick={() => {
+              resetForm();
+              setShowCreateProjectPopup(false);
+            }}
+            className="px-6 py-2 border-2 border-gray-300 text-gray-700 dark:text-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreateProject}
+            disabled={isLoading}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              isLoading
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Creating...
+              </div>
+            ) : (
+              "Create Project"
+            )}
+          </button>
+        </div>
+
+        {/* Icon Customization Popup */}
+        {isCustomizingIcon && (
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-xl rounded-xl p-4 z-60 border-2 border-gray-200 dark:border-gray-600"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Logo Letter:
+                </label>
+                <input
+                  type="text"
+                  value={logoLetter}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLogoLetter(value.length > 1 ? value[0] : value);
+                  }}
+                  className="w-12 h-12 text-center font-bold border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                  maxLength={1}
+                />
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Background Color:
+                </h3>
+                <div className="grid grid-cols-7 gap-2">
+                  {ColorsArray.map((color, index) => (
+                    <button
+                      key={index}
+                      className={`w-8 h-8 rounded-lg border-2 border-gray-300 flex items-center justify-center font-bold text-xs transition-all hover:scale-110 ${
+                        color
+                          ? `${color.bg} ${color.textColor}`
+                          : "bg-transparent text-gray-400"
+                      }`}
+                      onClick={() => setCustomizedLogo(color)}
+                    >
+                      {color ? logoLetter : <MdOutlineDoNotDisturbAlt />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsCustomizingIcon(false)}
+                className="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

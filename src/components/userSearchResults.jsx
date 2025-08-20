@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import realTimeUserSearch, {
   realTimeUserSearchForProject,
 } from "@/Firebase Functions/realTimeUserSearch";
@@ -9,37 +9,51 @@ import UsersOfSearchResults, {
 } from "./usersOfSearchResults";
 // import { useSelector } from "react-redux";
 
-const UserSearchResults = ({ username }) => {
+const UserSearchResults = ({
+  username,
+  onUserSelect,
+  showRoleSelector = false,
+  roleOptions = [],
+  excludeUsers = [],
+}) => {
   const [searchresultsArray, setSearchResultsArray] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [usersArray, setUsersArray] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("view");
 
-  const getSearchResults = (searchQuery) => {
-    //TODO change to lowercase
-    const upperCasedSearchQuery = searchQuery.toUpperCase();
+  const getSearchResults = useCallback(
+    (searchQuery) => {
+      //TODO change to lowercase
+      const upperCasedSearchQuery = searchQuery.toUpperCase();
 
-    const arr = [];
+      const arr = [];
 
-    if (searchQuery !== "") {
-      for (let i = 0; i < usersArray.length; i++) {
-        if (usersArray[i].UpperCasedUsername.includes(upperCasedSearchQuery)) {
-          arr.push(usersArray[i]);
-        } else if (
-          usersArray[i].UpperCasedName.includes(upperCasedSearchQuery)
-        ) {
-          arr.push(usersArray[i]);
+      if (searchQuery !== "") {
+        for (let i = 0; i < usersArray.length; i++) {
+          // Exclude already selected users
+          if (excludeUsers.includes(usersArray[i].uid)) continue;
+
+          if (
+            usersArray[i].UpperCasedUsername.includes(upperCasedSearchQuery)
+          ) {
+            arr.push(usersArray[i]);
+          } else if (
+            usersArray[i].UpperCasedName.includes(upperCasedSearchQuery)
+          ) {
+            arr.push(usersArray[i]);
+          }
         }
+        setSearchResultsArray(arr);
+      } else if (searchQuery == "") {
+        setSearchResultsArray([]);
       }
-      setSearchResultsArray(arr);
-    } else if (searchQuery == "") {
-      setSearchResultsArray([]);
-    }
-  };
+    },
+    [usersArray, excludeUsers]
+  );
 
   useEffect(() => {
     getSearchResults(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, getSearchResults]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -69,6 +83,25 @@ const UserSearchResults = ({ username }) => {
 
   return (
     <div className="">
+      {showRoleSelector && roleOptions.length > 0 && (
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Access Level:
+          </label>
+          <select
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+          >
+            {roleOptions.map((role) => (
+              <option key={role.value} value={role.value}>
+                {role.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <input
         type="text"
         id="search"
@@ -79,7 +112,7 @@ const UserSearchResults = ({ username }) => {
         className="outline-thm-clr-1 rounded-xl p-3 border-2 dark:border-gray-500 w-full dark:bg-gray-500 dark:text-gray-100 dark:placeholder:text-gray-100 bg-gray-100 placeholder:text-xs text-sm"
         placeholder="Type username or name"
       />
-      <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
+      <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all max-h-48">
         {searchresultsArray === null ? (
           <div className="loader w-9 h-9 border-[4px] border-white"></div>
         ) : searchresultsArray.length === 0 && searchQuery !== "" ? (
@@ -89,13 +122,23 @@ const UserSearchResults = ({ username }) => {
         ) : (
           searchresultsArray.map((user, index) => {
             console.log(user, username);
-            if (user.username !== username) {
+            if (
+              user.username !== username &&
+              !excludeUsers.includes(user.uid)
+            ) {
               return (
-                <>
+                <div
+                  key={index}
+                  onClick={() =>
+                    onUserSelect && onUserSelect(user, selectedRole)
+                  }
+                  className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border-b border-gray-200 dark:border-gray-700"
+                >
                   <UsersOfSearchResults index={index} user={user} />
-                </>
+                </div>
               );
             }
+            return null;
           })
         )}
       </div>
@@ -108,6 +151,8 @@ export default UserSearchResults;
 export const UserSearchResultsForProjects = ({
   username,
   workspaceMembersArray,
+  onUserSelect,
+  excludeUsers = [],
 }) => {
   // const username = params.user;
   const [searchresultsArray, setSearchResultsArray] = useState(null);
@@ -115,31 +160,39 @@ export const UserSearchResultsForProjects = ({
 
   const [usersArray, setUsersArray] = useState([]);
 
-  const getSearchResults = (searchQuery) => {
-    const upperCasedSearchQuery = searchQuery.toUpperCase();
+  const getSearchResults = useCallback(
+    (searchQuery) => {
+      const upperCasedSearchQuery = searchQuery.toUpperCase();
 
-    const arr = [];
+      const arr = [];
 
-    if (searchQuery !== "") {
-      for (let i = 0; i < usersArray.length; i++) {
-        if (usersArray[i].UpperCasedUsername.includes(upperCasedSearchQuery)) {
-          arr.push(usersArray[i]);
-        } else if (
-          usersArray[i].UpperCasedName.includes(upperCasedSearchQuery)
-        ) {
-          arr.push(usersArray[i]);
+      if (searchQuery !== "") {
+        for (let i = 0; i < usersArray.length; i++) {
+          // Exclude already selected users
+          if (excludeUsers.includes(usersArray[i].uid)) continue;
+
+          if (
+            usersArray[i].UpperCasedUsername.includes(upperCasedSearchQuery)
+          ) {
+            arr.push(usersArray[i]);
+          } else if (
+            usersArray[i].UpperCasedName.includes(upperCasedSearchQuery)
+          ) {
+            arr.push(usersArray[i]);
+          }
         }
-      }
 
-      setSearchResultsArray(arr);
-    } else if (searchQuery === "") {
-      setSearchResultsArray([]);
-    }
-  };
+        setSearchResultsArray(arr);
+      } else if (searchQuery === "") {
+        setSearchResultsArray([]);
+      }
+    },
+    [usersArray, excludeUsers]
+  );
 
   useEffect(() => {
     getSearchResults(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, getSearchResults]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -180,7 +233,7 @@ export const UserSearchResultsForProjects = ({
           className="outline-thm-clr-1 rounded-xl p-3 border-2 dark:border-gray-500 w-full dark:bg-gray-500 dark:text-gray-100 dark:placeholder:text-gray-100 bg-gray-100 placeholder:text-xs text-sm"
           placeholder="Type username or name"
         />
-        <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all">
+        <div className="overflow-auto w-[260px] searchResultScrollBar my-2 transition-all max-h-48">
           {searchresultsArray === null ? (
             <div className="loader w-9 h-9 border-[4px] border-white"></div>
           ) : searchresultsArray.length === 0 && searchQuery !== "" ? (
@@ -189,15 +242,22 @@ export const UserSearchResultsForProjects = ({
             </div>
           ) : (
             searchresultsArray.map((user, index) => {
-              if (user.username !== username) {
+              if (
+                user.username !== username &&
+                !excludeUsers.includes(user.uid)
+              ) {
                 return (
-                  <>
+                  <div
+                    key={index}
+                    onClick={() => onUserSelect && onUserSelect(user)}
+                    className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border-b border-gray-200 dark:border-gray-700"
+                  >
                     <UsersOfSearchResultsForProject
                       index={index}
                       user={user}
                       workspacearray={workspaceMembersArray}
                     />
-                  </>
+                  </div>
                 );
               }
             })

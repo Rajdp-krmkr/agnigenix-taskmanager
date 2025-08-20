@@ -3,6 +3,8 @@ import { auth } from "@/lib/firebaseConfig";
 import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { Suspense, useEffect, useState, useMemo } from "react";
+import { LiaProjectDiagramSolid } from "react-icons/lia";
+
 import {
   MdOutlineDashboard,
   MdDashboard,
@@ -27,6 +29,7 @@ import ThemeToggle from "./ThemeToggle";
 import AddTaskPopup from "./AddTaskPopup";
 import { useUserContext } from "@/context/userContext";
 import { fetchWorkspaces } from "@/lib/utils/fetchWorkspaces";
+import { FaDiagramProject } from "react-icons/fa6";
 
 // Constants
 const AUTH_PAGES = [
@@ -89,6 +92,12 @@ const createNavItems = (username) => [
     activeIcon: <MdOutlineWork />,
     hasSubMenu: true,
     isWorkspace: true,
+  },
+  {
+    name: "Projects",
+    icon: <LiaProjectDiagramSolid />,
+    activeIcon: <FaDiagramProject />,
+    url: `/projects`,
   },
 ];
 

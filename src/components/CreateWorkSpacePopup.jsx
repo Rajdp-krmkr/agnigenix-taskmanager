@@ -12,6 +12,7 @@ import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications"
 import { createDateInfo } from "@/lib/utils/CreateDateInfo";
 import { useUserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
+import { ColorsArray } from "@/lib/utils/LogoColorsArray";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
@@ -47,18 +48,6 @@ const CreateWorkSpacePopup = ({
   // Validation and Error State
   const [fillAllTheFields, setFillAllTheFields] = useState(null);
   const [workspaceMessage, setWorkspaceMessage] = useState(null);
-
-  // Constants
-  const ColorsArray = [
-    { textColor: "white", bg: "bg-black" },
-    { textColor: "white", bg: "bg-red-500" },
-    { textColor: "white", bg: "bg-green-500" },
-    { textColor: "white", bg: "bg-purple-500" },
-    { textColor: "white", bg: "bg-yellow-500" },
-    { textColor: "white", bg: "bg-cyan-500" },
-    { textColor: "white", bg: "bg-blue-500" },
-    { textColor: "white", bg: "bg-orange-500" },
-  ];
 
   // Show popup when createPopupNum changes
   useEffect(() => {

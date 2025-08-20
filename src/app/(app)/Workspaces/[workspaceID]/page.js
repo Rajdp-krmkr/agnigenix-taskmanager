@@ -1,14 +1,21 @@
 "use client";
 import AddProjectPopup from "@/components/AddProjectPopup";
 import { useUserContext } from "@/context/userContext";
-import { CheckIfUserAssignedToWorkspace } from "@/Firebase Functions/isUserAuthenticated";
-import getProjects from "@/Firebase Functions/projects";
 import { db } from "@/lib/firebaseConfig";
-import { collection, doc, getDoc, getDocs, where } from "@firebase/firestore";
+import { RiExpandDiagonalFill } from "react-icons/ri";
+
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "@firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import { FaPlus } from "react-icons/fa6";
 
@@ -20,6 +27,7 @@ const Page = () => {
 
   const [isUserAssigned, setisUserAssigned] = useState(null);
   const [membersData, setMembersData] = useState(null);
+  const [detailedMembersData, setDetailedMembersData] = useState([]);
   const [isMembersLoading, setIsMembersLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [projectsArray, setProjectsArray] = useState([]);
@@ -47,7 +55,7 @@ const Page = () => {
         const data = docSnap.data();
         setCurrentWorkspace(data);
         const membersArray = data?.members || [];
-        const member = membersArray.find((member) => member.uid == user.uid);
+        const member = membersArray.find((member) => member.uid == user?.uid);
         if (member) {
           setisUserAssigned(true);
           setIsAdmin(member?.isAdmin);
@@ -61,33 +69,59 @@ const Page = () => {
       }
       setIsLoadingCurrentWorkspace(false);
     };
-    if (isUserLoggedIn && !isLoading) fetchWorkspace();
-    else router.replace("/sign-up");
-  }, [user, isLoading, isUserLoggedIn]);
+
+    if (isUserLoggedIn && !isLoading && user?.uid) {
+      fetchWorkspace();
+    } else if (!isUserLoggedIn && !isLoading) {
+      router.replace("/sign-up");
+    }
+  }, [
+    user?.uid,
+    isLoading,
+    isUserLoggedIn,
+    workspaceID,
+    router,
+    setCurrentWorkspace,
+    setIsLoadingCurrentWorkspace,
+  ]);
 
   useEffect(() => {
-    if (membersData) {
-      let temp = [];
+    const fetchDetailedMembersData = async () => {
+      if (
+        membersData &&
+        membersData.length > 0 &&
+        detailedMembersData.length === 0
+      ) {
+        setIsMembersLoading(true);
+        try {
+          const memberPromises = membersData.map(async (member) => {
+            const q = query(
+              collection(db, "users"),
+              where("uid", "==", member.uid)
+            );
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+              return querySnapshot.docs[0].data();
+            }
+            return null;
+          });
 
-      membersData.forEach(async (member) => {
-        const q = query(
-          collection(db, "users"),
-          where("uid", "==", member.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          temp.push(doc.data());
-        });
+          const resolvedMembers = await Promise.all(memberPromises);
+          const validMembers = resolvedMembers.filter(
+            (member) => member !== null
+          );
 
-        // const memberRef = doc(db, "users", member.uid);
-        // const memberSnap = await getDoc(memberRef);
-        // if (memberSnap.exists()) {
-        //   temp.push(...memberSnap.data());
-        // }
-      });
-      setMembersData(temp);
-    }
-  }, [membersData, isMembersLoading]);
+          setDetailedMembersData(validMembers);
+        } catch (error) {
+          console.error("Error fetching members data:", error);
+        } finally {
+          setIsMembersLoading(false);
+        }
+      }
+    };
+
+    fetchDetailedMembersData();
+  }, [membersData, detailedMembersData.length]);
 
   if (isLoadingCurrentWorkspace) {
     return (
@@ -164,26 +198,9 @@ const Page = () => {
                               Admin
                             </h1>
                           ) : (
-                            <>
-                              <div className="w-[65px] h-5"></div>
-                            </>
+                            <div className="w-[65px] h-5"></div>
                           )}
-
-                          {/* {member.isPendingInvitation !== null
-                                ? member.isPendingInvitation
-                                  ? ""
-                                  : "Pending"
-                                : "null"} */}
                         </div>
-
-                        {/* <h1 className="dark:text-gray-300">
-                            isInvitationAccepted:{" "}
-                            {member.isInvitationAccepted
-                              ? member.isInvitationAccepted
-                                ? "true"
-                                : "false"
-                              : "null"}
-                          </h1> */}
                       </div>
                     );
                   })
@@ -196,12 +213,21 @@ const Page = () => {
           <div className="listOfUsers lg:w-1/3 dark:bg-gray-800 bg-gray-100 rounded-3xl p-3">
             <div className="text-xl flex flex-row justify-between items-center dark:text-gray-200 font-bold p-1 border-b-2 dark:border-gray-500">
               <h1>Projects</h1>
-              <FaPlus
-                className="hover:bg-gray-700 cursor-pointer"
-                onClick={() => {
-                  setAddProjectActivateNum(AddProjectActivateNum + 1);
-                }}
-              />
+              <div className="flex justify-center items-center   gap-5">
+                <RiExpandDiagonalFill
+                  className="hover:bg-gray-700 cursor-pointer text-3xl p-2"
+                  onClick={() => {
+                    router.push("/projects");
+                  }}
+                />
+
+                <FaPlus
+                  className="hover:bg-gray-700 cursor-pointer "
+                  onClick={() => {
+                    setAddProjectActivateNum(AddProjectActivateNum + 1);
+                  }}
+                />
+              </div>
             </div>
 
             <div className="m-4 h-[250px] overflow-auto workspaceScrollBar">
@@ -253,9 +279,10 @@ const Page = () => {
       <AddProjectPopup
         activateNum={AddProjectActivateNum}
         username={user.username}
+        userid={user.uid}
         ProjectsArray={projectsArray}
         workspaceID={workspaceID}
-        workspaceMembers={membersData}
+        workspaceMembers={detailedMembersData}
         workspaceTitle={currentWorkspace?.workspaceTitle}
       />
     </>
