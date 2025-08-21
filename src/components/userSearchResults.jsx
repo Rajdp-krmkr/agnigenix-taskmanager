@@ -53,7 +53,7 @@ const UserSearchResults = ({
 
   useEffect(() => {
     getSearchResults(searchQuery);
-  }, [searchQuery, getSearchResults]);
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -121,21 +121,22 @@ const UserSearchResults = ({
           </div>
         ) : (
           searchresultsArray.map((user, index) => {
-            console.log(user, username);
             if (
               user.username !== username &&
               !excludeUsers.includes(user.uid)
             ) {
               return (
-                <div
-                  key={index}
-                  onClick={() =>
-                    onUserSelect && onUserSelect(user, selectedRole)
-                  }
-                  className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border-b border-gray-200 dark:border-gray-700"
-                >
+                <div key={index}>
                   <UsersOfSearchResults index={index} user={user} />
                 </div>
+                // <div
+                //   key={index}
+                //   onClick={() =>
+                //     onUserSelect && onUserSelect(user, selectedRole)
+                //   }
+                //   className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border-b border-gray-200 dark:border-gray-700"
+                // >
+                // </div>
               );
             }
             return null;

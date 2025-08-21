@@ -356,7 +356,7 @@ const CreateWorkSpacePopup = ({
             <>
               <div className="w-[2px] bg-gray-300"></div>
               <div className="m-2 flex flex-col items-start ">
-                {/*animation-widthIncreasing */}
+                {/* animation-widthIncreasing */}
                 <h2 className="font-bold my-1">Invite users</h2>
                 <UserSearchResults username={currentUserUsername} />
               </div>

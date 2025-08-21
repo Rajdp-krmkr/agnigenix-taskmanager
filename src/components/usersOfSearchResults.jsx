@@ -12,11 +12,11 @@ const UsersOfSearchResults = ({ user, index }) => {
   const InvitedUser = useSelector((state) => state.invitedUsers);
 
   const isUserInvited = InvitedUser.invitedUsers.some(
-    (invitedUser) => invitedUser.username === user.username
+    (invitedUser) => invitedUser.uid === user.uid
   );
 
   useEffect(() => {
-    console.log(isUserInvited);
+    console.log("isUserInvited", isUserInvited);
   }, [isUserInvited]);
 
   useEffect(() => {
@@ -60,25 +60,24 @@ const UsersOfSearchResults = ({ user, index }) => {
       </div>
       <div className="w-10 flex gap-1 mx-2">
         {invitingButtons && !isUserInvited ? (
-          <>
-            <button
-              className="hover:scale-110"
-              onClick={(e) => {
-                e.preventDefault();
-                dispatch(
-                  addInvitedUser({
-                    isAdmin: false,
-                    uid: user.uid,
-                    isInvitationAccepted: false,
-                  })
-                );
-                setInvitingButtons(false);
-              }}
-              title="Send invitation"
-            >
-              ✅
-            </button>
-          </>
+          <button
+            className="hover:scale-110"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch(
+                addInvitedUser({
+                  isAdmin: false,
+                  uid: user.uid,
+                  isInvitationAccepted: false,
+                })
+              );
+              setInvitingButtons(false);
+              console.log("inviting buttons set to false");
+            }}
+            title="Send invitation"
+          >
+            ✅
+          </button>
         ) : (
           isUserInvited &&
           (!invitingButtons ? (
@@ -86,22 +85,20 @@ const UsersOfSearchResults = ({ user, index }) => {
               <span>Invited</span>
             </span>
           ) : (
-            <>
-              <button
-                className="hover:scale-110"
-                onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(
-                    removeInvitedUser({
-                      username: user.username,
-                    })
-                  );
-                  setInvitingButtons(false);
-                }}
-              >
-                ❌
-              </button>
-            </>
+            <button
+              className="hover:scale-110"
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch(
+                  removeInvitedUser({
+                    uid: user.uid,
+                  })
+                );
+                setInvitingButtons(false);
+              }}
+            >
+              ❌
+            </button>
           ))
         )}
       </div>

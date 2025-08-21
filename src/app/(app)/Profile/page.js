@@ -42,7 +42,7 @@ const Page = () => {
           This is your profile page, you can view and edit your information here
         </p>
       </div>
-      <div className="w-[90%] min-h-[70vh] flex flex-row gap-7 mx-20 m-5">
+      <div className="w-[90%] min-h-[70vh] flex flex-row gap-7 m-5">
         <div className="flex w-[50%] h-max rounded-3xl flex-col gap-2 bg-gray-100 dark:bg-gray-800">
           <div className="photos h-[190px] ">
             <div className="coverPhoto relative w-full h-36 bg-black rounded-t-3xl">
