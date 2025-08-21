@@ -37,11 +37,11 @@ const Page = () => {
 
   return (
     <>
-      <div className="mt-7 lg:ml-[210px] lg:mr-[180px] m-10 flex flex-col justify-center items-">
+      <div className="mt-7  lg:mr-[180px] m-10 flex flex-col justify-center items-">
         <div className="">
-          <h1 className="text-2xl font-bold mx-12">Notifications</h1>
+          <h1 className="text-2xl font-bold">Notifications</h1>
         </div>
-        <div className="flex flex-row mt-3 ml-[50px] ">
+        <div className="flex flex-row mt-3  ">
           <div className=" w-full">
             {AllNotifications === null ? (
               <div className="w-full flex justify-center items-center">
@@ -57,7 +57,6 @@ const Page = () => {
               <div className="text-center">No Notifications</div>
             ) : (
               AllNotifications.map((notification, index) => {
-                // console.log(notification);
                 return (
                   <>
                     <div key={index}>

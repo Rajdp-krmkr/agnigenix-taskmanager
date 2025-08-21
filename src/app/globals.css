@@ -63,7 +63,7 @@ html:not(.dark):not(.light) {
 }
 
 .dark .text-black {
-  color: #f9fafb !important;
+  /* color: #f9fafb !important; */
 }
 
 .btn {

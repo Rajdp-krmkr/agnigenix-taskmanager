@@ -31,6 +31,7 @@ const AddProjectPopup = ({
   workspaceMembers,
   workspaceTitle,
   userid,
+  setProjectsArray,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -327,8 +328,21 @@ const AddProjectPopup = ({
       };
 
       // Create project in Firestore
-      const projectId_final = await createProjectInFirestore(projectData);
+      const projectId_final = await createProjectInFirestore(
+        projectData,
+        workspaceID
+      );
+      // Update workspace context with new project
+      // dispatch(
+      //   addProjectToWorkspace({ workspaceID, projectId: projectId_final })
+      // );
 
+      setProjectsArray((prevProjects) => [
+        ...prevProjects,
+        { id: projectId_final, title: projectTitle },
+      ]);
+
+      //TODO: add to workspace in context and update to fetch project details
       // Send notifications
       await sendProjectNotifications(projectId_final, projectTitle);
 
@@ -349,7 +363,7 @@ const AddProjectPopup = ({
     }
   };
 
-  // Reset form function
+  // Reset form functionuu
   const resetForm = () => {
     setProjectTitle("");
     setProjectDescription("");
