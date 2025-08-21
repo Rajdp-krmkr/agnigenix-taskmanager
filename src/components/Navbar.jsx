@@ -103,7 +103,7 @@ const createNavItems = (username) => [
 
 const BOTTOM_NAV_ITEMS = [
   { name: "Settings", icon: <MdOutlineSettings />, url: `/Settings` },
-  { name: "Log out", icon: <MdLogout />, action: "logout" },
+  // { name: "Log out", icon: <MdLogout />, action: "logout" },
 ];
 
 // Sub-components

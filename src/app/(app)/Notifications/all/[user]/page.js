@@ -36,44 +36,42 @@ const Page = () => {
   }, [AllNotifications]);
 
   return (
-    <>
-      <div className="mt-7  lg:mr-[180px] m-10 flex flex-col justify-center items-">
-        <div className="">
-          <h1 className="text-2xl font-bold">Notifications</h1>
-        </div>
-        <div className="flex flex-row mt-3  ">
-          <div className=" w-full">
-            {AllNotifications === null ? (
-              <div className="w-full flex justify-center items-center">
-                <div className="typewriter absolute top-[40vh] self-center">
-                  <div className="slide">
-                    <i></i>
-                  </div>
-                  <div className="paper"></div>
-                  <div className="keyboard"></div>
-                </div>
-              </div>
-            ) : AllNotifications.length === 0 ? (
-              <div className="text-center">No Notifications</div>
-            ) : (
-              AllNotifications.map((notification, index) => {
-                return (
-                  <>
-                    <div key={index}>
-                      <Notifications
-                        username={username}
-                        notification={notification}
-                      />
-                    </div>
-                  </>
-                );
-              })
-            )}
-          </div>
-          <div></div>
-        </div>
+    <div className="mt-7  lg:mr-[180px] m-10 flex flex-col justify-center items-">
+      <div className="">
+        <h1 className="text-2xl font-bold">Notifications</h1>
       </div>
-    </>
+      <div className="flex flex-row mt-3  ">
+        <div className=" w-full">
+          {AllNotifications === null ? (
+            <div className="w-full flex justify-center items-center">
+              <div className="typewriter absolute top-[40vh] self-center">
+                <div className="slide">
+                  <i></i>
+                </div>
+                <div className="paper"></div>
+                <div className="keyboard"></div>
+              </div>
+            </div>
+          ) : AllNotifications.length === 0 ? (
+            <div className="text-center">No Notifications</div>
+          ) : (
+            AllNotifications.map((notification, index) => {
+              return (
+                <>
+                  <div key={index}>
+                    <Notifications
+                      username={username}
+                      notification={notification}
+                    />
+                  </div>
+                </>
+              );
+            })
+          )}
+        </div>
+        <div></div>
+      </div>
+    </div>
   );
 };
 
