@@ -21,7 +21,7 @@ export default function AppLayout({ children }) {
         isCollapsed ? "lg:ml-[80px]" : "lg:ml-[240px]"
       } min-h-screen pt-16 lg:pt-0`}
     >
-      <div className="p-4">{children}</div>
+      <div className="">{children}</div>
     </main>
   );
 }

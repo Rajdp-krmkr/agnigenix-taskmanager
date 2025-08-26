@@ -6,8 +6,14 @@ import { RxCross2 } from "react-icons/rx";
 import AddTask from "@/Firebase Functions/AddUpdateFetchTask";
 import { generateCustomCode } from "./getCustomCode";
 
-const AddTaskPopup = ({ addTaskPopupNum, username }) => {
+// Ensure components are available before rendering
+if (typeof window === "undefined") {
+  React.useLayoutEffect = React.useEffect;
+}
+
+const AddTaskPopup = ({ addTaskPopupNum = 0, username }) => {
   const [OpenPopup, setOpenPopup] = useState(false);
+
   useEffect(() => {
     if (addTaskPopupNum > 0) {
       setOpenPopup(true);

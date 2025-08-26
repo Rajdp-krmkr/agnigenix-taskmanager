@@ -589,19 +589,25 @@ const NavbarComponent = () => {
         </nav>
 
         {/* Popups */}
-        <CreateWorkSpacePopup
-          createPopupNum={popupCounters.workspace}
-          uname={user?.username}
-          name={user?.name || ""}
-          uniqID={user?.uid}
-          workspacearray={user?.workspaces || []}
-          email={user?.email}
-          photoUrl={user?.photoURL}
-        />
-        <AddTaskPopup
-          addTaskPopupNum={popupCounters.task}
-          username={user?.username}
-        />
+        <React.Suspense fallback={null}>
+          {user?.username && (
+            <>
+              <CreateWorkSpacePopup
+                createPopupNum={popupCounters?.workspace || 0}
+                uname={user?.username}
+                name={user?.name || ""}
+                uniqID={user?.uid}
+                workspacearray={user?.workspaces || []}
+                email={user?.email}
+                photoUrl={user?.photoURL}
+              />
+              {/* <AddTaskPopup
+                addTaskPopupNum={popupCounters?.task || 0}
+                username={user?.username}
+              /> */}
+            </>
+          )}
+        </React.Suspense>
       </>
     );
   }
