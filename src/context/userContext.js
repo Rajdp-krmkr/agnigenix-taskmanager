@@ -23,6 +23,8 @@ const UserContextProvider = ({ children }) => {
   const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(true);
   const [isLoadingCurrentWorkspace, setIsLoadingCurrentWorkspace] =
     useState(true);
+  const [currentProject, setCurrentProject] = useState(null);
+  const [isCurrentProjectLoading, setIsCurrentProjectLoading] = useState(true);
 
   const fetchUser = () => {
     return onAuthStateChanged(auth, async (authUser) => {
@@ -95,6 +97,10 @@ const UserContextProvider = ({ children }) => {
         setIsLoadingWorkspace,
         isLoadingCurrentWorkspace,
         setIsLoadingCurrentWorkspace,
+        isCurrentProjectLoading,
+        setIsCurrentProjectLoading,
+        currentProject,
+        setCurrentProject,
       }}
     >
       {children}

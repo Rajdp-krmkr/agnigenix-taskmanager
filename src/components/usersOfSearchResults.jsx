@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addInvitedUser,
@@ -7,7 +7,7 @@ import {
   removeInvitedUser,
 } from "@/lib/features/slice";
 
-const UsersOfSearchResults = ({ user, index }) => {
+const UsersOfSearchResults = memo(({ user, index }) => {
   const dispatch = useDispatch();
   const InvitedUser = useSelector((state) => state.invitedUsers);
 
@@ -104,11 +104,13 @@ const UsersOfSearchResults = ({ user, index }) => {
       </div>
     </div>
   );
-};
+});
+
+UsersOfSearchResults.displayName = 'UsersOfSearchResults';
 
 export default UsersOfSearchResults;
 
-export const UsersOfSearchResultsForProject = ({
+export const UsersOfSearchResultsForProject = memo(({
   user,
   index,
   workspaceMembersarray,
@@ -232,4 +234,6 @@ export const UsersOfSearchResultsForProject = ({
       </div>
     </div>
   );
-};
+});
+
+UsersOfSearchResultsForProject.displayName = 'UsersOfSearchResultsForProject';
