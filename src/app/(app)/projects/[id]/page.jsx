@@ -276,35 +276,35 @@ const Project = () => {
   };
 
   const renderOverview = () => (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Project Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <MdTask className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-1.5 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <MdTask className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 Total Tasks
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
                 {project.tasks.length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-              <MdCheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-1.5 bg-green-100 dark:bg-green-900 rounded-lg">
+              <MdCheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 Completed
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
                 {
                   project.tasks.filter((task) => task.status === "completed")
                     .length
@@ -314,16 +314,16 @@ const Project = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-              <FaHourglassHalf className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+            <div className="p-1.5 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+              <FaHourglassHalf className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 In Progress
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
                 {
                   project.tasks.filter((task) => task.status === "in-progress")
                     .length
@@ -333,16 +333,16 @@ const Project = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <MdGroup className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-1.5 bg-purple-100 dark:bg-purple-900 rounded-lg">
+              <MdGroup className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                 Team Members
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
                 {project.members.length}
               </p>
             </div>
@@ -351,25 +351,25 @@ const Project = () => {
       </div>
 
       {/* Progress Section */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
           Project Progress
         </h3>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             Overall Progress
           </span>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {project.progress}%
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
-            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${project.progress}%` }}
           ></div>
         </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
           <div className="text-center">
             <p className="font-medium text-gray-900 dark:text-white">
               Start Date
@@ -391,7 +391,7 @@ const Project = () => {
               Priority
             </p>
             <span
-              className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(
+              className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${getPriorityColor(
                 project.priority.toLowerCase()
               )}`}
             >
@@ -402,20 +402,20 @@ const Project = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
           Recent Activity
         </h3>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {project.recentActivity.map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-3">
+            <div key={activity.id} className="flex items-start space-x-2">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <FaEye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <FaEye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 dark:text-white">
+                <p className="text-xs text-gray-900 dark:text-white">
                   <span className="font-medium">{activity.user}</span>{" "}
                   {activity.action}{" "}
                   <span className="font-medium">{activity.target}</span>
@@ -432,68 +432,68 @@ const Project = () => {
   );
 
   const renderTasks = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {project.tasks.map((task) => (
         <div
           key={task.id}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-2">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-md font-medium text-gray-900 dark:text-white">
                   {task.title}
                 </h3>
                 <span
-                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                  className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${getStatusColor(
                     task.status
                   )}`}
                 >
                   {task.status.replace("-", " ")}
                 </span>
                 <span
-                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(
+                  className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${getPriorityColor(
                     task.priority
                   )}`}
                 >
                   {task.priority}
                 </span>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 {task.description}
               </p>
-              <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center space-x-1">
-                  <FaCalendarAlt className="w-4 h-4" />
+                  <FaCalendarAlt className="w-3 h-3" />
                   <span>
                     Due: {new Date(task.dueDate).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   <Image
                     src="/icons/github-mark.png"
                     alt={task.assignee.name}
-                    width={20}
-                    height={20}
+                    width={16}
+                    height={16}
                     className="rounded-full"
                   />
                   <span>{task.assignee.name}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1 mt-3">
+              <div className="flex flex-wrap gap-1 mt-2">
                 {task.labels.map((label) => (
                   <span
                     key={label}
-                    className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+                    className="inline-flex px-1.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
                   >
                     {label}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="ml-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <FaEllipsisV className="w-5 h-5" />
+            <div className="ml-3">
+              <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <FaEllipsisV className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -503,41 +503,41 @@ const Project = () => {
   );
 
   const renderTeam = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {project.members.map((member) => (
         <div
           key={member.id}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700"
+          className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700"
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <div className="relative">
               <Image
                 src="/icons/github-mark.png"
                 alt={member.name}
-                width={48}
-                height={48}
+                width={40}
+                height={40}
                 className="rounded-full"
               />
               <div
-                className={`absolute bottom-0 right-0 w-3 h-3 ${getUserStatus(
+                className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${getUserStatus(
                   member.status
                 )} rounded-full border-2 border-white dark:border-gray-800`}
               ></div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-md font-medium text-gray-900 dark:text-white">
                 {member.name}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 @{member.username}
               </p>
-              <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
                 {member.role}
               </p>
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-sm">
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs">
               <span className="text-gray-600 dark:text-gray-400">Status:</span>
               <span
                 className={`capitalize font-medium ${
@@ -559,12 +559,12 @@ const Project = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800   shadow-sm border dark:border-gray-700 ">
-        <div className="p-6">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border dark:border-gray-700">
+        <div className="p-4">
           <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <div
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl"
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-lg"
                 style={{
                   backgroundColor: project.color + "20",
                   color: project.color,
@@ -574,16 +574,16 @@ const Project = () => {
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {project.title}
                   </h1>
                   <button
                     onClick={() => setShowDetails(!showDetails)}
-                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="p-1.5 ml-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                     aria-label={showDetails ? "Hide details" : "Show details"}
                   >
                     <MdKeyboardArrowDown 
-                      className={`w-6 h-6 transform transition-transform duration-200 ${
+                      className={`w-5 h-5 transform transition-transform duration-200 ${
                         showDetails ? "rotate-180" : ""
                       }`}
                     />
@@ -591,32 +591,32 @@ const Project = () => {
                 </div>
                 <div
                   className={`transition-all duration-300 overflow-hidden ${
-                    showDetails ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0"
+                    showDetails ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
                   }`}
                 >
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 max-w-xl">
                     {project.description}
                   </p>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3">
                     <span
-                      className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getStatusColor(
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(
                         project.status.toLowerCase().replace(" ", "-")
                       )}`}
                     >
                       {project.status}
                     </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Project ID: {project.id}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex space-x-3">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <div className="flex space-x-2">
+              <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Add Task
               </button>
-              <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <button className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 Settings
               </button>
             </div>
@@ -625,7 +625,7 @@ const Project = () => {
 
         {/* Tabs */}
         <div className="border-t border-gray-200 dark:border-gray-700">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex space-x-6 px-4">
             {[
               { id: "overview", label: "Overview", icon: <MdBarChart /> },
               { id: "tasks", label: "Tasks", icon: <FaCheckCircle /> },
@@ -634,13 +634,13 @@ const Project = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                 }`}
               >
-                <span className="mr-2 inline-flex items-center">
+                <span className="mr-1.5 inline-flex items-center">
                   {tab.icon}
                 </span>
                 {tab.label}
@@ -649,7 +649,7 @@ const Project = () => {
           </nav>
         </div>
       </div>
-      <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
         {/* Project Header */}
 
         {/* Tab Content */}
