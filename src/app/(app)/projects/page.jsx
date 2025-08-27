@@ -1,8 +1,6 @@
 "use client";
 import { useUserContext } from "@/context/userContext";
-import { db } from "@/lib/firebaseConfig";
-import { fetchAllProjects } from "@/lib/utils/fetchAllProjects";
-import { collection, getDocs, query, where } from "@firebase/firestore";
+import { fetchProjects } from "@/lib/utils/projectService";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -25,13 +23,16 @@ const Page = () => {
 
   useEffect(() => {
     if (user) {
-      fetchAllProjects(user)
+      setIsLoadingProjects(true);
+
+      // Use our new function to fetch projects for this user
+      fetchProjects({ userId: user.uid })
         .then((projects) => {
           setAllProjects(projects);
-          console.log(projects);
+          console.log("Projects loaded:", projects);
         })
         .catch((err) => {
-          console.log(err);
+          console.error("Error loading projects:", err);
         })
         .finally(() => {
           setIsLoadingProjects(false);

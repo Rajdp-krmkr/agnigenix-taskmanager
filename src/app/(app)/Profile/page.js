@@ -1,4 +1,5 @@
 "use client";
+import TypeWriterLoader from "@/components/typewriterloader";
 import { useUserContext } from "@/context/userContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -19,13 +20,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="mt-7 lg:ml-[270px] lg:mr-[180px] m-10 flex flex-col justify-center items-center">
-        <div className="typewriter absolute top-[40vh] self-center">
-          <div className="slide">
-            <i></i>
-          </div>
-          <div className="paper"></div>
-          <div className="keyboard"></div>
-        </div>
+        <TypeWriterLoader />
       </div>
     );
   }

@@ -17,6 +17,7 @@ import { FaTasks } from "react-icons/fa";
 import { TbCalendarDue } from "react-icons/tb";
 import { BsClipboardCheck } from "react-icons/bs";
 import { BiTaskX } from "react-icons/bi";
+import TypeWriterLoader from "@/components/typewriterloader";
 
 const Page = () => {
   const router = useRouter();
@@ -96,13 +97,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen">
-        <div className="typewriter">
-          <div className="slide">
-            <i></i>
-          </div>
-          <div className="paper"></div>
-          <div className="keyboard"></div>
-        </div>
+        <TypeWriterLoader />
       </div>
     );
   }

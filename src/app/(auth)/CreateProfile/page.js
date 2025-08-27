@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
 import { useUserContext } from "@/context/userContext";
+import TypeWriterLoader from "@/components/typewriterloader";
 
 const PageComponent = () => {
   const router = useRouter();
@@ -221,13 +222,7 @@ const PageComponent = () => {
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
               {shouldWait ? (
-                <div className="typewriter m-5">
-                  <div className="slide">
-                    <i></i>
-                  </div>
-                  <div className="paper"></div>
-                  <div className="keyboard"></div>
-                </div>
+                 <TypeWriterLoader />
               ) : (
                 <button
                   className="btn p-1"

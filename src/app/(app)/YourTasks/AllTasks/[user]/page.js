@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { fetchAllTasks } from "@/Firebase Functions/AddUpdateFetchTask";
 import { FaRegCircle, FaRegCheckCircle } from "react-icons/fa";
 import { setTaskCompleted } from "@/Firebase Functions/AddUpdateFetchTask";
+import TypeWriterLoader from "@/components/typewriterloader";
 
 const Task = ({ username, task }) => {
   const taskID = task.taskID;
@@ -133,13 +134,7 @@ const Page = () => {
           <div className="my-6 w-full flex flex-col items-center">
             {TasksArray === null ? (
               <>
-                <div className="typewriter absolute top-[35vh] self-center">
-                  <div className="slide">
-                    <i></i>
-                  </div>
-                  <div className="paper"></div>
-                  <div className="keyboard"></div>
-                </div>
+                <TypeWriterLoader />
               </>
             ) : TasksArray.length > 0 ? (
               <>

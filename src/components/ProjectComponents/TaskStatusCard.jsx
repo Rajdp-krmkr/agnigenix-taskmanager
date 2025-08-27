@@ -20,7 +20,7 @@ const TaskStatusCard = ({ project }) => {
             </p>
           </div>
           <p className="text-xl font-bold text-gray-900 dark:text-white">
-            {project.tasks.length}
+            {project?.tasks?.length || 0}
           </p>
         </div>
 
@@ -35,7 +35,7 @@ const TaskStatusCard = ({ project }) => {
             </p>
           </div>
           <p className="text-xl font-bold text-gray-900 dark:text-white">
-            {project.tasks.filter((task) => task.status === "completed").length}
+            {project?.tasks?.filter((task) => task?.status === "completed")?.length || 0}
           </p>
         </div>
 
@@ -51,8 +51,8 @@ const TaskStatusCard = ({ project }) => {
           </div>
           <p className="text-xl font-bold text-gray-900 dark:text-white">
             {
-              project.tasks.filter((task) => task.status === "in-progress")
-                .length
+              project?.tasks?.filter((task) => task?.status === "in-progress")
+                ?.length || 0
             }
           </p>
         </div>

@@ -11,13 +11,13 @@ const ProjectProgressCard = ({ project, getPriorityColor }) => {
           Overall Progress
         </span>
         <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-          {project.progress}%
+          {project?.progress || 0}%
         </span>
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${project.progress}%` }}
+          style={{ width: `${project?.progress || 0}%` }}
         ></div>
       </div>
       <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -26,23 +26,27 @@ const ProjectProgressCard = ({ project, getPriorityColor }) => {
             Start Date
           </p>
           <p className="text-gray-600 dark:text-gray-400">
-            {new Date(project.createdAt).toLocaleDateString()}
+            {project?.createdAt
+              ? new Date(project.createdAt).toLocaleDateString()
+              : "N/A"}
           </p>
         </div>
         <div className="text-center">
           <p className="font-medium text-gray-900 dark:text-white">Due Date</p>
           <p className="text-gray-600 dark:text-gray-400">
-            {new Date(project.dueDate).toLocaleDateString()}
+            {project?.dueDate
+              ? new Date(project.dueDate).toLocaleDateString()
+              : "N/A"}
           </p>
         </div>
         <div className="text-center">
           <p className="font-medium text-gray-900 dark:text-white">Priority</p>
           <span
             className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${getPriorityColor(
-              project.priority.toLowerCase()
+              project?.priority?.toLowerCase() || "medium"
             )}`}
           >
-            {project.priority}
+            {project?.priority || "Medium"}
           </span>
         </div>
       </div>

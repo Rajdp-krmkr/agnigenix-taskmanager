@@ -6,6 +6,7 @@ import GetNotifications, {
 } from "@/Firebase Functions/GetAndPostNotifications";
 import Notifications from "@/components/notifications";
 import Link from "next/link"; //! don't remove Link
+import TypeWriterLoader from "@/components/typewriterloader";
 
 const Page = () => {
   const params = useParams();
@@ -44,13 +45,7 @@ const Page = () => {
         <div className=" w-full">
           {AllNotifications === null ? (
             <div className="w-full flex justify-center items-center">
-              <div className="typewriter absolute top-[40vh] self-center">
-                <div className="slide">
-                  <i></i>
-                </div>
-                <div className="paper"></div>
-                <div className="keyboard"></div>
-              </div>
+              <TypeWriterLoader />
             </div>
           ) : AllNotifications.length === 0 ? (
             <div className="text-center">No Notifications</div>

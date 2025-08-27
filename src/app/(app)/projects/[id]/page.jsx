@@ -1,6 +1,6 @@
 "use client";
 import { useUserContext } from "@/context/userContext";
-import fetchCurrentProject from "@/lib/utils/fetchCurrentProject";
+import fetchProjectById from "@/lib/utils/projectService";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState, useMemo } from "react";
 import { FaRocket } from "react-icons/fa";
@@ -9,11 +9,11 @@ import {
   ProjectTabs,
   TaskStatusCard,
   ProjectProgressCard,
-  TeamMemberCard,
   RecentActivityCard,
   TaskItem,
   TeamMemberItem,
 } from "@/components/ProjectComponents";
+import TypeWriterLoader from "@/components/typewriterloader";
 
 const Project = () => {
   const params = useParams();
@@ -184,10 +184,16 @@ const Project = () => {
     const fetchProject = async () => {
       setIsCurrentProjectLoading(true);
       try {
-        // For now, use dummy data
-        // const project = await fetchCurrentProject(id);
+        const projectData = await fetchProjectById(id);
+
         if (isMounted) {
-          setCurrentProject(dummyProject);
+          if (projectData) {
+            console.log(projectData);
+            setCurrentProject(projectData);
+          } else {
+            // If no project is found, fallback to dummy data
+            setCurrentProject(dummyProject);
+          }
           setIsCurrentProjectLoading(false);
         }
       } catch (error) {
@@ -207,18 +213,14 @@ const Project = () => {
     };
   }, [id, dummyProject, setCurrentProject, setIsCurrentProjectLoading]);
 
+  useEffect(() => {}, []);
+
   const project = currentProject || dummyProject;
 
   if (isCurrentProjectLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen">
-        <div className="typewriter">
-          <div className="slide">
-            <i></i>
-          </div>
-          <div className="paper"></div>
-          <div className="keyboard"></div>
-        </div>
+        <TypeWriterLoader />
       </div>
     );
   }
@@ -277,32 +279,41 @@ const Project = () => {
       {/* <TeamMemberCard project={project} /> */}
 
       {/* Recent Activity */}
-      <RecentActivityCard activities={project.recentActivity} />
+      <RecentActivityCard activities={project?.recentActivity || []} />
     </div>
   );
 
   const renderTasks = () => (
     <div className="space-y-3">
-      {project.tasks.map((task) => (
+      {project?.tasks?.map((task) => (
         <TaskItem
-          key={task.id}
+          key={task?.id}
           task={task}
           getStatusColor={getStatusColor}
           getPriorityColor={getPriorityColor}
         />
-      ))}
+      )) || (
+        <div className="text-center py-8 text-gray-500">
+          No tasks available for this project.
+        </div>
+      )}
     </div>
   );
 
   const renderTeam = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {project.members.map((member) => (
+      {/* // TODO add members details */}
+      {project?.members?.map((member) => (
         <TeamMemberItem
-          key={member.id}
+          key={member?.id}
           member={member}
           getUserStatus={getUserStatus}
         />
-      ))}
+      )) || (
+        <div className="text-center py-8 text-gray-500">
+          No team members assigned to this project.
+        </div>
+      )}
     </div>
   );
 
@@ -320,7 +331,6 @@ const Project = () => {
         project={project}
       />
       <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-        {/* Tab Content */}
         <div>
           {activeTab === "overview" && renderOverview()}
           {activeTab === "tasks" && renderTasks()}

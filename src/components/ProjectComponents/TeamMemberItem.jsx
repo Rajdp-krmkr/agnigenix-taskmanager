@@ -8,26 +8,26 @@ const TeamMemberItem = ({ member, getUserStatus }) => {
         <div className="relative">
           <Image
             src="/icons/github-mark.png"
-            alt={member.name}
+            alt={member?.name || "Team Member"}
             width={40}
             height={40}
             className="rounded-full"
           />
           <div
             className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${getUserStatus(
-              member.status
+              member?.status || "offline"
             )} rounded-full border-2 border-white dark:border-gray-800`}
           ></div>
         </div>
         <div className="flex-1">
           <h3 className="text-md font-medium text-gray-900 dark:text-white">
-            {member.name}
+            {member?.name || "Unknown User"}
           </h3>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            @{member.username}
+            @{member?.username || "username"}
           </p>
           <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
-            {member.role}
+            {member?.role || "Team Member"}
           </p>
         </div>
       </div>
@@ -36,14 +36,14 @@ const TeamMemberItem = ({ member, getUserStatus }) => {
           <span className="text-gray-600 dark:text-gray-400">Status:</span>
           <span
             className={`capitalize font-medium ${
-              member.status === "online"
+              member?.status === "online"
                 ? "text-green-600 dark:text-green-400"
-                : member.status === "away"
+                : member?.status === "away"
                 ? "text-yellow-600 dark:text-yellow-400"
                 : "text-gray-600 dark:text-gray-400"
             }`}
           >
-            {member.status}
+            {member?.status || "offline"}
           </span>
         </div>
       </div>

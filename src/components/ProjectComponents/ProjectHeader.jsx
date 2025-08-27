@@ -15,16 +15,16 @@ const ProjectHeader = ({
             <div
               className="w-12 h-12 rounded-lg flex items-center justify-center text-lg"
               style={{
-                backgroundColor: project.color + "20",
-                color: project.color,
+                backgroundColor: (project?.color || "#3B82F6") + "20",
+                color: project?.color || "#3B82F6",
               }}
             >
-              {project.icon}
+              {project?.icon}
             </div>
             <div>
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {project.title}
+                  {project?.title || "Untitled Project"}
                 </h1>
                 <button
                   onClick={() => setShowDetails(!showDetails)}
@@ -46,18 +46,19 @@ const ProjectHeader = ({
                 }`}
               >
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 max-w-xl">
-                  {project.description}
+                  {project?.description || "No description available."}
                 </p>
                 <div className="flex items-center space-x-3">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(
-                      project.status.toLowerCase().replace(" ", "-")
+                      project?.status?.toLowerCase()?.replace(" ", "-") ||
+                        "in-progress"
                     )}`}
                   >
-                    {project.status}
+                    {project?.status || "In Progress"}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Project ID: {project.id}
+                    Project ID: {project?.id || "Unknown"}
                   </span>
                 </div>
               </div>

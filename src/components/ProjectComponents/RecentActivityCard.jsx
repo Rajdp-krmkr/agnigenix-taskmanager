@@ -8,25 +8,35 @@ const RecentActivityCard = ({ activities }) => {
         Recent Activity
       </h3>
       <div className="space-y-3">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex items-start space-x-2">
-            <div className="flex-shrink-0">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                <FaEye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+        {activities?.length > 0 ? (
+          activities.map((activity) => (
+            <div key={activity?.id} className="flex items-start space-x-2">
+              <div className="flex-shrink-0">
+                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <FaEye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-900 dark:text-white">
+                  <span className="font-medium">
+                    {activity?.user || "Someone"}
+                  </span>{" "}
+                  {activity?.action || "updated"}{" "}
+                  <span className="font-medium">
+                    {activity?.target || "something"}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {activity?.timestamp || "recently"}
+                </p>
               </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-900 dark:text-white">
-                <span className="font-medium">{activity.user}</span>{" "}
-                {activity.action}{" "}
-                <span className="font-medium">{activity.target}</span>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {activity.timestamp}
-              </p>
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-3 text-sm text-gray-500">
+            No recent activity available.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

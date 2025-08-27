@@ -1,5 +1,6 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
+import TypeWriterLoader from "@/components/typewriterloader";
 import { useUserContext } from "@/context/userContext";
 import { auth, db } from "@/lib/firebaseConfig";
 import { onAuthStateChanged, sendEmailVerification } from "@firebase/auth";
@@ -99,13 +100,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="w-full flex justify-center items-center">
-        <div className="typewriter absolute top-[40vh] self-center">
-          <div className="slide">
-            <i></i>
-          </div>
-          <div className="paper"></div>
-          <div className="keyboard"></div>
-        </div>
+        <TypeWriterLoader />
       </div>
     );
   }

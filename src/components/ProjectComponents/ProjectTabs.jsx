@@ -10,7 +10,7 @@ const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
   ];
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-800">
+    <div className="border-t border-gray-200 dark:border-gray-700 dark:bg-gray-800 bg-white">
       <nav className="flex space-x-6 px-4">
         {tabs.map((tab) => (
           <button
@@ -24,7 +24,7 @@ const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
           >
             <span className="mr-1.5 inline-flex items-center">{tab.icon}</span>
             {tab.label}
-            {tab.id === "team" && <span> ({project.members.length})</span>}
+            {tab.id === "team" && <span> ({project?.members?.length || 0})</span>}
           </button>
         ))}
       </nav>
