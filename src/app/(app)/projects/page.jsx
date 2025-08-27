@@ -28,6 +28,7 @@ const Page = () => {
       fetchAllProjects(user)
         .then((projects) => {
           setAllProjects(projects);
+          console.log(projects);
         })
         .catch((err) => {
           console.log(err);

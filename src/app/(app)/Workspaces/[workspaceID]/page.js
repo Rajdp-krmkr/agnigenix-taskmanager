@@ -19,6 +19,7 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import { FaPlus } from "react-icons/fa6";
 import { findProjectsDetails } from "@/lib/utils/findProjectsDetails";
+import Link from "next/link";
 
 const Page = () => {
   const router = useRouter();
@@ -260,39 +261,40 @@ const Page = () => {
                   console.log(project);
 
                   return (
-                    <div
-                      key={index}
-                      className="flex flex-row justify-between items-center border-b-gray-600 border-b-2 p-2 dark:hover:bg-gray-700 hover:cursor-pointer hover:rounded-md transition-all"
-                    >
-                      <div className="flex gap-2 items-center">
-                        <span
-                          className={`${project.logo?.bg || "bg-gray-200"} ${
-                            project.logo?.textColor
-                              ? `text-${project.logo.textColor}`
-                              : "text-gray-600"
-                          } font-semibold text-center aspect-square flex items-center justify-center text-xs rounded-lg w-6 h-6`}
-                        >
-                          {project.logo?.letter ||
-                            project.workspaceTitle?.[0] ||
-                            "W"}
-                        </span>
-                        <span className="text-sm">{project.title}</span>
-                      </div>
-
+                    <Link key={index} href={`/projects/${project.id}`}>
                       <div
-                        className={`${
-                          project.priority == " "
-                            ? "bg-green-500 "
-                            : project.priority == "medium"
-                            ? "bg-yellow-500 "
-                            : project.priority == "high"
-                            ? "bg-red-600 "
-                            : "animate-ping bg-red-500 "
-                        } text-black w-2 h-2 rounded-full`}
-                        title={`Priority: ${project?.priority}`}
-                      ></div>
-                    </div>
-                    // <div key={index}></div>
+                        key={index}
+                        className="flex flex-row justify-between items-center border-b-gray-600 border-b-2 p-2 dark:hover:bg-gray-700 hover:cursor-pointer hover:rounded-md transition-all"
+                      >
+                        <div className="flex gap-2 items-center">
+                          <span
+                            className={`${project.logo?.bg || "bg-gray-200"} ${
+                              project.logo?.textColor
+                                ? `text-${project.logo.textColor}`
+                                : "text-gray-600"
+                            } font-semibold text-center aspect-square flex items-center justify-center text-xs rounded-lg w-6 h-6`}
+                          >
+                            {project.logo?.letter ||
+                              project.workspaceTitle?.[0] ||
+                              "W"}
+                          </span>
+                          <span className="text-sm">{project.title}</span>
+                        </div>
+
+                        <div
+                          className={`${
+                            project.priority == " "
+                              ? "bg-green-500 "
+                              : project.priority == "medium"
+                              ? "bg-yellow-500 "
+                              : project.priority == "high"
+                              ? "bg-red-600 "
+                              : "animate-ping bg-red-500 "
+                          } text-black w-2 h-2 rounded-full`}
+                          title={`Priority: ${project?.priority}`}
+                        ></div>
+                      </div>
+                    </Link>
                   );
                 })
               ) : (
