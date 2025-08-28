@@ -13,23 +13,6 @@ const AuthContextProvider = ({ children }) => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [isProfileCreated, setIsProfileCreated] = useState(false);
 
-  const value = useMemo(
-    () => ({
-      user,
-      setUser,
-      isUserLoggedIn,
-      setIsUserLoggedIn,
-      isLoading,
-      setIsLoading,
-      fetchUser,
-      emailVerified,
-      setEmailVerified,
-      isProfileCreated,
-      setIsProfileCreated,
-    }),
-    [user, isLoading, emailVerified, isProfileCreated, isUserLoggedIn]
-  );
-
   const fetchUser = () => {
     return onAuthStateChanged(auth, async (authUser) => {
       if (authUser) {
@@ -75,6 +58,23 @@ const AuthContextProvider = ({ children }) => {
       setIsLoading(false);
     });
   };
+
+    const value = useMemo(
+      () => ({
+        user,
+        setUser,
+        isUserLoggedIn,
+        setIsUserLoggedIn,
+        isLoading,
+        setIsLoading,
+        fetchUser,
+        emailVerified,
+        setEmailVerified,
+        isProfileCreated,
+        setIsProfileCreated,
+      }),
+      [user, isLoading, emailVerified, isProfileCreated, isUserLoggedIn]
+    );
 
   useEffect(() => {
     const unsubscribe = fetchUser();

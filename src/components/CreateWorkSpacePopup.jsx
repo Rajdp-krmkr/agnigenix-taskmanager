@@ -141,6 +141,8 @@ const CreateWorkSpacePopup = ({
         ...invitedUsers,
         {
           uid: currentUserid,
+          username: currentUserUsername,
+          name: currentUserFullName,
           isAdmin: true,
           isInvitationAccepted: true,
           joinedAt: new Date(),

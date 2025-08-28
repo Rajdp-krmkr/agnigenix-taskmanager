@@ -26,16 +26,16 @@ const ProjectProgressCard = ({ project, getPriorityColor }) => {
             Start Date
           </p>
           <p className="text-gray-600 dark:text-gray-400">
-            {project?.createdAt
-              ? new Date(project.createdAt).toLocaleDateString()
+            {project?.deadlines.start_date
+              ? new Date(project.deadlines.start_date).toLocaleDateString()
               : "N/A"}
           </p>
         </div>
         <div className="text-center">
           <p className="font-medium text-gray-900 dark:text-white">Due Date</p>
           <p className="text-gray-600 dark:text-gray-400">
-            {project?.dueDate
-              ? new Date(project.dueDate).toLocaleDateString()
+            {project?.deadlines.end_date
+              ? new Date(project.deadlines.end_date).toLocaleDateString()
               : "N/A"}
           </p>
         </div>

@@ -14,6 +14,8 @@ import {
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import { useProjectContext } from "@/context/ProjectContext";
+import { collection, doc, getDocs, query, where } from "@firebase/firestore";
+import { db } from "@/lib/firebaseConfig";
 
 const Project = () => {
   const params = useParams();
@@ -29,6 +31,8 @@ const Project = () => {
 
   const [activeTab, setActiveTab] = useState("overview");
   const [showDetails, setShowDetails] = useState(false);
+
+  const [projectMembers, setProjectMembers] = useState([]);
 
   // Memoized dummy data for project
   const dummyProject = useMemo(
@@ -213,9 +217,31 @@ const Project = () => {
     };
   }, [id, dummyProject, setCurrentProject, setIsCurrentProjectLoading]);
 
-  useEffect(() => {}, []);
-
   const project = currentProject || dummyProject;
+
+  const fetchMemberDetails = async (members) => {
+    const newArray = members.map((member) => member.user_id);
+
+    try {
+      const docsRef = collection(db, "users");
+      const docsSnap = query(docsRef, where("uid", "in", newArray));
+      const memberDocs = await getDocs(docsSnap);
+      const membersData = memberDocs.docs.map((doc) => ({
+        ...doc.data(),
+        role: members.find((member) => member.user_id === doc.data().uid)?.role,
+      }));
+      console.log(membersData);
+      setProjectMembers(membersData);
+    } catch (error) {
+      console.error("Error fetching member details:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (project && project?.members.length > 0) {
+      fetchMemberDetails(project?.members);
+    }
+  }, [project?.members]);
 
   if (isCurrentProjectLoading) {
     return (
@@ -303,13 +329,15 @@ const Project = () => {
   const renderTeam = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {/* // TODO add members details */}
-      {project?.members?.map((member) => (
-        <TeamMemberItem
-          key={member?.id}
-          member={member}
-          getUserStatus={getUserStatus}
-        />
-      )) || (
+      {projectMembers.length > 0 ? (
+        projectMembers.map((member) => (
+          <TeamMemberItem
+            key={member?.id}
+            member={member}
+            getUserStatus={getUserStatus}
+          />
+        ))
+      ) : (
         <div className="text-center py-8 text-gray-500">
           No team members assigned to this project.
         </div>

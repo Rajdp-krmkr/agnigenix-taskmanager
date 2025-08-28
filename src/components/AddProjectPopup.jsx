@@ -290,7 +290,7 @@ const AddProjectPopup = ({
 
     setIsLoading(true);
     try {
-      const projectId = generateCustomCode(12);
+      const projectId = generateCustomCode(12); 
 
       // Prepare project data according to new schema
       const projectData = {
@@ -305,17 +305,23 @@ const AddProjectPopup = ({
         members: [
           // Creator gets full access
           {
+            name: currentUserFullName,
+            username: currentUserUsername,
             user_id: username, // Assuming username is the user ID
             role: "admin",
           },
           // Add assignees with edit access
           ...assignees.map((assignee) => ({
             user_id: assignee.user_id,
+            name: assignee.name,
+            username: assignee.username,
             role: assignee.role,
           })),
           // Add invited users with specified roles
           ...inviteUsers.map((invite) => ({
             user_id: invite.user_id,
+            name: invite.name,
+            username: invite.username,
             role: invite.role,
           })),
         ],
