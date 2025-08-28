@@ -1,7 +1,7 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
 import TypeWriterLoader from "@/components/typewriterloader";
-import { useUserContext } from "@/context/userContext";
+import { useAuthContext } from "@/context/AuthContext";
 import { auth, db } from "@/lib/firebaseConfig";
 import { onAuthStateChanged, sendEmailVerification } from "@firebase/auth";
 import {
@@ -25,7 +25,7 @@ const Page = () => {
     isProfileCreated,
     isLoading,
     setIsLoading,
-  } = useUserContext();
+  } = useAuthContext();
 
   const [authStateUser, setAuthStateUser] = useState(null);
 

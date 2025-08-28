@@ -1,6 +1,7 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
-import UserContextProvider, { useUserContext } from "@/context/userContext";
+import { useAuthContext } from "@/context/AuthContext";
+// import UserContextProvider, { useUserContext } from "@/context/userContext";
 import IsUserExist from "@/Firebase Functions/IsUserExist";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "@firebase/auth";
@@ -22,7 +23,7 @@ export default function Home() {
     setEmailVerified,
     isProfileCreated,
     setIsProfileCreated,
-  } = useUserContext();
+  } = useAuthContext();
 
   useEffect(() => {
     if (!isLoading) {

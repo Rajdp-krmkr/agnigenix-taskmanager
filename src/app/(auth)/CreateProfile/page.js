@@ -9,8 +9,9 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
-import { useUserContext } from "@/context/userContext";
+import { useUser } from "@/context/userContext";
 import TypeWriterLoader from "@/components/typewriterloader";
+import { useAuthContext } from "@/context/AuthContext";
 
 const PageComponent = () => {
   const router = useRouter();
@@ -27,7 +28,7 @@ const PageComponent = () => {
   const [IsUsernameExist, setIsUsernameExist] = useState(null);
   const [usernameMessage, setUsernameMessage] = useState(null);
 
-  const { user } = useUserContext();
+  const { user } = useAuthContext();
 
   const searchparams = useSearchParams();
   const id = searchparams.get("id");
@@ -222,7 +223,7 @@ const PageComponent = () => {
             </div>
             <div className="AuthBtn flex justify-center items-center m-3">
               {shouldWait ? (
-                 <TypeWriterLoader />
+                <TypeWriterLoader />
               ) : (
                 <button
                   className="btn p-1"

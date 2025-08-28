@@ -15,8 +15,8 @@ import {
 import { auth, db } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, setDoc } from "@firebase/firestore";
-import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Page = () => {
   const router = useRouter();
@@ -34,7 +34,7 @@ const Page = () => {
     setEmailVerified,
     isProfileCreated,
     setIsProfileCreated,
-  } = useUserContext();
+  } = useAuthContext();
 
   const SignUpWithGoogle = async () => {
     try {

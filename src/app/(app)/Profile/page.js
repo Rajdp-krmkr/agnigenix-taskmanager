@@ -1,6 +1,6 @@
 "use client";
 import TypeWriterLoader from "@/components/typewriterloader";
-import { useUserContext } from "@/context/userContext";
+import { useAuthContext } from "@/context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -15,7 +15,7 @@ const Page = () => {
     setIsUserLoggedIn,
     isLoading,
     setIsLoading,
-  } = useUserContext();
+  } = useAuthContext();
 
   if (isLoading) {
     return (

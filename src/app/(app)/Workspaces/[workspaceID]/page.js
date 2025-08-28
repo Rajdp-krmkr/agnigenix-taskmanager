@@ -1,6 +1,5 @@
 "use client";
 import AddProjectPopup from "@/components/AddProjectPopup";
-import { useUserContext } from "@/context/userContext";
 import { db } from "@/lib/firebaseConfig";
 import { RiExpandDiagonalFill } from "react-icons/ri";
 
@@ -21,6 +20,9 @@ import { FaPlus } from "react-icons/fa6";
 import { findProjectsDetails } from "@/lib/utils/findProjectsDetails";
 import Link from "next/link";
 import TypeWriterLoader from "@/components/typewriterloader";
+import isUserAuthenticated from "@/Firebase Functions/isUserAuthenticated";
+import { useAuthContext } from "@/context/AuthContext";
+import { useWorkspaceContext } from "@/context/WorkspaceContext";
 
 const Page = () => {
   const router = useRouter();
@@ -46,11 +48,14 @@ const Page = () => {
     setIsUserLoggedIn,
     isLoading,
     setIsLoading,
+  } = useAuthContext();
+
+  const {
     currentWorkspace,
     setCurrentWorkspace,
     isLoadingCurrentWorkspace,
     setIsLoadingCurrentWorkspace,
-  } = useUserContext();
+  } = useWorkspaceContext();
 
   useEffect(() => {
     const fetchWorkspace = async () => {

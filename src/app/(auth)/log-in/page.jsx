@@ -13,8 +13,8 @@ import {
 import { auth, db } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "@firebase/firestore";
-import { useUserContext } from "@/context/userContext";
 import Link from "next/link";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Page = () => {
   const router = useRouter();
@@ -22,7 +22,7 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { user, isUserLoggedIn, isLoading, emailVerified, isProfileCreated } =
-    useUserContext();
+    useAuthContext();
 
   const handleEmailLogin = async () => {
     try {

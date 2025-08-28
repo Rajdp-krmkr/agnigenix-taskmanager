@@ -1,6 +1,5 @@
 "use client";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useUserContext } from "@/context/userContext";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import {
@@ -18,6 +17,7 @@ import { TbCalendarDue } from "react-icons/tb";
 import { BsClipboardCheck } from "react-icons/bs";
 import { BiTaskX } from "react-icons/bi";
 import TypeWriterLoader from "@/components/typewriterloader";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Page = () => {
   const router = useRouter();
@@ -35,7 +35,7 @@ const Page = () => {
     setEmailVerified,
     isProfileCreated,
     setIsProfileCreated,
-  } = useUserContext();
+  } = useAuthContext();
 
   // Mock data for dashboard stats - replace with real data
   const [dashboardStats, setDashboardStats] = useState({

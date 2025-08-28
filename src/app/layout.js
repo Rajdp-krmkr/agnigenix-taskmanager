@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import Providers from "@/lib/Provider";
 import UserContextProvider from "@/context/userContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
+import { WorkspaceContextProvider } from "@/context/WorkspaceContext";
+import { ProjectContextProvider } from "@/context/ProjectContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,10 +28,14 @@ export default function RootLayout({ children }) {
       >
         <ThemeProvider>
           <Providers>
-            <UserContextProvider>
-              <Navbar />
-              {children}
-            </UserContextProvider>
+            <AuthContextProvider>
+              <WorkspaceContextProvider>
+                <ProjectContextProvider>
+                  <Navbar />
+                  {children}
+                </ProjectContextProvider>
+              </WorkspaceContextProvider>
+            </AuthContextProvider>
           </Providers>
         </ThemeProvider>
       </body>

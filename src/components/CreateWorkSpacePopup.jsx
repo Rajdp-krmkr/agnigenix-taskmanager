@@ -10,9 +10,10 @@ import CreateWorkspace, {
 } from "@/Firebase Functions/CreateWorkspace";
 import { PostNotifications } from "@/Firebase Functions/GetAndPostNotifications";
 import { createDateInfo } from "@/lib/utils/CreateDateInfo";
-import { useUserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import { ColorsArray } from "@/lib/utils/LogoColorsArray";
+import { useWorkspaceContext } from "@/context/WorkspaceContext";
+import { useAuthContext } from "@/context/AuthContext";
 
 const CreateWorkSpacePopup = ({
   createPopupNum,
@@ -26,8 +27,9 @@ const CreateWorkSpacePopup = ({
   const dispatch = useDispatch();
   const router = useRouter();
   const invitedUsers = useSelector((state) => state.invitedUsers.invitedUsers);
-  const { user, setUser, currentWorkspace, setCurrentWorkspace } =
-    useUserContext();
+
+  const { user, setUser } = useAuthContext();
+  const { currentWorkspace, setCurrentWorkspace } = useWorkspaceContext();
 
   // UI State
   const [showCreateWorkspacePopup, setShowCreateWorkspacePopup] =

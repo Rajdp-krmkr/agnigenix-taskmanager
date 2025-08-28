@@ -1,5 +1,6 @@
 "use client";
-import { useUserContext } from "@/context/userContext";
+import { useAuthContext } from "@/context/AuthContext";
+import { useWorkspaceContext } from "@/context/WorkspaceContext";
 import { fetchProjects } from "@/lib/utils/projectService";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -12,11 +13,14 @@ const Page = () => {
     setIsUserLoggedIn,
     isLoading,
     setIsLoading,
+  } = useAuthContext();
+
+  const {
     currentWorkspace,
     setCurrentWorkspace,
     isLoadingCurrentWorkspace,
     setIsLoadingCurrentWorkspace,
-  } = useUserContext();
+  } = useWorkspaceContext();
 
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [allProjects, setAllProjects] = useState([]);

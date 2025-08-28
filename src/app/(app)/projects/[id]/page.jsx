@@ -1,5 +1,4 @@
 "use client";
-import { useUserContext } from "@/context/userContext";
 import fetchProjectById from "@/lib/utils/projectService";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState, useMemo } from "react";
@@ -14,6 +13,7 @@ import {
   TeamMemberItem,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
+import { useProjectContext } from "@/context/ProjectContext";
 
 const Project = () => {
   const params = useParams();
@@ -21,11 +21,11 @@ const Project = () => {
   const id = params.id;
 
   const {
-    isCurrentProjectLoading,
-    setIsCurrentProjectLoading,
     currentProject,
     setCurrentProject,
-  } = useUserContext();
+    isCurrentProjectLoading,
+    setIsCurrentProjectLoading,
+  } = useProjectContext();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [showDetails, setShowDetails] = useState(false);
