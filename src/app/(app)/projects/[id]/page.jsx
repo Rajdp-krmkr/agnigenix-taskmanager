@@ -11,6 +11,7 @@ import {
   RecentActivityCard,
   TaskItem,
   TeamMemberItem,
+  KanbanBoard,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import { useProjectContext } from "@/context/ProjectContext";
@@ -345,6 +346,8 @@ const Project = () => {
     </div>
   );
 
+  const renderKanban = () => <KanbanBoard project={project} />;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <ProjectHeader
@@ -362,6 +365,7 @@ const Project = () => {
         <div>
           {activeTab === "overview" && renderOverview()}
           {activeTab === "tasks" && renderTasks()}
+          {activeTab === "kanban" && renderKanban()}
           {activeTab === "team" && renderTeam()}
         </div>
       </div>

@@ -1,17 +1,18 @@
 import React from "react";
-import { MdBarChart } from "react-icons/md";
+import { MdBarChart, MdViewKanban } from "react-icons/md";
 import { FaCheckCircle, FaUserFriends } from "react-icons/fa";
 
 const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
   const tabs = [
     { id: "overview", label: "Overview", icon: <MdBarChart /> },
     { id: "tasks", label: "Tasks", icon: <FaCheckCircle /> },
+    { id: "kanban", label: "Kanban", icon: <MdViewKanban /> },
     { id: "team", label: "Team", icon: <FaUserFriends /> },
   ];
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 dark:bg-gray-800 bg-white">
-      <nav className="flex space-x-6 px-4">
+    <div className="border-t border-gray-200 dark:border-gray-700 dark:bg-gray-800 bg-white sticky top-0 z-50 shadow-sm">
+      <div className="flex space-x-6 px-4 bg-white dark:bg-gray-800">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -24,10 +25,12 @@ const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
           >
             <span className="mr-1.5 inline-flex items-center">{tab.icon}</span>
             {tab.label}
-            {tab.id === "team" && <span> ({project?.members?.length || 0})</span>}
+            {tab.id === "team" && (
+              <span> ({project?.members?.length || 0})</span>
+            )}
           </button>
         ))}
-      </nav>
+      </div>
     </div>
   );
 };
