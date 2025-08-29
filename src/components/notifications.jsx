@@ -7,8 +7,6 @@ import React, { useEffect, useState } from "react";
 import acceptInvitation, { rejectInvitation } from "./accep&RejectInvitation";
 
 const Notifications = ({ username, notification }) => {
-  // console.log("notification.jsx: ", notification);
-
   const [isNotificationRead, setIsNotificationRead] = useState(false);
   const [isInvitationAccepted, setIsInvitationAccepted] = useState(null);
   const [isInvitationExpired, setIsInvitationExpired] = useState(null);
@@ -92,13 +90,14 @@ const Notifications = ({ username, notification }) => {
     <>
       <div
         className={`flex flex-row items-center justify-between gap-16 border-b-2 dark:border-gray-700 p-2 ${
-          isNotificationRead ? "bg-gray-100 dark:bg-gray-900" : "bg-transparent dark:bg-gray-700"
+          isNotificationRead
+            ? "bg-gray-100 dark:bg-gray-900"
+            : "bg-transparent dark:bg-gray-700"
         } hover:bg-gray-100 rounded-lg transition-all cursor-pointer`}
         onClick={() => {
           setIsNotificationRead(true);
 
           notification.isRead = true;
-          // console.log(notification);
 
           updateNotifications(username, notification)
             .then(() => {
@@ -141,7 +140,7 @@ const Notifications = ({ username, notification }) => {
                         })
                         .catch((error) => {
                           setIsInvitationAccepted(error);
-                          console.error(" error in accepting invitation");
+                          console.error("Error in accepting invitation");
                         });
                     }}
                   >
