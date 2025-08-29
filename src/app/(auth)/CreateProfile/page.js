@@ -9,7 +9,6 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import useDebounce from "@/Firebase Functions/useDebounce";
-import { useUser } from "@/context/userContext";
 import TypeWriterLoader from "@/components/typewriterloader";
 import { useAuthContext } from "@/context/AuthContext";
 

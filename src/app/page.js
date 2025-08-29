@@ -1,7 +1,6 @@
 "use client";
 import DottedBg from "@/components/dottedBg";
 import { useAuthContext } from "@/context/AuthContext";
-// import UserContextProvider, { useUserContext } from "@/context/userContext";
 import IsUserExist from "@/Firebase Functions/IsUserExist";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "@firebase/auth";

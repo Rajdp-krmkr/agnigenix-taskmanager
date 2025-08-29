@@ -2,7 +2,6 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Providers from "@/lib/Provider";
-import UserContextProvider from "@/context/userContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { WorkspaceContextProvider } from "@/context/WorkspaceContext";

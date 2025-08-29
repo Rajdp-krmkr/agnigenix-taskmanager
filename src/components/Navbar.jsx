@@ -27,7 +27,6 @@ import { GoTasklist } from "react-icons/go";
 import CreateWorkSpacePopup from "./CreateWorkSpacePopup";
 import ThemeToggle from "./ThemeToggle";
 import AddTaskPopup from "./AddTaskPopup";
-// import { useAuthContext } from "@/context/userContext";
 import { fetchWorkspaces } from "@/lib/utils/fetchWorkspaces";
 import { FaDiagramProject } from "react-icons/fa6";
 import { useAuthContext } from "@/context/AuthContext";

@@ -14,6 +14,7 @@ import {
   KanbanBoard,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
+import AddTaskPopup from "@/components/AddTaskPopup";
 import { useProjectContext } from "@/context/ProjectContext";
 import { collection, doc, getDocs, query, where } from "@firebase/firestore";
 import { db } from "@/lib/firebaseConfig";
@@ -32,6 +33,7 @@ const Project = () => {
 
   const [activeTab, setActiveTab] = useState("overview");
   const [showDetails, setShowDetails] = useState(false);
+  const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
 
   const [projectMembers, setProjectMembers] = useState([]);
 
@@ -252,6 +254,24 @@ const Project = () => {
     );
   }
 
+  // Add task handlers
+  const handleAddTask = () => {
+    setShowAddTaskPopup(true);
+  };
+
+  const handleCloseAddTaskPopup = () => {
+    setShowAddTaskPopup(false);
+  };
+
+  const handleTaskAdded = (newTask) => {
+    // Update the project tasks list with the new task
+    setCurrentProject((prev) => ({
+      ...prev,
+      tasks: [...(prev?.tasks || []), newTask],
+    }));
+    console.log("New task added:", newTask);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -355,6 +375,7 @@ const Project = () => {
         showDetails={showDetails}
         setShowDetails={setShowDetails}
         getStatusColor={getStatusColor}
+        onAddTask={handleAddTask}
       />
       <ProjectTabs
         activeTab={activeTab}
@@ -369,6 +390,15 @@ const Project = () => {
           {activeTab === "team" && renderTeam()}
         </div>
       </div>
+
+      {/* Add Task Popup */}
+      <AddTaskPopup
+        isOpen={showAddTaskPopup}
+        onClose={handleCloseAddTaskPopup}
+        projectId={id}
+        projectMembers={projectMembers || []}
+        onTaskAdded={handleTaskAdded}
+      />
     </div>
   );
 };

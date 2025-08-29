@@ -6,6 +6,7 @@ const ProjectHeader = ({
   showDetails,
   setShowDetails,
   getStatusColor,
+  onAddTask,
 }) => {
   return (
     <div className="bg-white dark:bg-gray-800 shadow-sm border dark:border-gray-700">
@@ -74,7 +75,7 @@ const ProjectHeader = ({
           <div className="flex space-x-2">
             <button
               className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              onClick={() => {}}
+              onClick={onAddTask}
             >
               Add Task
             </button>

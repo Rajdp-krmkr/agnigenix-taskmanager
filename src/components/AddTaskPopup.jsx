@@ -1,340 +1,481 @@
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { MdKeyboardArrowDown } from "react-icons/md";
-import { LuPlusCircle } from "react-icons/lu";
 import { RxCross2 } from "react-icons/rx";
-import AddTask from "@/Firebase Functions/AddUpdateFetchTask";
-import { generateCustomCode } from "./getCustomCode";
+import { FaCalendarAlt, FaUser, FaFlag, FaTasks } from "react-icons/fa";
+import { MdKeyboardArrowDown } from "react-icons/md";
+import { useAuthContext } from "@/context/AuthContext";
+import { db } from "@/lib/firebaseConfig";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import Image from "next/image";
 
-// Ensure components are available before rendering
-if (typeof window === "undefined") {
-  React.useLayoutEffect = React.useEffect;
-}
+const AddTaskPopup = ({
+  isOpen,
+  onClose,
+  projectId,
+  projectMembers = [],
+  onTaskAdded,
+}) => {
+  const { user } = useAuthContext();
 
-const AddTaskPopup = ({ addTaskPopupNum = 0, username }) => {
-  const [OpenPopup, setOpenPopup] = useState(false);
+  // Form states
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    assignedTo: "",
+    dueDate: "",
+    status: "todo",
+    priority: "medium",
+  });
 
+  const [loading, setLoading] = useState(false);
+  const [showDropdowns, setShowDropdowns] = useState({
+    assignee: false,
+    status: false,
+    priority: false,
+  });
+
+  // Reset form when popup opens/closes
   useEffect(() => {
-    if (addTaskPopupNum > 0) {
-      setOpenPopup(true);
+    if (!isOpen) {
+      setFormData({
+        title: "",
+        description: "",
+        assignedTo: "",
+        dueDate: "",
+        status: "todo",
+        priority: "medium",
+      });
+      setShowDropdowns({
+        assignee: false,
+        status: false,
+        priority: false,
+      });
     }
-  }, [addTaskPopupNum]);
+  }, [isOpen]);
 
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-
-  const [taskType, setTaskType] = useState(null);
-  const [taskDate, setTaskDate] = useState(null);
-  const [taskPriority, setTaskPriority] = useState(null);
-  const [taskTag, setTaskTag] = useState("");
-  const [taskTagArray, setTaskTagArray] = useState([]);
-
-  const [taskTypePopup, setTaskTypePopup] = useState(false);
-  const [taskDatePopup, setTaskDatePopup] = useState(false);
-  const [taskPriorityPopup, setTaskPriorityPopup] = useState(false);
-  const [taskTagPopup, setTaskTagPopup] = useState(false);
-  const [taskdescription, setTaskDescription] = useState("");
-  const [addTaskDescription, setAddTaskDescription] = useState(false);
-
-  const btnsArray = [
+  // Options for dropdowns
+  const statusOptions = [
+    { value: "todo", label: "To Do", color: "bg-gray-100 text-gray-800" },
     {
-      title: "Type",
-      taskfeature: taskType,
-      setTaskFeature: setTaskType,
-      popup: taskTypePopup,
-      setPopup: setTaskTypePopup,
-      popupContent: [
-        { title: "Design" },
-        { title: "Management" },
-        { title: "Frontend" },
-        { title: "Backend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-      ],
+      value: "in-progress",
+      label: "In Progress",
+      color: "bg-blue-100 text-blue-800",
     },
-    {
-      title: "Date",
-      taskfeature: taskDate,
-      setTaskFeature: setTaskDate,
-      popup: taskDatePopup,
-      setPopup: setTaskDatePopup,
-      popupContent: [
-        { title: "Design" },
-        { title: "Management" },
-        { title: "Frontend" },
-        { title: "Backend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-        { title: "Frontend" },
-      ],
-    },
-    {
-      title: "Priority",
-      taskfeature: taskPriority,
-      setTaskFeature: setTaskPriority,
-      popup: taskPriorityPopup,
-      setPopup: setTaskPriorityPopup,
-      popupContent: [
-        { title: "Low", color: "bg-blue-500" },
-        { title: "Medium", color: "bg-yellow-500" },
-        { title: "High", color: "bg-red-500" },
-      ],
-    },
-    {
-      title: "Tag",
-      taskfeature: taskTag,
-      setTaskFeature: setTaskTag,
-      popup: taskTagPopup,
-      setPopup: setTaskTagPopup,
-      popupContent: [],
-    },
+    { value: "done", label: "Done", color: "bg-green-100 text-green-800" },
   ];
 
-  useEffect(() => {
-    console.log("taskTagArray: ", taskTagArray);
-  }, [taskTagArray]);
+  const priorityOptions = [
+    { value: "low", label: "Low", color: "bg-green-100 text-green-800" },
+    {
+      value: "medium",
+      label: "Medium",
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    { value: "high", label: "High", color: "bg-red-100 text-red-800" },
+  ];
 
-  function handleAddTask() {
-    const taskID = generateCustomCode(10); //generate a random taskID
-    const yourtask = {
-      title: newTaskTitle,
-      taskID,
-      description: taskdescription,
-      type: taskType,
-      date: taskDate,
-      priority: taskPriority,
-      tag: taskTagArray,
-      isCompleted: false,
-      dateAssigned: new Date().toLocaleDateString(),
-    };
+  // Handle form input changes
+  const handleInputChange = (field, value) => {
+    console.log(
+      `🔄 handleInputChange - Field: ${field}, Value:`,
+      value,
+      `Type: ${typeof value}`
+    );
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-    AddTask(username, taskID, yourtask)
-      .then(() => {
-        setOpenPopup(false);
-        btnsArray.forEach((item) => {
-          item.setPopup(false);
-        });
-        setAddTaskDescription(false);
-        setNewTaskTitle("");
-        setTaskDescription("");
-        setTaskType(null);
-        setTaskDate(null);
-        setTaskPriority(null);
-        setTaskTag("");
-      })
-      .catch(() => {
-        console.log("Something went wrong while storing task");
+  // Toggle dropdown visibility
+  const toggleDropdown = (dropdown) => {
+    setShowDropdowns((prev) => ({
+      ...prev,
+      [dropdown]: !prev[dropdown],
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.title.trim()) {
+      alert("Please enter a task title");
+      return;
+    }
+
+    if (!projectId) {
+      alert("Project ID is required");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const taskData = {
+        projectId,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        assignedTo: formData.assignedTo || null,
+        createdBy: user?.uid,
+        createdAt: serverTimestamp(),
+        dueDate: formData.dueDate
+          ? new Date(formData.dueDate).toISOString()
+          : null,
+        completedAt: null,
+        status: formData.status,
+        priority: formData.priority,
+      };
+
+      // 🔍 CONSOLE LOG: All task data that would be stored in database
+      console.log("=== TASK DATA TO BE STORED IN DATABASE ===");
+      console.log("📋 Complete Task Object:", taskData);
+      console.log("🆔 Project ID:", projectId);
+      console.log("📝 Task Title:", formData.title.trim());
+      console.log("📄 Description:", formData.description.trim() || "(empty)");
+      console.log("👤 Assigned To RAW:", formData.assignedTo);
+      console.log("👤 Assigned To PROCESSED:", formData.assignedTo || null);
+      console.log("👤 Assigned To TYPE:", typeof formData.assignedTo);
+      console.log("👤 Assigned To LENGTH:", formData.assignedTo?.length);
+      console.log("👨‍💻 Created By (User UID):", user?.uid);
+      console.log("📅 Created At:", "serverTimestamp() - will be current time");
+      console.log(
+        "⏰ Due Date:",
+        formData.dueDate
+          ? new Date(formData.dueDate).toISOString()
+          : "No due date"
+      );
+      console.log("✅ Completed At:", null);
+      console.log("🏷️ Status:", formData.status);
+      console.log("🚩 Priority:", formData.priority);
+      console.log("===========================================");
+
+      // Additional context logging
+      console.log("🔧 ADDITIONAL CONTEXT:");
+      console.log("📊 Form Data State:", formData);
+      console.log("👥 Available Project Members:", projectMembers);
+      console.log("🔐 Current User Info:", {
+        uid: user?.uid,
+        email: user?.email,
+        displayName: user?.displayName,
       });
-  }
+      console.log("===========================================");
+
+      // Add task to Firestore
+      const docRef = await addDoc(collection(db, "tasks"), taskData);
+
+      // Call callback if provided
+      if (onTaskAdded) {
+        onTaskAdded({
+          id: docRef.id,
+          ...taskData,
+          createdAt: new Date().toISOString(), // Convert for immediate use
+        });
+      }
+
+      // Close popup and reset form
+      onClose();
+    } catch (error) {
+      console.error("Error adding task:", error);
+      alert("Failed to add task. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Close popup when clicking outside
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <>
-      <div
-        className={`${
-          OpenPopup ? "flex" : "hidden"
-        } absolute justify-center items-start w-screen h-screen top-0 left-0 bg-black/50  backdrop-blur-sm z-20 overflow-x-hidden`}
-        onClick={() => {
-          setOpenPopup(false);
-          btnsArray.forEach((item) => {
-            item.setPopup(false);
-          });
-          setAddTaskDescription(false);
-          setNewTaskTitle("");
-          setTaskDescription("");
-          setTaskType(null);
-          setTaskDate(null);
-          setTaskPriority(null);
-          setTaskTag("");
-        }}
-      >
-        <div
-          className={` scrollbar1 flex flex-col justify-between gap-2 w-[50%] ${
-            addTaskDescription ? "h-[36%]" : "h-[28%]"
-          } bg-[#dbdbdb] dark:bg-gray-800 rounded-3xl z-[21] transition-all p-4 animate-PopUpAppear mt-[100px]`}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <div className="w-full flex flex-col justify-between gap-3">
-            <div className="w-full">
-              <div className=" text-sm rounded-xl border-2 w-full outline-thm-clr-1 flex flex-row items-center bg-gray-100 dark:border-gray-500 dark:bg-gray-700">
-                <input
-                  className="resize-none overflow-auto bg-gray-100 rounded-xl w-full dark:border-gray-500 p-3 dark:bg-gray-700 outline-none dark:placeholder:text-gray-100 placeholder:text-xs"
-                  placeholder="Write a new task . . ."
-                  value={newTaskTitle}
-                  onChange={(e) => {
-                    setNewTaskTitle(e.target.value);
-                  }}
-                />
-                <button
-                  className="text-2xl bg-thm-clr-1 p-2 px-4 rounded-xl m-2 hover:bg-blue-700 transition-all duration-75"
-                  onClick={() => {
-                    handleAddTask();
-                  }}
-                >
-                  +
-                </button>
-              </div>
-              <div className="my-3 flex justify-end flex-col">
-                {!addTaskDescription ? (
-                  <span
-                    className="text-sm dark:text-gray-500 flex p-1 w-[28%] rounded-lg duration-100 transition-all items-center cursor-pointer dark:hover:text-gray-300 dark:hover:bg-gray-700"
-                    onClick={() => {
-                      setAddTaskDescription(true);
-                    }}
-                  >
-                    <LuPlusCircle className="mx-2" />
-                    Add Task description
-                  </span>
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Add New Task
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            <RxCross2 size={24} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Task Title *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Enter task title"
+              required
+            />
+          </div>
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Enter task description"
+            />
+          </div>
+          {/* /* Assignee Dropdown */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Assign To
+            </label>
+            <button
+              type="button"
+              onClick={() => toggleDropdown("assignee")}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white flex items-center justify-between"
+            >
+              <span className="flex items-center">
+                {formData.assignedTo ? (
+                  (() => {
+                    const assignedMember = projectMembers.find(
+                      (m) => m.uid === formData.assignedTo
+                    );
+                    return assignedMember ? (
+                      <div className="flex items-center">
+                        <Image
+                          src={assignedMember.photoURL}
+                          width={24}
+                          height={24}
+                          className="rounded-full border border-gray-300 mr-2"
+                          alt="assignee-photo"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-sm font-medium">
+                            {assignedMember.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            @{assignedMember.username}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <FaUser className="mr-2 text-gray-400" /> Unknown User
+                      </>
+                    );
+                  })()
                 ) : (
                   <>
-                    <div className=" text-sm rounded-xl border-2 w-full outline-thm-clr-1 flex flex-row items-center bg-gray-100 dark:border-gray-500 dark:bg-gray-700">
-                      <textarea
-                        className="resize-none overflow-auto bg-gray-100 rounded-xl w-full dark:border-gray-500 p-3 dark:bg-gray-700 outline-none dark:placeholder:text-gray-100 placeholder:text-xs"
-                        placeholder="Write a description. . ."
-                        value={taskdescription}
-                        onChange={(e) => {
-                          setTaskDescription(e.target.value);
-                        }}
-                      ></textarea>
-                      <div></div>
-                    </div>
-                    <div className="flex justify-end text-xs">
-                      <span
-                        className=" flex m-2 gap-2 p-1 px-2 cursor-pointer transition-all duration-75 rounded-lg flex-row justify-center items-center dark:text-gray-500 dark:hover:bg-gray-500 dark:hover:text-gray-300"
-                        onClick={() => {
-                          setAddTaskDescription(false);
-                        }}
-                      >
-                        <RxCross2 />
-                        <span className="">cancel</span>
-                      </span>
-                    </div>
+                    <FaUser className="mr-2 text-gray-400" /> Select assignee
                   </>
                 )}
-              </div>
-            </div>
-            <div className="buttons flex flex-row justify-evenly text-sm">
-              {btnsArray.map((item, index) => (
-                <div key={index} className="w-[20%] ">
-                  <button
-                    className="p-2 w-full dark:bg-gray-700 rounded-lg"
-                    onClick={() => {
-                      item.setPopup(!item.popup);
-                    }}
-                  >
-                    <span className="flex gap-1 justify-center items-center">
-                      {item.taskfeature === "" ||
-                      item.taskfeature === null ||
-                      item.title === "Tag" ? (
-                        <>
-                          <MdKeyboardArrowDown className="text-gray-400" />
-                          <span>{item.title}</span>
-                        </>
-                      ) : (
-                        <div className="flex flex-row justify-center items-center gap-2">
-                          {item.taskfeature.color && (
-                            <span
-                              className={`${item.taskfeature.color} w-2 h-2 rounded-full`}
-                            ></span>
-                          )}
-                          <span>{item.taskfeature.title}</span>
-                        </div>
-                      )}
-                    </span>
-                  </button>
+              </span>
+              <MdKeyboardArrowDown
+                className={`transition-transform ${
+                  showDropdowns.assignee ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
-                  {/* Popup container */}
-                  {item.popup && (
-                    <div className="max-h-48 ">
-                      <div
-                        className={`p-2 my-2 dark:bg-gray-700 rounded-lg max-h-60 overflow-auto ${
-                          item.title == "Priority"
-                            ? "animation-curtain-2 overflow-hidden"
-                            : item.title == "Tag"
-                            ? "animation-curtain-3 overflow-hidden"
-                            : "animation-curtain-1"
-                        }`}
-                        onClick={(e) => {
-                          if (item.title === "Tag") return;
-                          item.setPopup(false); //if item.title is not "Tag" then close the popup, otherwise keep it open
-                        }}
-                      >
-                        {item.title === "Tag" && (
-                          <div className="flex flex-row justify-center items-center w-full ">
-                            {taskTag !== "" && (
-                              <span className=" text-xs text-center">#</span>
-                            )}
-                            <input
-                              type="text"
-                              className="bg-transparent p-1 w-full placeholder:text-xs text-xs text-center outline-none"
-                              placeholder="#tag"
-                              value={taskTag}
-                              onChange={(e) => {
-                                setTaskTag(e.target.value);
-                              }}
-                            />
-                            <button
-                              className="p-1 px-2 rounded-lg bg-thm-clr-1 text-center outline-transparent"
-                              onClick={() => {
-                                taskTagArray.push(taskTag);
-                                setTaskTag("");
-                              }}
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                        {item.popup && item.popupContent !== 0 && (
-                          <>
-                            {item.popupContent.map((content, index) => (
-                              <button
-                                key={index}
-                                className="p-2 w-full dark:bg-gray-700 rounded-lg flex flex-row gap-2 justify-center items-center "
-                                onClick={() => {
-                                  item.setTaskFeature(content);
-                                  item.setPopup(false);
-                                }}
-                              >
-                                {content.color && (
-                                  <span
-                                    className={`${content.color}
-                                  w-2 h-2 rounded-full`}
-                                  ></span>
-                                )}
-                                <span className="text-[14px]">
-                                  {content.title}
-                                </span>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                        {/* You can place popup content here */}
+            {showDropdowns.assignee && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                <div
+                  onClick={() => {
+                    handleInputChange("assignedTo", "");
+                    toggleDropdown("assignee");
+                  }}
+                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-500"
+                >
+                  Unassigned
+                </div>
+                {projectMembers.map((member) => {
+                  console.log(member);
+                  return (
+                    <div
+                      key={member.user_id}
+                      onClick={() => {
+                        handleInputChange("assignedTo", member.uid);
+                        // console.log(member.uid)
+                        toggleDropdown("assignee");
+                      }}
+                      className="px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center space-x-3"
+                    >
+                      <div className="flex-shrink-0">
+                        <Image
+                          src={member?.photoURL}
+                          width={40}
+                          height={40}
+                          className="rounded-full border-2 border-white"
+                          alt="profile-photo"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {member.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          @{member.username}
+                        </div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                          {member.email}
+                        </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          {/* Due Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Due Date
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => handleInputChange("dueDate", e.target.value)}
+                className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              />
+              <FaCalendarAlt className="absolute left-3 top-3 text-gray-400" />
             </div>
           </div>
-        </div>
-        <div
-          className="bg-[#dbdbdb] dark:bg-gray-800 absolute top-0 right-0 p-2 min-h-screen w-[250px]"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        ></div>
+          {/* Status and Priority Row */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Status Dropdown */}
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Status
+              </label>
+              <button
+                type="button"
+                onClick={() => toggleDropdown("status")}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white flex items-center justify-between"
+              >
+                <span className="flex items-center">
+                  <FaTasks className="mr-2 text-gray-400" />
+                  {
+                    statusOptions.find((s) => s.value === formData.status)
+                      ?.label
+                  }
+                </span>
+                <MdKeyboardArrowDown
+                  className={`transition-transform ${
+                    showDropdowns.status ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {showDropdowns.status && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                  {statusOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      onClick={() => {
+                        handleInputChange("status", option.value);
+                        toggleDropdown("status");
+                      }}
+                      className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                    >
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${option.color}`}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Priority Dropdown */}
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Priority
+              </label>
+              <button
+                type="button"
+                onClick={() => toggleDropdown("priority")}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white flex items-center justify-between"
+              >
+                <span className="flex items-center">
+                  <FaFlag className="mr-2 text-gray-400" />
+                  {
+                    priorityOptions.find((p) => p.value === formData.priority)
+                      ?.label
+                  }
+                </span>
+                <MdKeyboardArrowDown
+                  className={`transition-transform ${
+                    showDropdowns.priority ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {showDropdowns.priority && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                  {priorityOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      onClick={() => {
+                        handleInputChange("priority", option.value);
+                        toggleDropdown("priority");
+                      }}
+                      className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                    >
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${option.color}`}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Submit Buttons */}
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition-colors"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`px-4 py-2 rounded-md transition-colors ${
+                loading
+                  ? "bg-gray-200 text-gray-400 cursor-none"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              } disabled:opacity-50`}
+              disabled={loading}
+              onClick={() => {}}
+            >
+              {loading ? "Adding..." : "Add Task"}
+            </button>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 };
 
