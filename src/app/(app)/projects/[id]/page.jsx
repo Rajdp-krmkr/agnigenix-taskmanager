@@ -18,6 +18,7 @@ import AddTaskPopup from "@/components/AddTaskPopup";
 import { useProjectContext } from "@/context/ProjectContext";
 import { collection, doc, getDocs, query, where } from "@firebase/firestore";
 import { db } from "@/lib/firebaseConfig";
+import { fetchTasks } from "@/lib/utils/fetchTasks";
 
 const Project = () => {
   const params = useParams();
@@ -36,6 +37,7 @@ const Project = () => {
   const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
 
   const [projectMembers, setProjectMembers] = useState([]);
+  const [projectTasks, setProjectTasks] = useState([]);
 
   // Memoized dummy data for project
   const dummyProject = useMemo(
@@ -220,6 +222,16 @@ const Project = () => {
     };
   }, [id, dummyProject, setCurrentProject, setIsCurrentProjectLoading]);
 
+  useEffect(() => {
+    const fetchTaskFunc = async () => {
+      const tasks = await fetchTasks(id);
+      setProjectTasks(tasks);
+    };
+    if (id) {
+      fetchTaskFunc();
+    }
+  }, [id]);
+
   const project = currentProject || dummyProject;
 
   const fetchMemberDetails = async (members) => {
@@ -332,12 +344,15 @@ const Project = () => {
 
   const renderTasks = () => (
     <div className="space-y-3">
-      {project?.tasks?.map((task) => (
+      {projectTasks.map((task) => (
         <TaskItem
           key={task?.id}
           task={task}
           getStatusColor={getStatusColor}
           getPriorityColor={getPriorityColor}
+          assignee={projectMembers.find(
+            (member) => member.uid == task.assignedTo
+          )}
         />
       )) || (
         <div className="text-center py-8 text-gray-500">

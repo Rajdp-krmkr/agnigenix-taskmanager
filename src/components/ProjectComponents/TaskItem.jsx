@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { FaCalendarAlt, FaEllipsisV } from "react-icons/fa";
 
-const TaskItem = ({ task, getStatusColor, getPriorityColor }) => {
+const TaskItem = ({ task, getStatusColor, getPriorityColor, assignee }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
@@ -41,13 +41,13 @@ const TaskItem = ({ task, getStatusColor, getPriorityColor }) => {
             </div>
             <div className="flex items-center space-x-1">
               <Image
-                src="/icons/github-mark.png"
-                alt={task?.assignee?.name || "Unassigned"}
+                src={assignee?.photoURL || "/icons/github-mark.png"}
+                alt={assignee?.name || "Unassigned"}
                 width={16}
                 height={16}
                 className="rounded-full"
               />
-              <span>{task?.assignee?.name || "Unassigned"}</span>
+              <span>{assignee?.name || "Unassigned"}</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-1 mt-2">
