@@ -17,6 +17,8 @@ import {
   OverdueTasksCard,
   WorkloadBalanceCard,
   TaskTrendsCard,
+  PriorityBreakdown,
+  AverageCompletionTime,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import AddTaskPopup from "@/components/AddTaskPopup";
@@ -234,8 +236,24 @@ const Project = () => {
         </div>
       </div>
 
-      {/* Task Trends */}
-      <TaskTrendsCard
+      {/* Task Trends and Priority Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="lg:col-span-3">
+          <TaskTrendsCard
+            projectTasks={projectTasks}
+            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <PriorityBreakdown
+            projectTasks={projectTasks}
+            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+          />
+        </div>
+      </div>
+
+      {/* Average Completion Time */}
+      <AverageCompletionTime
         projectTasks={projectTasks}
         isLoading={isCurrentProjectLoading || projectTasks.length === 0}
       />

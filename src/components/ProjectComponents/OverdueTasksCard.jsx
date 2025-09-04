@@ -113,7 +113,9 @@ const OverdueTasksCard = ({ projectTasks, projectMembers, isLoading }) => {
             return (
               <div
                 key={task.id}
-                className="p-3 bg-red-50 dark:bg-red-500/20 rounded-lg border border-red-200 dark:border-red-500/30"
+                className={`p-3 bg-red-50 dark:bg-red-500/20 rounded-lg border border-red-200 dark:border-red-500/30 ${
+                  task.priority == "high" && "animate-pulse dark:bg-red-500/50"
+                }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">

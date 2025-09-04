@@ -18,3 +18,5 @@ export { default as MembersContributionCard } from "./MembersContributionCard";
 export { default as OverdueTasksCard } from "./OverdueTasksCard";
 export { default as WorkloadBalanceCard } from "./WorkloadBalanceCard";
 export { default as TaskTrendsCard } from "./TaskTrendsCard";
+export { default as PriorityBreakdown } from "./PriorityBreakdown";
+export { default as AverageCompletionTime } from "./AverageCompletionTime";
