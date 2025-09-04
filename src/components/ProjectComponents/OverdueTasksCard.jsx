@@ -58,7 +58,7 @@ const OverdueTasksCard = ({ projectTasks, projectMembers, isLoading }) => {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800  p-4 rounded-lg shadow-sm border dark:border-gray-700">
         <div className="animate-pulse">
           <div className="flex items-center mb-4">
             <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded mr-2"></div>
@@ -89,7 +89,7 @@ const OverdueTasksCard = ({ projectTasks, projectMembers, isLoading }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+    <div className="bg-white h-full dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <FaExclamationTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />

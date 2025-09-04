@@ -16,6 +16,7 @@ import {
   MembersContributionCard,
   OverdueTasksCard,
   WorkloadBalanceCard,
+  TaskTrendsCard,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import AddTaskPopup from "@/components/AddTaskPopup";
@@ -46,154 +47,6 @@ const Project = () => {
   const [projectTasks, setProjectTasks] = useState([]);
   const [taskProgress, setTaskProgress] = useState(null);
 
-  // Memoized dummy data for project
-  const dummyProject = useMemo(
-    () => ({
-      id: id || "proj-001",
-      title: "Agnigenix Task Manager",
-      description:
-        "A comprehensive task management system with real-time collaboration, user management, and workspace organization features.",
-      status: "In Progress",
-      priority: "High",
-      progress: 65,
-      createdAt: "2025-08-01",
-      dueDate: "2025-12-15",
-      icon: <FaRocket />,
-      color: "#3B82F6",
-      members: [
-        {
-          id: "user-1",
-          name: "Rajdeep Karmakar",
-          username: "rajdp-krmkr",
-          role: "Project Manager",
-          avatar: "/public/icons/github-mark.png",
-          status: "online",
-        },
-        {
-          id: "user-2",
-          name: "Sarah Johnson",
-          username: "sarah.j",
-          role: "Frontend Developer",
-          avatar: "/public/icons/github-mark.png",
-          status: "online",
-        },
-        {
-          id: "user-3",
-          name: "Mike Chen",
-          username: "mike.chen",
-          role: "Backend Developer",
-          avatar: "/public/icons/github-mark.png",
-          status: "away",
-        },
-        {
-          id: "user-4",
-          name: "Emma Wilson",
-          username: "emma.w",
-          role: "UI/UX Designer",
-          avatar: "/public/icons/github-mark.png",
-          status: "offline",
-        },
-      ],
-      tasks: [
-        {
-          id: "task-1",
-          title: "Design user authentication flow",
-          description: "Create wireframes and mockups for login/signup process",
-          status: "completed",
-          priority: "high",
-          assignee: {
-            name: "Emma Wilson",
-            avatar: "/public/icons/github-mark.png",
-          },
-          dueDate: "2025-08-15",
-          labels: ["design", "auth"],
-        },
-        {
-          id: "task-2",
-          title: "Implement user search functionality",
-          description:
-            "Build real-time user search with debouncing and filtering",
-          status: "in-progress",
-          priority: "high",
-          assignee: {
-            name: "Sarah Johnson",
-            avatar: "/public/icons/github-mark.png",
-          },
-          dueDate: "2025-08-28",
-          labels: ["frontend", "search"],
-        },
-        {
-          id: "task-3",
-          title: "Setup Firebase authentication",
-          description:
-            "Configure Firebase auth with email/password and Google sign-in",
-          status: "completed",
-          priority: "medium",
-          assignee: {
-            name: "Mike Chen",
-            avatar: "/public/icons/github-mark.png",
-          },
-          dueDate: "2025-08-10",
-          labels: ["backend", "auth"],
-        },
-        {
-          id: "task-4",
-          title: "Create project dashboard",
-          description:
-            "Build responsive dashboard with project overview and statistics",
-          status: "todo",
-          priority: "medium",
-          assignee: {
-            name: "Sarah Johnson",
-            avatar: "/public/icons/github-mark.png",
-          },
-          dueDate: "2025-09-05",
-          labels: ["frontend", "dashboard"],
-        },
-        {
-          id: "task-5",
-          title: "Implement real-time notifications",
-          description: "Add real-time notification system for task updates",
-          status: "todo",
-          priority: "low",
-          assignee: {
-            name: "Mike Chen",
-            avatar: "/public/icons/github-mark.png",
-          },
-          dueDate: "2025-09-20",
-          labels: ["backend", "notifications"],
-        },
-      ],
-      recentActivity: [
-        {
-          id: "activity-1",
-          type: "task_completed",
-          user: "Emma Wilson",
-          action: "completed task",
-          target: "Design user authentication flow",
-          timestamp: "2 hours ago",
-        },
-        {
-          id: "activity-2",
-          type: "comment",
-          user: "Sarah Johnson",
-          action: "commented on",
-          target: "Implement user search functionality",
-          timestamp: "4 hours ago",
-        },
-        {
-          id: "activity-3",
-          type: "task_assigned",
-          user: "Rajdeep Karmakar",
-          action: "assigned task to Mike Chen",
-          target: "Implement real-time notifications",
-          timestamp: "1 day ago",
-        },
-      ],
-    }),
-    [id]
-  );
-
   useEffect(() => {
     let isMounted = true;
 
@@ -208,14 +61,14 @@ const Project = () => {
             setCurrentProject(projectData);
           } else {
             // If no project is found, fallback to dummy data
-            setCurrentProject(dummyProject);
+            setCurrentProject(null);
           }
           setIsCurrentProjectLoading(false);
         }
       } catch (error) {
         console.error("Error fetching project:", error);
         if (isMounted) {
-          setCurrentProject(dummyProject); // Fallback to dummy data
+          setCurrentProject(null);
           setIsCurrentProjectLoading(false);
         }
       }
@@ -227,7 +80,7 @@ const Project = () => {
       isMounted = false;
       setIsCurrentProjectLoading(false);
     };
-  }, [id, dummyProject, setCurrentProject, setIsCurrentProjectLoading]);
+  }, [id, setCurrentProject, setIsCurrentProjectLoading]);
 
   useEffect(() => {
     const fetchTaskProgress = async () => {
@@ -248,7 +101,7 @@ const Project = () => {
     }
   }, [id]);
 
-  const project = currentProject || dummyProject;
+  const project = currentProject;
 
   const fetchMemberDetails = useCallback(
     async (members) => {
@@ -380,6 +233,12 @@ const Project = () => {
           />
         </div>
       </div>
+
+      {/* Task Trends */}
+      <TaskTrendsCard
+        projectTasks={projectTasks}
+        isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+      />
 
       {/* Team Members */}
       {/* <TeamMemberCard project={project} /> */}
