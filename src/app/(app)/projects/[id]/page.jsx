@@ -15,6 +15,7 @@ import {
   KanbanBoard,
   MembersContributionCard,
   OverdueTasksCard,
+  WorkloadBalanceCard,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import AddTaskPopup from "@/components/AddTaskPopup";
@@ -370,6 +371,14 @@ const Project = () => {
             isLoading={isCurrentProjectLoading || projectTasks.length === 0}
           />
         </div>
+        <div className="lg:col-span-2">
+          {/* Workload Balance */}
+          <WorkloadBalanceCard
+            projectTasks={projectTasks}
+            projectMembers={projectMembers}
+            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+          />
+        </div>
       </div>
 
       {/* Team Members */}
@@ -460,7 +469,7 @@ const Project = () => {
         setActiveTab={setActiveTab}
         project={project}
       />
-      <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4 mx-auto">
         <div>
           {activeTab === "overview" && renderOverview()}
           {activeTab === "tasks" && renderTasks()}
