@@ -96,6 +96,7 @@ const Project = () => {
   useEffect(() => {
     const fetchTaskFunc = async () => {
       const tasks = await fetchTasks(id);
+    console.log("tasks: ", tasks);
       setProjectTasks(tasks);
     };
     if (id) {
@@ -208,6 +209,7 @@ const Project = () => {
         <div className="lg:col-span-2">
           <MembersContributionCard
             projectId={id}
+            tasks={projectTasks}
             projectMembers={projectMembers}
             isLoading={isCurrentProjectLoading}
           />
@@ -238,14 +240,18 @@ const Project = () => {
 
       {/* Task Trends and Priority Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3">
-          <TaskTrendsCard
+        <div className="lg:col-span-2">
+          <PriorityBreakdown
             projectTasks={projectTasks}
             isLoading={isCurrentProjectLoading || projectTasks.length === 0}
           />
         </div>
-        <div className="lg:col-span-2">
-          <PriorityBreakdown
+        <div className="lg:col-span-3 flex flex-col gap-4">
+          <TaskTrendsCard
+            projectTasks={projectTasks}
+            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+          />
+          <AverageCompletionTime
             projectTasks={projectTasks}
             isLoading={isCurrentProjectLoading || projectTasks.length === 0}
           />
@@ -253,10 +259,6 @@ const Project = () => {
       </div>
 
       {/* Average Completion Time */}
-      <AverageCompletionTime
-        projectTasks={projectTasks}
-        isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-      />
 
       {/* Team Members */}
       {/* <TeamMemberCard project={project} /> */}

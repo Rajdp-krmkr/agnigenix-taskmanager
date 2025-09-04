@@ -41,7 +41,7 @@ const TaskStatusCard = ({ taskProgress, isLoading }) => {
       </h3>
       {isLoading ? (
         <div className="animate-pulse">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Loading skeleton for each card */}
             {[1, 2, 3].map((item) => (
               <div
@@ -61,25 +61,27 @@ const TaskStatusCard = ({ taskProgress, isLoading }) => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {taskStatusData.map((status) => {
             const IconComponent = status.icon;
             return (
               <div
                 key={status.id}
-                className="border dark:border-gray-700 flex flex-row justify-between rounded-lg p-3"
+                className="border dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between rounded-lg p-3 hover:shadow-md transition-shadow duration-200"
               >
-                <div className="flex flex-row items-end">
-                  <p className="font-bold text-gray-900 dark:text-white text-5xl">
+                <div className="flex flex-row items-center sm:items-end mb-2 sm:mb-0">
+                  <p className="font-bold text-gray-900 dark:text-white text-3xl sm:text-4xl lg:text-5xl">
                     {status.value}
                   </p>
-                  <p className="ml-2 text-xs font-medium text-gray-600 dark:text-gray-400">
+                  <p className="ml-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 self-end">
                     {status.title}
                   </p>
                 </div>
-                <div className="flex items-start mb-2">
+                <div className="flex items-start justify-end sm:justify-start">
                   <div className={`p-1.5 ${status.bgColor} rounded-lg`}>
-                    <IconComponent className={`w-5 h-5 ${status.iconColor}`} />
+                    <IconComponent
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${status.iconColor}`}
+                    />
                   </div>
                 </div>
               </div>

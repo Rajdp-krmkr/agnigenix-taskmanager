@@ -4,7 +4,12 @@ import { getMemberContribution } from "@/lib/utils/getMembersContribution";
 import { FaUser, FaTasks, FaCheckCircle } from "react-icons/fa";
 import { HiTrendingUp } from "react-icons/hi";
 
-const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
+const MembersContributionCard = ({
+  tasks,
+  projectId,
+  projectMembers,
+  isLoading,
+}) => {
   const [contributions, setContributions] = useState({});
   const [contributionLoading, setContributionLoading] = useState(true);
 
@@ -14,7 +19,7 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
 
       try {
         setContributionLoading(true);
-        const contributionData = await getMemberContribution(projectId);
+        const contributionData = await getMemberContribution(tasks);
         setContributions(contributionData);
       } catch (error) {
         console.error("Error fetching member contributions:", error);
@@ -24,7 +29,7 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
     };
 
     fetchContributions();
-  }, [projectId]);
+  }, [projectId, tasks]);
 
   const getMemberInfo = (memberId) => {
     return (
@@ -47,18 +52,18 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
 
   if (isLoading || contributionLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border dark:border-gray-700">
         <div className="animate-pulse">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-40"></div>
+          <div className="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded mb-3 sm:mb-4 w-32 sm:w-40"></div>
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
               <div key={item} className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2 w-24"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2 w-20 sm:w-24"></div>
+                  <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded w-24 sm:w-32"></div>
                 </div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+                <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-10 sm:w-12 flex-shrink-0"></div>
               </div>
             ))}
           </div>
@@ -68,16 +73,16 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
-      <div className="flex items-center mb-4">
-        <HiTrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-center mb-3 sm:mb-4">
+        <HiTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
+        <h3 className="text-sm sm:text-md font-semibold text-gray-900 dark:text-white">
           Member Contributions
         </h3>
       </div>
 
       {sortedContributions.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {sortedContributions.map(([memberId, contribution]) => {
             const member = getMemberInfo(memberId);
             const completionRate = calculateCompletionRate(
@@ -88,52 +93,65 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
             return (
               <div
                 key={memberId}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-2 sm:space-y-0 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors duration-150"
               >
-                <div className="flex items-center space-x-3">
+                {/* Member Info Section */}
+                <div className="flex items-center space-x-3 min-w-0">
                   {/* Member Avatar */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     {member.photoURL ? (
                       <Image
                         src={member.photoURL}
                         alt={member.displayName}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full object-cover"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                        <FaUser className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <FaUser className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                       </div>
                     )}
                   </div>
 
-                  {/* Member Info */}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {/* Member Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
                       {member.name || "Unknown User"}
                     </p>
-                    <div className="flex items-center space-x-4 text-xs text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-col xs:flex-row xs:items-center xs:space-x-4 space-y-1 xs:space-y-0 text-xs text-gray-600 dark:text-gray-400">
                       <div className="flex items-center">
-                        <FaTasks className="w-3 h-3 mr-1" />
-                        {contribution.assigned} assigned
+                        <FaTasks className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">
+                          {contribution.assigned} assigned
+                        </span>
                       </div>
                       <div className="flex items-center">
-                        <FaCheckCircle className="w-3 h-3 mr-1 text-green-500" />
-                        {contribution.completed} completed
+                        <FaCheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 text-green-500 flex-shrink-0" />
+                        <span className="truncate">
+                          {contribution.completed} completed
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Completion Rate */}
-                <div className="text-right">
-                  <div className={`text-sm font-semibold ${completionRate >= 80 ? 'text-green-500' : completionRate >= 60 ? 'dark:text-white text-gray-700' : 'text-red-500'}`}>
+                {/* Completion Rate Section */}
+                <div className="flex items-center justify-between sm:justify-end sm:flex-col sm:items-end space-x-2 sm:space-x-0">
+                  <div
+                    className={`text-sm sm:text-base font-semibold ${
+                      completionRate >= 80
+                        ? "text-green-500"
+                        : completionRate >= 60
+                        ? "text-gray-700 dark:text-white"
+                        : "text-red-500"
+                    }`}
+                  >
                     {completionRate}%
                   </div>
-                  <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
+                  <div className="w-16 sm:w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 sm:h-2 mt-0 sm:mt-1">
                     <div
-                      className={`h-2 rounded-full transition-all duration-300 ${
+                      className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                         completionRate >= 80
                           ? "bg-green-500"
                           : completionRate >= 60
@@ -149,9 +167,9 @@ const MembersContributionCard = ({ projectId, projectMembers, isLoading }) => {
           })}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <FaUser className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No member contributions yet</p>
+        <div className="text-center py-6 sm:py-8 text-gray-500 dark:text-gray-400">
+          <FaUser className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm sm:text-base">No member contributions yet</p>
         </div>
       )}
     </div>

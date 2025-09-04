@@ -12,6 +12,8 @@ export const fetchTasks = async (id) => {
       ...doc.data(),
     }));
 
+    
+
     return tasks;
   } catch (error) {
     console.error("Error fetching tasks:", error);
