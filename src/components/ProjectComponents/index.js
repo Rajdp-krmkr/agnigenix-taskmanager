@@ -7,3 +7,5 @@ export { default as RecentActivityCard } from "./RecentActivityCard";
 export { default as TaskItem } from "./TaskItem";
 export { default as TeamMemberItem } from "./TeamMemberItem";
 export { default as KanbanBoard } from "./KanbanBoard";
+export { default as MembersContributionCard } from "./MembersContributionCard";
+export { default as OverdueTasksCard } from "./OverdueTasksCard";

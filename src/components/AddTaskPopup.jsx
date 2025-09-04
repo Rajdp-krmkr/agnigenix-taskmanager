@@ -12,7 +12,10 @@ const AddTaskPopup = ({
   onClose,
   projectId,
   projectMembers = [],
-  onTaskAdded,
+  // onTaskAdded,
+  taskProgress,
+  setTaskProgress,
+  setProjectTasks,
 }) => {
   const { user } = useAuthContext();
 
@@ -126,50 +129,25 @@ const AddTaskPopup = ({
         priority: formData.priority,
       };
 
-      // 🔍 CONSOLE LOG: All task data that would be stored in database
-      console.log("=== TASK DATA TO BE STORED IN DATABASE ===");
-      console.log("📋 Complete Task Object:", taskData);
-      console.log("🆔 Project ID:", projectId);
-      console.log("📝 Task Title:", formData.title.trim());
-      console.log("📄 Description:", formData.description.trim() || "(empty)");
-      console.log("👤 Assigned To RAW:", formData.assignedTo);
-      console.log("👤 Assigned To PROCESSED:", formData.assignedTo || null);
-      console.log("👤 Assigned To TYPE:", typeof formData.assignedTo);
-      console.log("👤 Assigned To LENGTH:", formData.assignedTo?.length);
-      console.log("👨‍💻 Created By (User UID):", user?.uid);
-      console.log("📅 Created At:", "serverTimestamp() - will be current time");
-      console.log(
-        "⏰ Due Date:",
-        formData.dueDate
-          ? new Date(formData.dueDate).toISOString()
-          : "No due date"
-      );
-      console.log("✅ Completed At:", null);
-      console.log("🏷️ Status:", formData.status);
-      console.log("🚩 Priority:", formData.priority);
-      console.log("===========================================");
-
-      // Additional context logging
-      console.log("🔧 ADDITIONAL CONTEXT:");
-      console.log("📊 Form Data State:", formData);
-      console.log("👥 Available Project Members:", projectMembers);
-      console.log("🔐 Current User Info:", {
-        uid: user?.uid,
-        email: user?.email,
-        displayName: user?.displayName,
-      });
-      console.log("===========================================");
-
       // Add task to Firestore
       const docRef = await addDoc(collection(db, "tasks"), taskData);
 
-      // Call callback if provided
-      if (onTaskAdded) {
-        onTaskAdded({
-          id: docRef.id,
-          ...taskData,
-          createdAt: new Date().toISOString(), // Convert for immediate use
-        });
+
+      if(docRef.id) {
+        setProjectTasks((prevTasks) => [
+          ...prevTasks,
+          {
+            id: docRef.id,
+            ...taskData,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+        setTaskProgress({
+          ...taskProgress,
+          [formData.status === "in-progress" ? "inProgress" : formData.status]:
+            taskProgress[formData.status === "in-progress" ? "inProgress" : formData.status] + 1,
+
+        })
       }
 
       // Close popup and reset form
@@ -468,7 +446,6 @@ const AddTaskPopup = ({
                   : "bg-blue-600 hover:bg-blue-700 text-white"
               } disabled:opacity-50`}
               disabled={loading}
-              onClick={() => {}}
             >
               {loading ? "Adding..." : "Add Task"}
             </button>

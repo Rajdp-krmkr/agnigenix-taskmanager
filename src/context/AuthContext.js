@@ -13,6 +13,18 @@ const AuthContextProvider = ({ children }) => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [isProfileCreated, setIsProfileCreated] = useState(false);
 
+  useEffect(() => {
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
   const fetchUser = () => {
     return onAuthStateChanged(auth, async (authUser) => {
       if (authUser) {

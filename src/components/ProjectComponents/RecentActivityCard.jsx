@@ -3,7 +3,7 @@ import { FaEye } from "react-icons/fa";
 
 const RecentActivityCard = ({ activities }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 h-full">
       <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
         Recent Activity
       </h3>

@@ -18,7 +18,7 @@ const ProjectHeader = ({
                 ${
                   project?.logo.customized.bg
                     ? `${project.logo.customized.bg}`
-                    : "bg-[#black]"
+                    : "bg-black"
                 }
                 ${
                   project?.logo.customized.textColor

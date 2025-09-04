@@ -1,8 +1,9 @@
 "use client";
 import fetchProjectById from "@/lib/utils/projectService";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { FaRocket } from "react-icons/fa";
+import { HiViewGrid, HiViewList } from "react-icons/hi";
 import {
   ProjectHeader,
   ProjectTabs,
@@ -12,6 +13,8 @@ import {
   TaskItem,
   TeamMemberItem,
   KanbanBoard,
+  MembersContributionCard,
+  OverdueTasksCard,
 } from "@/components/ProjectComponents";
 import TypeWriterLoader from "@/components/typewriterloader";
 import AddTaskPopup from "@/components/AddTaskPopup";
@@ -19,6 +22,7 @@ import { useProjectContext } from "@/context/ProjectContext";
 import { collection, doc, getDocs, query, where } from "@firebase/firestore";
 import { db } from "@/lib/firebaseConfig";
 import { fetchTasks } from "@/lib/utils/fetchTasks";
+import { getTaskProgress } from "@/lib/utils/ProjectAnalytics";
 
 const Project = () => {
   const params = useParams();
@@ -35,9 +39,11 @@ const Project = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showDetails, setShowDetails] = useState(false);
   const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
+  const [taskViewMode, setTaskViewMode] = useState("list"); // "grid" or "list"
 
   const [projectMembers, setProjectMembers] = useState([]);
   const [projectTasks, setProjectTasks] = useState([]);
+  const [taskProgress, setTaskProgress] = useState(null);
 
   // Memoized dummy data for project
   const dummyProject = useMemo(
@@ -223,6 +229,15 @@ const Project = () => {
   }, [id, dummyProject, setCurrentProject, setIsCurrentProjectLoading]);
 
   useEffect(() => {
+    const fetchTaskProgress = async () => {
+      const progress = await getTaskProgress(id);
+      setTaskProgress(progress);
+    };
+
+    fetchTaskProgress();
+  }, [id]);
+
+  useEffect(() => {
     const fetchTaskFunc = async () => {
       const tasks = await fetchTasks(id);
       setProjectTasks(tasks);
@@ -234,23 +249,27 @@ const Project = () => {
 
   const project = currentProject || dummyProject;
 
-  const fetchMemberDetails = async (members) => {
-    const newArray = members.map((member) => member.user_id);
+  const fetchMemberDetails = useCallback(
+    async (members) => {
+      const newArray = members.map((member) => member.user_id);
 
-    try {
-      const docsRef = collection(db, "users");
-      const docsSnap = query(docsRef, where("uid", "in", newArray));
-      const memberDocs = await getDocs(docsSnap);
-      const membersData = memberDocs.docs.map((doc) => ({
-        ...doc.data(),
-        role: members.find((member) => member.user_id === doc.data().uid)?.role,
-      }));
-      console.log(membersData);
-      setProjectMembers(membersData);
-    } catch (error) {
-      console.error("Error fetching member details:", error);
-    }
-  };
+      try {
+        const docsRef = collection(db, "users");
+        const docsSnap = query(docsRef, where("uid", "in", newArray));
+        const memberDocs = await getDocs(docsSnap);
+        const membersData = memberDocs.docs.map((doc) => ({
+          ...doc.data(),
+          role: members.find((member) => member.user_id === doc.data().uid)
+            ?.role,
+        }));
+        console.log(membersData);
+        setProjectMembers(membersData);
+      } catch (error) {
+        console.error("Error fetching member details:", error);
+      }
+    },
+    [project?.members]
+  );
 
   useEffect(() => {
     if (project && project?.members.length > 0) {
@@ -273,15 +292,6 @@ const Project = () => {
 
   const handleCloseAddTaskPopup = () => {
     setShowAddTaskPopup(false);
-  };
-
-  const handleTaskAdded = (newTask) => {
-    // Update the project tasks list with the new task
-    setCurrentProject((prev) => ({
-      ...prev,
-      tasks: [...(prev?.tasks || []), newTask],
-    }));
-    console.log("New task added:", newTask);
   };
 
   const getStatusColor = (status) => {
@@ -327,34 +337,87 @@ const Project = () => {
     <div className="space-y-4">
       {/* Combined Progress and Tasks Status */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <TaskStatusCard project={project} />
+        <TaskStatusCard
+          taskProgress={taskProgress}
+          isLoading={taskProgress == null}
+        />
         <ProjectProgressCard
           project={project}
           getPriorityColor={getPriorityColor}
+          taskProgress={taskProgress}
+          isLoading={taskProgress == null}
         />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="lg:col-span-2">
+          <MembersContributionCard
+            projectId={id}
+            projectMembers={projectMembers}
+            isLoading={isCurrentProjectLoading}
+          />
+        </div>
+        <div className="lg:col-span-3">
+          <RecentActivityCard activities={project?.recentActivity || []} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="lg:col-span-3">
+          {/* Overdue Tasks */}
+          <OverdueTasksCard
+            projectTasks={projectTasks}
+            projectMembers={projectMembers}
+            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+          />
+        </div>
       </div>
 
       {/* Team Members */}
       {/* <TeamMemberCard project={project} /> */}
-
-      {/* Recent Activity */}
-      <RecentActivityCard activities={project?.recentActivity || []} />
     </div>
   );
 
   const renderTasks = () => (
-    <div className="space-y-3">
-      {projectTasks.map((task) => (
-        <TaskItem
-          key={task?.id}
-          task={task}
-          getStatusColor={getStatusColor}
-          getPriorityColor={getPriorityColor}
-          assignee={projectMembers.find(
-            (member) => member.uid == task.assignedTo
+    <div className="space-y-4">
+      {/* View Mode Toggle */}
+      <div className="flex justify-end">
+        <button
+          onClick={() =>
+            setTaskViewMode(taskViewMode === "list" ? "grid" : "list")
+          }
+          className="flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors text-gray-700 dark:text-gray-300"
+        >
+          {taskViewMode === "list" ? (
+            <HiViewGrid className="w-4 h-4" />
+          ) : (
+            <HiViewList className="w-4 h-4" />
           )}
-        />
-      )) || (
+        </button>
+      </div>
+
+      {/* Tasks Display */}
+      {projectTasks.length > 0 ? (
+        <div
+          className={
+            taskViewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              : "space-y-3"
+          }
+        >
+          {projectTasks.map((task) => (
+            <TaskItem
+              key={task?.id}
+              task={task}
+              getStatusColor={getStatusColor}
+              getPriorityColor={getPriorityColor}
+              assignee={projectMembers.find(
+                (member) => member.uid == task.assignedTo
+              )}
+              viewMode={taskViewMode}
+            />
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-8 text-gray-500">
           No tasks available for this project.
         </div>
@@ -412,7 +475,10 @@ const Project = () => {
         onClose={handleCloseAddTaskPopup}
         projectId={id}
         projectMembers={projectMembers || []}
-        onTaskAdded={handleTaskAdded}
+        projectTasks={projectTasks}
+        setProjectTasks={setProjectTasks}
+        taskProgress={taskProgress}
+        setTaskProgress={setTaskProgress}
       />
     </div>
   );
