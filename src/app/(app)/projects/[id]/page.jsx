@@ -2,7 +2,7 @@
 import fetchProjectById from "@/lib/utils/projectService";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { FaRocket } from "react-icons/fa";
+import { FaRocket, FaChartBar, FaChartPie, FaChartLine } from "react-icons/fa";
 import { HiViewGrid, HiViewList } from "react-icons/hi";
 import {
   ProjectHeader,
@@ -27,6 +27,7 @@ import { collection, doc, getDocs, query, where } from "@firebase/firestore";
 import { db } from "@/lib/firebaseConfig";
 import { fetchTasks } from "@/lib/utils/fetchTasks";
 import { getTaskProgress } from "@/lib/utils/ProjectAnalytics";
+import { MdBarChart } from "react-icons/md";
 
 const Project = () => {
   const params = useParams();
@@ -44,6 +45,7 @@ const Project = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
   const [taskViewMode, setTaskViewMode] = useState("list"); // "grid" or "list"
+  const [overviewViewMode, setOverviewViewMode] = useState("cards"); // "cards" or "charts"
 
   const [projectMembers, setProjectMembers] = useState([]);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -96,7 +98,7 @@ const Project = () => {
   useEffect(() => {
     const fetchTaskFunc = async () => {
       const tasks = await fetchTasks(id);
-    console.log("tasks: ", tasks);
+      console.log("tasks: ", tasks);
       setProjectTasks(tasks);
     };
     if (id) {
@@ -190,78 +192,291 @@ const Project = () => {
     }
   };
 
+  // Chart Placeholder Components
+  const TaskStatusPieChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 lg:col-span-3">
+      <div className="flex items-center mb-4">
+        <FaChartPie className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Task Status Breakdown (Pie Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartPie className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Pie chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MemberContributionChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <FaChartBar className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Member Contribution (Bar Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartBar className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Bar chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const WorkloadBalanceChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <FaChartBar className="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Workload Balance (Stacked Bar Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartBar className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Stacked bar chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const TaskTrendsLineChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <FaChartLine className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Task Completion Trend (Line Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartLine className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Line chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const OverdueTasksChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <FaChartBar className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Overdue Tasks Trend (Bar Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartBar className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Bar chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const PriorityDistributionChart = ({ isLoading }) => (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <FaChartPie className="w-5 h-5 text-orange-600 dark:text-orange-400 mr-2" />
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+          Priority Distribution (Pie Chart)
+        </h3>
+      </div>
+      <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="text-center">
+          <FaChartPie className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">Chart placeholder</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Pie chart will be implemented here
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderOverview = () => (
     <div className="space-y-4">
-      {/* Combined Progress and Tasks Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <TaskStatusCard
-          taskProgress={taskProgress}
-          isLoading={taskProgress == null}
-        />
-        <ProjectProgressCard
-          project={project}
-          getPriorityColor={getPriorityColor}
-          taskProgress={taskProgress}
-          isLoading={taskProgress == null}
-        />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-2">
-          <MembersContributionCard
-            projectId={id}
-            tasks={projectTasks}
-            projectMembers={projectMembers}
-            isLoading={isCurrentProjectLoading}
-          />
-        </div>
-        <div className="lg:col-span-3">
-          <RecentActivityCard activities={project?.recentActivity || []} />
-        </div>
+      {/* View Mode Toggle */}
+      <div className="flex justify-end">
+        <button
+          onClick={() =>
+            setOverviewViewMode(
+              overviewViewMode === "cards" ? "charts" : "cards"
+            )
+          }
+          className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          {overviewViewMode === "cards" ? (
+            <>
+              <FaChartBar className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              <HiViewGrid className="w-4 h-4" />
+            </>
+          )}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3">
-          {/* Overdue Tasks */}
-          <OverdueTasksCard
-            projectTasks={projectTasks}
-            projectMembers={projectMembers}
-            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-          />
-        </div>
-        <div className="lg:col-span-2">
-          {/* Workload Balance */}
-          <WorkloadBalanceCard
-            projectTasks={projectTasks}
-            projectMembers={projectMembers}
-            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-          />
-        </div>
-      </div>
+      {overviewViewMode === "cards" ? (
+        <>
+          {/* Combined Progress and Tasks Status */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <TaskStatusCard
+              taskProgress={taskProgress}
+              isLoading={taskProgress == null}
+              overViewMode={overviewViewMode}
+            />
+            <ProjectProgressCard
+              project={project}
+              getPriorityColor={getPriorityColor}
+              taskProgress={taskProgress}
+              isLoading={taskProgress == null}
+              overViewMode={overviewViewMode}
+            />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+            <div className="lg:col-span-3">
+              <OverdueTasksCard
+                projectTasks={projectTasks}
+                projectMembers={projectMembers}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+            </div>
+            <div className="lg:col-span-3">
+              <AverageCompletionTime
+                projectTasks={projectTasks}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+            </div>
+          </div>
 
-      {/* Task Trends and Priority Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-2">
-          <PriorityBreakdown
-            projectTasks={projectTasks}
-            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-          />
-        </div>
-        <div className="lg:col-span-3 flex flex-col gap-4">
-          <TaskTrendsCard
-            projectTasks={projectTasks}
-            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-          />
-          <AverageCompletionTime
-            projectTasks={projectTasks}
-            isLoading={isCurrentProjectLoading || projectTasks.length === 0}
-          />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-3">
+              <MembersContributionCard
+                projectId={id}
+                tasks={projectTasks}
+                projectMembers={projectMembers}
+                isLoading={isCurrentProjectLoading}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <WorkloadBalanceCard
+                projectTasks={projectTasks}
+                projectMembers={projectMembers}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+            </div>
+          </div>
 
-      {/* Average Completion Time */}
+          {/* Task Trends and Priority Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-2">
+              <PriorityBreakdown
+                projectTasks={projectTasks}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+            </div>
+            <div className="lg:col-span-3 flex flex-col gap-4">
+              <TaskTrendsCard
+                projectTasks={projectTasks}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+              <RecentActivityCard activities={project?.recentActivity || []} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Charts View */}
+          {/* Task Status and Project Progress (keep ProjectProgressCard unchanged) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <TaskStatusPieChart
+              isLoading={taskProgress == null}
+              overViewMode={overviewViewMode}
+            />
+            <ProjectProgressCard
+              project={project}
+              getPriorityColor={getPriorityColor}
+              taskProgress={taskProgress}
+              isLoading={taskProgress == null}
+              overViewMode={overviewViewMode}
+            />
+          </div>
 
-      {/* Team Members */}
-      {/* <TeamMemberCard project={project} /> */}
+          {/* Overdue Tasks Chart and Average Completion Time (keep AverageCompletionTime unchanged) */}
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+            <div className="lg:col-span-3">
+              <OverdueTasksChart
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+                overViewMode={overviewViewMode}
+              />
+            </div>
+            <div className="lg:col-span-3">
+              <AverageCompletionTime
+                projectTasks={projectTasks}
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+                overViewMode={overviewViewMode}
+              />
+            </div>
+          </div>
+
+          {/* Member Contribution and Workload Balance Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-3">
+              <MemberContributionChart
+                isLoading={isCurrentProjectLoading}
+                overViewMode={overviewViewMode}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <WorkloadBalanceChart
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+              />
+              overViewMode={overviewViewMode}
+            </div>
+          </div>
+
+          {/* Task Trends and Priority Distribution Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-2">
+              <PriorityDistributionChart
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+                overViewMode={overviewViewMode}
+              />
+            </div>
+            <div className="lg:col-span-3 flex flex-col gap-4">
+              <TaskTrendsLineChart
+                isLoading={isCurrentProjectLoading || projectTasks.length === 0}
+                overViewMode={overviewViewMode}
+              />
+              <RecentActivityCard
+                activities={project?.recentActivity || []}
+                overViewMode={overviewViewMode}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 

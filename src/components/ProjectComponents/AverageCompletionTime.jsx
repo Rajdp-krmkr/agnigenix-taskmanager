@@ -210,7 +210,7 @@ const AverageCompletionTime = ({ projectTasks = [], isLoading = false }) => {
 
   if (!completionData || completionData.totalCompletedTasks === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm  border border-transparent transition-all hover:dark:border-gray-700">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
             <FaClock className="w-6 h-6 text-indigo-600" />
@@ -252,7 +252,7 @@ const AverageCompletionTime = ({ projectTasks = [], isLoading = false }) => {
   } = completionData;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+    <div className="bg-white rounded-lg p-6 shadow-sm border border-transparent transition-all hover:dark:border-gray-700">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">

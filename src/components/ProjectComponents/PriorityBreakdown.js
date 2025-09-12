@@ -110,7 +110,7 @@ const PriorityBreakdown = ({ projectTasks = [], isLoading = false }) => {
 
   if (!priorityData || priorityData.total === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-transparent transition-all hover:dark:border-gray-700">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
             <FaChartPie className="w-6 h-6 text-blue-600" />
@@ -143,7 +143,7 @@ const PriorityBreakdown = ({ projectTasks = [], isLoading = false }) => {
   const { total, priorityItems } = priorityData;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm  border border-transparent transition-all hover:dark:border-gray-700">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">

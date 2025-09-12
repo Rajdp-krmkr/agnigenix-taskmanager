@@ -2,7 +2,7 @@ import React from "react";
 import { MdTask, MdCheckCircle } from "react-icons/md";
 import { FaHourglassHalf } from "react-icons/fa";
 
-const TaskStatusCard = ({ taskProgress, isLoading }) => {
+const TaskStatusCard = ({ taskProgress, isLoading, overViewMode }) => {
   // Create array of task status data
   const taskStatusData = [
     {
@@ -35,7 +35,7 @@ const TaskStatusCard = ({ taskProgress, isLoading }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 lg:col-span-3">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-transparent transition-all hover:dark:border-gray-700 lg:col-span-3">
       <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
         Task Status
       </h3>

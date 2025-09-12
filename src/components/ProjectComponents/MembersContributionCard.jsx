@@ -73,7 +73,7 @@ const MembersContributionCard = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-transparent hover:dark:border-gray-700 transition-all hover:shadow-md duration-200">
       <div className="flex items-center mb-3 sm:mb-4">
         <HiTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
         <h3 className="text-sm sm:text-md font-semibold text-gray-900 dark:text-white">

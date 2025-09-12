@@ -98,7 +98,7 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
 
   if (!trendData || trendData.totalCompleted === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-800  border border-transparent transition-all hover:dark:border-gray-700 rounded-lg p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
             <FaChartLine className="w-6 h-6 text-purple-600" />
@@ -112,7 +112,7 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
             </p>
           </div>
         </div>
-        
+
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <FaCalendarAlt className="w-8 h-8 text-gray-400" />

@@ -6,6 +6,7 @@ const ProjectProgressCard = ({
   getPriorityColor,
   isLoading,
   taskProgress,
+  overViewMode
 }) => {
   if (isLoading) {
     return (
@@ -43,11 +44,11 @@ const ProjectProgressCard = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border dark:border-gray-700 lg:col-span-2 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-transparent transition-all hover:dark:border-gray-700 lg:col-span-2 hover:shadow-md duration-200">
       <h3 className="text-sm sm:text-md font-semibold text-gray-900 dark:text-white mb-3">
         Project Progress
       </h3>
-      
+
       {/* Progress Section */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
@@ -74,30 +75,36 @@ const ProjectProgressCard = ({
           </p>
           <p className="text-gray-600 dark:text-gray-400 break-words">
             {project?.deadlines.start_date
-              ? new Date(project.deadlines.start_date).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })
+              ? new Date(project.deadlines.start_date).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }
+                )
               : "Not set"}
           </p>
         </div>
-        
+
         <div className="text-center  p-2 sm:p-0">
           <p className="font-medium text-gray-900 dark:text-white mb-1">
             Due Date
           </p>
           <p className="text-gray-600 dark:text-gray-400 break-words">
             {project?.deadlines.end_date
-              ? new Date(project.deadlines.end_date).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })
+              ? new Date(project.deadlines.end_date).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }
+                )
               : "Not set"}
           </p>
         </div>
-        
+
         <div className="text-center  p-2 sm:p-0 ">
           <p className="font-medium text-gray-900 dark:text-white mb-1">
             Priority

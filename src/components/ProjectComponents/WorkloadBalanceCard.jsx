@@ -119,7 +119,7 @@ const WorkloadBalanceCard = ({ projectTasks, projectMembers, isLoading }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+    <div className="bg-white h-full dark:bg-gray-800 p-4 rounded-lg shadow-sm border transition-all border-transparent hover:dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <FaBalanceScale className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
