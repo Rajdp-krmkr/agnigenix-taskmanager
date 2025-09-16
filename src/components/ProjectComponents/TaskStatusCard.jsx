@@ -1,38 +1,109 @@
-import React from "react";
+import React, { useEffect, useMemo, memo } from "react";
 import { MdTask, MdCheckCircle } from "react-icons/md";
-import { FaHourglassHalf } from "react-icons/fa";
+import { FaChartPie, FaHourglassHalf } from "react-icons/fa";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
-const TaskStatusCard = ({ taskProgress, isLoading, overViewMode }) => {
-  // Create array of task status data
-  const taskStatusData = [
-    {
-      id: "total",
-      title: "Total Tasks",
-      value:
-        (taskProgress?.todo || 0) +
-        (taskProgress?.inProgress || 0) +
-        (taskProgress?.done || 0),
-      icon: MdTask,
-      bgColor: "bg-blue-100 dark:bg-blue-900",
-      iconColor: "text-blue-600 dark:text-blue-400",
-    },
-    {
-      id: "completed",
-      title: "Completed",
-      value: taskProgress?.done || 0,
-      icon: MdCheckCircle,
-      bgColor: "bg-green-100 dark:bg-green-900",
-      iconColor: "text-green-600 dark:text-green-400",
-    },
-    {
-      id: "inProgress",
-      title: "In Progress",
-      value: taskProgress?.inProgress || 0,
-      icon: FaHourglassHalf,
-      bgColor: "bg-yellow-100 dark:bg-yellow-900",
-      iconColor: "text-yellow-600 dark:text-yellow-400",
-    },
-  ];
+const TaskStatusCard = memo(({ taskProgress, isLoading, overviewViewMode }) => {
+  useEffect(() => {
+    console.log("overviewViewMode changed", overviewViewMode);
+  }, [overviewViewMode]);
+
+  // Memoize task status data calculation
+  const taskStatusData = useMemo(
+    () => [
+      {
+        id: "total",
+        title: "Total Tasks",
+        value:
+          (taskProgress?.todo || 0) +
+          (taskProgress?.inProgress || 0) +
+          (taskProgress?.done || 0),
+        icon: MdTask,
+        bgColor: "bg-blue-100 dark:bg-blue-900",
+        iconColor: "text-blue-600 dark:text-blue-400",
+      },
+      {
+        id: "completed",
+        title: "Completed",
+        value: taskProgress?.done || 0,
+        icon: MdCheckCircle,
+        bgColor: "bg-green-100 dark:bg-green-900",
+        iconColor: "text-green-600 dark:text-green-400",
+      },
+      {
+        id: "inProgress",
+        title: "In Progress",
+        value: taskProgress?.inProgress || 0,
+        icon: FaHourglassHalf,
+        bgColor: "bg-yellow-100 dark:bg-yellow-900",
+        iconColor: "text-yellow-600 dark:text-yellow-400",
+      },
+    ],
+    [taskProgress]
+  );
+
+  // Memoize chart data calculation
+  const chartData = useMemo(() => {
+    if (!taskProgress) return [];
+    return [
+      { name: "To Do", value: taskProgress.toDo, fill: "#ef4444" },
+      {
+        name: "In Progress",
+        value: taskProgress.inProgress,
+        fill: "#f59e0b",
+      },
+      { name: "In Review", value: taskProgress.inReview, fill: "#3b82f6" },
+      { name: "Completed", value: taskProgress.completed, fill: "#10b981" },
+    ].filter((item) => item.value > 0);
+  }, [taskProgress]);
+
+  // For chart rendering
+  if (overviewViewMode === "charts") {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 lg:col-span-3">
+        <div className="flex items-center mb-4">
+          <FaChartPie className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+            Task Status Breakdown
+          </h3>
+        </div>
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ) : (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-transparent transition-all hover:dark:border-gray-700 lg:col-span-3">
@@ -91,6 +162,22 @@ const TaskStatusCard = ({ taskProgress, isLoading, overViewMode }) => {
       )}
     </div>
   );
+});
+
+// Custom comparison function for React.memo
+const arePropsEqual = (prevProps, nextProps) => {
+  return (
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.overviewViewMode === nextProps.overviewViewMode &&
+    prevProps.taskProgress?.todo === nextProps.taskProgress?.todo &&
+    prevProps.taskProgress?.inProgress === nextProps.taskProgress?.inProgress &&
+    prevProps.taskProgress?.done === nextProps.taskProgress?.done &&
+    prevProps.taskProgress?.toDo === nextProps.taskProgress?.toDo &&
+    prevProps.taskProgress?.inReview === nextProps.taskProgress?.inReview &&
+    prevProps.taskProgress?.completed === nextProps.taskProgress?.completed
+  );
 };
 
-export default TaskStatusCard;
+TaskStatusCard.displayName = "TaskStatusCard";
+
+export default memo(TaskStatusCard, arePropsEqual);

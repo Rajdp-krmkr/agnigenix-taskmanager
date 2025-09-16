@@ -1,64 +1,87 @@
-import React, { useMemo } from 'react'
-import { FaTrendUp, FaTrendDown, FaMinus, FaChartLine, FaCalendarAlt } from 'react-icons/fa'
-import { getTaskTrend } from '@/lib/utils/getTaskTrends'
+import React, { useMemo } from "react";
+import {
+  FaTrendUp,
+  FaTrendDown,
+  FaMinus,
+  FaChartLine,
+  FaCalendarAlt,
+} from "react-icons/fa";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { getTaskTrend } from "@/lib/utils/getTaskTrends";
 
-const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
+const TaskTrendsCard = ({
+  projectTasks = [],
+  isLoading = false,
+  overviewViewMode,
+}) => {
   const trendData = useMemo(() => {
     if (!projectTasks?.length) return null;
-    
+
     const rawTrend = getTaskTrend(projectTasks);
-    
+
     // Convert to array of last 7 days with data
     const today = new Date();
     const last7Days = [];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-      
+      const dateStr = date.toISOString().split("T")[0];
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+
       last7Days.push({
         date: dateStr,
         dayName,
         count: rawTrend[dateStr] || 0,
-        fullDate: date.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric' 
-        })
+        fullDate: date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
       });
     }
-    
+
     // Calculate trend direction
     const firstHalf = last7Days.slice(0, 3);
     const secondHalf = last7Days.slice(4, 7);
-    
-    const firstAvg = firstHalf.reduce((sum, day) => sum + day.count, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, day) => sum + day.count, 0) / secondHalf.length;
-    
-    let trend = 'stable';
+
+    const firstAvg =
+      firstHalf.reduce((sum, day) => sum + day.count, 0) / firstHalf.length;
+    const secondAvg =
+      secondHalf.reduce((sum, day) => sum + day.count, 0) / secondHalf.length;
+
+    let trend = "stable";
     let changePercentage = 0;
-    
+
     if (firstAvg > 0) {
       changePercentage = ((secondAvg - firstAvg) / firstAvg) * 100;
-      if (changePercentage > 10) trend = 'up';
-      else if (changePercentage < -10) trend = 'down';
+      if (changePercentage > 10) trend = "up";
+      else if (changePercentage < -10) trend = "down";
     } else if (secondAvg > 0) {
-      trend = 'up';
+      trend = "up";
       changePercentage = 100;
     }
-    
+
     const totalTasks = last7Days.reduce((sum, day) => sum + day.count, 0);
     const avgPerDay = totalTasks / 7;
-    
+
     return {
-      chartData: last7Days,
       trend,
       changePercentage: Math.abs(changePercentage),
       totalCompleted: totalTasks,
       avgPerDay,
       firstAvg,
-      secondAvg
+      secondAvg,
     };
   }, [projectTasks]);
 
@@ -74,20 +97,25 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
             <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
         </div>
-        
+
         {/* Loading chart skeleton */}
         <div className="mb-6">
           <div className="flex items-end gap-2 h-40 bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
             {[...Array(7)].map((_, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-t animate-pulse" 
-                     style={{ height: `${Math.random() * 80 + 20}%` }}></div>
+              <div
+                key={index}
+                className="flex-1 flex flex-col items-center gap-2"
+              >
+                <div
+                  className="w-full bg-gray-200 dark:bg-gray-700 rounded-t animate-pulse"
+                  style={{ height: `${Math.random() * 80 + 20}%` }}
+                ></div>
                 <div className="h-3 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
               </div>
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -128,26 +156,113 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
     );
   }
 
-  const { chartData, trend, changePercentage, totalCompleted, avgPerDay } = trendData;
-  const maxValue = Math.max(...chartData.map(d => d.count));
+  const { trend, changePercentage, totalCompleted, avgPerDay } = trendData;
+  const maxValue = Math.max(...chartData.map((d) => d.count));
 
   const getTrendIcon = () => {
-    if (trend === 'up') return <FaTrendUp className="text-green-500" />;
-    if (trend === 'down') return <FaTrendDown className="text-red-500" />;
+    if (trend === "up") return <FaTrendUp className="text-green-500" />;
+    if (trend === "down") return <FaTrendDown className="text-red-500" />;
     return <FaMinus className="text-gray-500" />;
   };
 
   const getTrendColor = () => {
-    if (trend === 'up') return 'text-green-600';
-    if (trend === 'down') return 'text-red-600';
-    return 'text-gray-600';
+    if (trend === "up") return "text-green-600";
+    if (trend === "down") return "text-red-600";
+    return "text-gray-600";
   };
 
   const getTrendBgColor = () => {
-    if (trend === 'up') return 'bg-green-50 dark:bg-green-900/20';
-    if (trend === 'down') return 'bg-red-50 dark:bg-red-900/20';
-    return 'bg-gray-50 dark:bg-gray-700/30';
+    if (trend === "up") return "bg-green-50 dark:bg-green-900/20";
+    if (trend === "down") return "bg-red-50 dark:bg-red-900/20";
+    return "bg-gray-50 dark:bg-gray-700/30";
   };
+
+  const chartData = !projectTasks
+    ? []
+    : (() => {
+        // Group tasks by creation date for the last 30 days
+        const last30Days = Array.from({ length: 30 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (29 - i));
+          return date.toISOString().split("T")[0];
+        });
+
+        return last30Days.map((date) => {
+          const dayTasks = projectTasks.filter(
+            (task) =>
+              task.createdAt?.toDate?.()?.toISOString().split("T")[0] ===
+                date ||
+              (typeof task.createdAt === "string" &&
+                task.createdAt.split("T")[0] === date)
+          );
+          const completedTasks = projectTasks.filter(
+            (task) =>
+              task.completedAt?.toDate?.()?.toISOString().split("T")[0] ===
+                date ||
+              (typeof task.completedAt === "string" &&
+                task.completedAt.split("T")[0] === date)
+          );
+
+          return {
+            date: new Date(date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            }),
+            created: dayTasks.length,
+            completed: completedTasks.length,
+          };
+        });
+      })();
+
+  if (overviewViewMode == "cards") {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="flex items-center mb-4">
+          <FaChartLine className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+            Task Completion Trend (Last 30 Days)
+          </h3>
+        </div>
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ) : (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="created"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  name="Tasks Created"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="completed"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  name="Tasks Completed"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
@@ -166,15 +281,15 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
             </p>
           </div>
         </div>
-        
+
         {/* Trend indicator */}
         <div className={`px-3 py-1 rounded-full ${getTrendBgColor()}`}>
           <div className="flex items-center gap-2">
             {getTrendIcon()}
             <span className={`text-sm font-medium ${getTrendColor()}`}>
-              {trend === 'up' && 'Trending Up'}
-              {trend === 'down' && 'Trending Down'}
-              {trend === 'stable' && 'Stable'}
+              {trend === "up" && "Trending Up"}
+              {trend === "down" && "Trending Down"}
+              {trend === "stable" && "Stable"}
             </span>
           </div>
         </div>
@@ -186,16 +301,19 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
           {chartData.map((day, index) => {
             const height = maxValue > 0 ? (day.count / maxValue) * 100 : 0;
             return (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
+              <div
+                key={index}
+                className="flex-1 flex flex-col items-center gap-2"
+              >
                 <div className="relative group">
                   <div
                     className="w-full bg-gradient-to-t from-purple-600 to-purple-400 rounded-t transition-all duration-300 hover:from-purple-700 hover:to-purple-500 cursor-pointer"
-                    style={{ 
+                    style={{
                       height: `${Math.max(height, 4)}px`,
-                      minHeight: day.count > 0 ? '4px' : '2px'
+                      minHeight: day.count > 0 ? "4px" : "2px",
                     }}
                   />
-                  
+
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                     <div className="bg-gray-900 dark:bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
@@ -205,7 +323,7 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
                   </div>
                 </div>
-                
+
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                   {day.dayName}
                 </span>
@@ -228,7 +346,7 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
             Total Completed
           </div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {avgPerDay.toFixed(1)}
@@ -237,19 +355,17 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
             Avg per Day
           </div>
         </div>
-        
+
         <div className="text-center">
           <div className={`text-2xl font-bold ${getTrendColor()}`}>
             {changePercentage.toFixed(0)}%
           </div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">
-            Change
-          </div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Change</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-            {Math.max(...chartData.map(d => d.count))}
+            {Math.max(...chartData.map((d) => d.count))}
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
             Peak Day
@@ -262,9 +378,15 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
         <div className="flex items-center gap-2 text-sm">
           {getTrendIcon()}
           <span className={`font-medium ${getTrendColor()}`}>
-            {trend === 'up' && `Productivity increased by ${changePercentage.toFixed(1)}% this week`}
-            {trend === 'down' && `Productivity decreased by ${changePercentage.toFixed(1)}% this week`}
-            {trend === 'stable' && 'Productivity remains consistent this week'}
+            {trend === "up" &&
+              `Productivity increased by ${changePercentage.toFixed(
+                1
+              )}% this week`}
+            {trend === "down" &&
+              `Productivity decreased by ${changePercentage.toFixed(
+                1
+              )}% this week`}
+            {trend === "stable" && "Productivity remains consistent this week"}
           </span>
         </div>
       </div>
@@ -272,4 +394,4 @@ const TaskTrendsCard = ({ projectTasks = [], isLoading = false }) => {
   );
 };
 
-export default TaskTrendsCard
+export default TaskTrendsCard;

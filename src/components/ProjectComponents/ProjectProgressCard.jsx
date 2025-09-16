@@ -6,7 +6,7 @@ const ProjectProgressCard = ({
   getPriorityColor,
   isLoading,
   taskProgress,
-  overViewMode
+  overviewViewMode
 }) => {
   if (isLoading) {
     return (

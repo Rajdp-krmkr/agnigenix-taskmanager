@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { getMemberContribution } from "@/lib/utils/getMembersContribution";
-import { FaUser, FaTasks, FaCheckCircle } from "react-icons/fa";
+import { FaUser, FaTasks, FaCheckCircle, FaChartBar } from "react-icons/fa";
 import { HiTrendingUp } from "react-icons/hi";
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const MembersContributionCard = ({
   tasks,
   projectId,
   projectMembers,
   isLoading,
+  projectTasks,
+  overviewViewMode,
 }) => {
   const [contributions, setContributions] = useState({});
   const [contributionLoading, setContributionLoading] = useState(true);
@@ -50,6 +53,29 @@ const MembersContributionCard = ({
     ([, a], [, b]) => b.assigned + b.completed - (a.assigned + a.completed)
   );
 
+  const chartData =
+    !projectMembers || !projectTasks
+      ? []
+      : projectMembers
+          .map((member) => {
+            const memberTasks = projectTasks.filter(
+              (task) => task.assignee?.uid === member.uid
+            );
+            const completedTasks = memberTasks.filter(
+              (task) => task.status === "completed"
+            ).length;
+            const totalTasks = memberTasks.length;
+
+            return {
+              name:
+                member.displayName || member.email?.split("@")[0] || "Unknown",
+              completed: completedTasks,
+              total: totalTasks,
+              pending: totalTasks - completedTasks,
+            };
+          })
+          .filter((member) => member.total > 0);
+
   if (isLoading || contributionLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border dark:border-gray-700">
@@ -68,6 +94,44 @@ const MembersContributionCard = ({
             ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (overviewViewMode == "cards") {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="flex items-center mb-4">
+          <FaChartBar className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+            Member Task Contribution
+          </h3>
+        </div>
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ) : (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="completed" fill="#10b981" name="Completed" />
+                <Bar dataKey="pending" fill="#f59e0b" name="Pending" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
     );
   }
