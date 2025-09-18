@@ -18,6 +18,7 @@ import {
   IoMdArrowDropright,
   IoMdAdd,
   IoMdNotificationsOutline,
+  IoMdNotifications,
 } from "react-icons/io";
 import { TbCalendarDue } from "react-icons/tb";
 import { BsClipboardCheck } from "react-icons/bs";
@@ -48,12 +49,12 @@ const createNavItems = (username) => [
     activeIcon: <MdDashboard />,
     url: `/Dashboard`,
   },
-  {
-    name: "Notifications",
-    icon: <IoMdNotificationsOutline />,
-    activeIcon: <IoMdNotificationsOutline />,
-    url: `/Notifications/all/${username}`,
-  },
+  // {
+  //   name: "Notifications",
+  //   icon: <IoMdNotificationsOutline />,
+  //   activeIcon: <IoMdNotificationsOutline />,
+  //   url: `/Notifications/all/${username}`,
+  // },
   {
     name: "Your tasks",
     icon: <FaTasks />,
@@ -430,7 +431,24 @@ const NavbarComponent = () => {
                   Task Manager
                 </h1>
                 <div className="flex items-center gap-2">
-                  <ThemeToggle />
+                  {/* <ThemeToggle /> */}
+                  <button
+                    onClick={() => {
+                      router.push(`/Notifications/all/${user?.username}`);
+                    }}
+                    className={`${
+                      pathname == `/Notifications/all/${user?.username}`
+                        ? "text-thm-clr-1 dark:text-blue-500"
+                        : "text-black dark:text-slate-200"
+                    }
+                  } cursor-pointer p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors`}
+                  >
+                    {pathname == `/Notifications/all/${user?.username}` ? (
+                      <IoMdNotifications />
+                    ) : (
+                      <IoMdNotificationsOutline />
+                    )}
+                  </button>
                   <CollapseButton
                     isCollapsed={isCollapsed}
                     onClick={handleCollapseToggle}

@@ -98,7 +98,7 @@ const MembersContributionCard = ({
     );
   }
 
-  if (overviewViewMode == "cards") {
+  if (overviewViewMode !== "cards") {
     return (
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
         <div className="flex items-center mb-4">
